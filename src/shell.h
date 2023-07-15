@@ -4,6 +4,7 @@
 #include <vector>
 using namespace std;
 #define MAX_INPUT 100
+#define BACKSPACE 8
 string getInput(void);
 void checkLength(string& s);
 vector<string> tokenise(string s, char delimiter);
