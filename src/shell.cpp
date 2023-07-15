@@ -24,8 +24,12 @@ vector<string> tokenise(string s, char delimiter){
     bool wordBoundaryFlag = true;
     string temp;
     for(int i = 0; i < s[i]; i++){
-        if (s[i] != ' '){            
-            temp.push_back(s[i]);
+        if (s[i] != ' '){
+            if ((int) s[i] == BACKSPACE){
+                temp.pop_back();
+            } else {
+                temp.push_back(s[i]);
+            }
             wordBoundaryFlag = false;
         } else {
             // if previous state was false
@@ -38,7 +42,8 @@ vector<string> tokenise(string s, char delimiter){
                 temp = "";
                 wordBoundaryFlag = true;
             }
-        } 
+        }
+
     }
     if (!wordBoundaryFlag){
         // if the last word was not a space,
