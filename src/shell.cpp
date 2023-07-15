@@ -12,7 +12,6 @@ string getInput(void){
     string shellInput;
     getline(cin, shellInput);
     // limit length of terminal input
-    cout << "shellInput.size(): " << shellInput.size() << endl;
     checkLength(shellInput);
     return shellInput;
 }
@@ -22,17 +21,30 @@ vector<string> tokenise(string s, char delimiter){
     // ignore whitespaces 
     // end on enter 
     vector<string> tokens;
-    int i = 0;
-    int delimIndex;
-    do {
-        delimIndex = s.find(delimiter);
-        cout << "delimIndex: " << delimIndex << endl; 
-        tokens.push_back(s.substr(i, delimIndex));
-        printTokens(tokens);
-        i = delimIndex+1;
-        s = s.substr(i);
-    } while (delimIndex != std::string::npos);
-
+    bool wordBoundaryFlag = true;
+    string temp;
+    for(int i = 0; i < s[i]; i++){
+        if (s[i] != ' '){            
+            temp.push_back(s[i]);
+            wordBoundaryFlag = false;
+        } else {
+            // if previous state was false
+            // this is a transition from finding a word
+            // to finding a space 
+            if (!wordBoundaryFlag){
+                // add to tokens
+                tokens.push_back(temp);
+                // empty temp string
+                temp = "";
+                wordBoundaryFlag = true;
+            }
+        } 
+    }
+    if (!wordBoundaryFlag){
+        // if the last word was not a space,
+        // need to add the temp at the end
+        tokens.push_back(temp);
+    }
     return tokens;
 }
 
