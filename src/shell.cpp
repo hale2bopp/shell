@@ -1,6 +1,8 @@
 #include <iostream>
 #include <unistd.h>
 #include "shell.h"
+#include <string>
+#include <vector>
 
 void checkLength(string &shellInput){
     if (shellInput.size() > MAX_INPUT){
@@ -16,6 +18,26 @@ string getInput(void){
     return shellInput;
 }
 
+void convertStringToConstCharArr(vector<string> vec, char** str){
+    std::vector<char*> pvec(vec.size());
+    std::transform(vec.begin(), vec.end(), pvec.begin(), [](auto& str) {
+        return &str[0];
+    });
+    str = pvec.data();
+}
+
+void executeProgram(string cmd, vector<string> args, string env){
+    // args need to be NULL terminated 
+    args.push_back(NULL);
+    // env too 
+    env.push_back(NULL);
+
+    std::vector<char*> pvec(args.size());
+    std::transform(args.begin(), args.end(), pvec.begin(), [](auto& str) {
+        return &str[0];
+    });
+    execve(cmd.c_str(), pvec.data(), NULL);
+}
 
 vector<string> tokenise(string s, char delimiter){
     // ignore whitespaces 

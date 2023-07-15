@@ -1,26 +1,29 @@
 #include <iostream>
+#include<sys/wait.h>
 #include "shell.h"
 string prompt = "penn-shredder# ";
 
+string env = "PATH=/usr/local/sbin/:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games";
 int main(void){
     while (1) {
         cout << prompt << " ";
         string shellInput = getInput();
         vector<string> tokens =  tokenise(shellInput, ' ');
         printTokens(tokens);
-        /*
-        pid = fork(); 
+        int pid = fork(); 
+        cout << "pid how is it getting printed again: " << pid << endl;
         if (pid == 0) { 
-            execve(); 
-            perror(""); 
-            exit(EXIT_FAILURE);
+            cout << "Hello from child: " <<tokens[0] << " " <<   pid << endl; 
+            vector<string> args = {tokens.begin() + 1, tokens.end()}; 
+            executeProgram(tokens[0], args, env);
+//            execve(tokens[0].c_str(), NULL, env); 
+//            perror("unable to run command"); 
+//            exit(EXIT_FAILURE);
+        } else {
+            cout << "hello from parent" << endl;
+            wait(NULL);
+            cout << "child has terminated" << endl;
         }
-
-        if (pid > 0) 
-            wait();
-        }
-        */
-
     }
     return 0;
 }
