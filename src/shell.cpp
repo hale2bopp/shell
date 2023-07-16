@@ -38,6 +38,33 @@ vector<string> tokenise(string s, char delimiter){
     bool wordBoundaryFlag = true;
     string temp;
     for(int i = 0; i < s[i]; i++){
+        switch(s[i]){
+            case ' ':
+                // if previous state was false
+                // this is a transition from finding a word
+                // to finding a space
+                if (!wordBoundaryFlag){
+                    // add to tokens
+                    tokens.push_back(temp);
+                    // empty temp string
+                    temp = "";
+                    wordBoundaryFlag = true;
+                }
+                break;
+            case char(72):
+                cout << "UP Arrow" << endl; 
+                break;
+            case BACKSPACE:
+                temp.pop_back();
+                wordBoundaryFlag = false;
+                break;
+            default: 
+                temp.push_back(s[i]);
+                wordBoundaryFlag = false;
+                break;
+
+        }
+/*
         if (s[i] != ' '){
             if ((int) s[i] == BACKSPACE){
                 temp.pop_back();
@@ -57,7 +84,7 @@ vector<string> tokenise(string s, char delimiter){
                 wordBoundaryFlag = true;
             }
         }
-
+*/
     }
     if (!wordBoundaryFlag){
         // if the last word was not a space,
