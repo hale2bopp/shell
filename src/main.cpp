@@ -16,9 +16,6 @@ int main(void){
             cout << "Hello from child: " <<tokens[0] << " " <<   pid << endl; 
             vector<string> args = {tokens.begin() + 1, tokens.end()}; 
             executeProgram(tokens[0], args, env);
-//            execve(tokens[0].c_str(), NULL, env); 
-//            perror("unable to run command"); 
-//            exit(EXIT_FAILURE);
         } else {
             cout << "hello from parent" << endl;
             wait(NULL);
