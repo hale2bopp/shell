@@ -2,7 +2,9 @@
 #include <unistd.h>
 #include "shell.h"
 #include <string>
+#include <string.h>
 #include <vector>
+#include <algorithm>
 
 void checkLength(string &shellInput){
     if (shellInput.size() > MAX_INPUT){
@@ -18,25 +20,47 @@ string getInput(void){
     return shellInput;
 }
 
-void convertStringToConstCharArr(vector<string> vec, char** str){
-    std::vector<char*> pvec(vec.size());
-    std::transform(vec.begin(), vec.end(), pvec.begin(), [](auto& str) {
-        return &str[0];
-    });
-    str = pvec.data();
+void convertStringToConstCharArr(vector<string> vec, vector<const char*> ptrs){
+//    std::vector<const char*> ptrs;
+//    for (std::string const& str : args) {
+//        ptrs.push_back(str.data());
+//    }
+//    std::vector<char*> pvec(vec.size());
+//    std::transform(vec.begin(), vec.end(), pvec.begin(), [](auto& str) {
+//        return &str[0];
+//    });
+//    str = pvec.data();
 }
 
-void executeProgram(string cmd, vector<string> args, string env){
+void executeProgram(string cmd, vector<string> argv, string env){
     // args need to be NULL terminated 
-    args.push_back(NULL);
+//    args.push_back(NULL);
     // env too 
-    env.push_back(NULL);
+//    env.push_back(NULL);
 
-    std::vector<char*> pvec(args.size());
-    std::transform(args.begin(), args.end(), pvec.begin(), [](auto& str) {
-        return &str[0];
-    });
-    execve(cmd.c_str(), pvec.data(), NULL);
+    std::vector<char *> vec_cp;
+    vec_cp.reserve(argv.size() + 1);
+    int i = 0;
+    for (auto s : argv){
+        vec_cp.push_back(strdup(s.c_str()));
+        cout << "vec_cp: " << vec_cp[i] << endl;
+        i++;
+    }
+
+    vec_cp.push_back(NULL);
+//
+
+//    const char **argv = new const char* [args.size()+1];   // extra room for program name and sentinel
+//    for (int j = 0;  j < args.size()+1;  ++j)     // copy args
+//        argv [j+1] = args[j] .c_str();
+
+//    argv [args.size()+1] = NULL;  // end of arguments sentinel is NULL
+
+    // cout << vec_cp << endl;
+//    execve(cmd.c_str(), const_cast<char* const*>(vec_cp.data()), NULL);
+    execvp(cmd.c_str(), const_cast<char* const*>(vec_cp.data()));
+//    for (auto p : vec_cp)
+//        free(p);
 }
 
 vector<string> tokenise(string s, char delimiter){
