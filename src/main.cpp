@@ -11,7 +11,7 @@ int main(void){
         vector<string> tokens =  tokenise(shellInput, ' ');
         printTokens(tokens);
         int pid = fork(); 
-        cout << "pid how is it getting printed again: " << pid << endl;
+        cout << "pid: " << pid << endl;
         if (pid == 0) { 
             cout << "Hello from child: " <<tokens[0] << " " <<   pid << endl; 
             vector<string> args = {tokens.begin() + 1, tokens.end()}; 
