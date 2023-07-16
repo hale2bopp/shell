@@ -11,15 +11,10 @@ int main(void){
         vector<string> tokens =  tokenise(shellInput, ' ');
         printTokens(tokens);
         int pid = fork(); 
-        cout << "pid: " << pid << endl;
         if (pid == 0) { 
-            cout << "Hello from child: " <<tokens[0] << " " <<   pid << endl; 
-            vector<string> args = {tokens.begin() + 1, tokens.end()}; 
-            executeProgram(tokens[0], args, env);
+            executeProgram(tokens[0], tokens, env);
         } else {
-            cout << "hello from parent" << endl;
             wait(NULL);
-            cout << "child has terminated" << endl;
         }
     }
     return 0;
