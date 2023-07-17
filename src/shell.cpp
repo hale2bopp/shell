@@ -2,7 +2,6 @@
 #include <unistd.h>
 #include "shell.h"
 #include <string>
-#include <curses.h>
 #include <string.h>
 #include <vector>
 #include <algorithm>
@@ -38,7 +37,7 @@ string replaceInput(queue<vector<string>>&cmdList){
     for (string s: cmdList.back()){
         shellInput+= s+" " ;
     }
-    cout << shellInput << endl;
+    cout << "replaced string: " << shellInput << endl;
 //    string moreShellInput;
 //    getline(cin, moreShellInput);
     return shellInput;
@@ -47,8 +46,27 @@ string replaceInput(queue<vector<string>>&cmdList){
 string getInput(void){ 
     string shellInput;
     int c = 0;
-    while(c!= 10){
+    while(c!=10){
         c = getchar();
+        switch(c){
+            case 27:
+                // get 2 more
+                c = getchar();
+                c = getchar();
+                if (c == 65){
+                    cout << " showing you most recent history" << endl;
+                    shellInput = handleUpArrow();
+                }
+                break;
+
+            case 10:
+                break;
+            default:
+                shellInput += c; 
+                break;
+        }
+
+        /*
         if (c == 27){
             // get 2 more 
             c = getchar();
@@ -57,8 +75,10 @@ string getInput(void){
                 cout << " showing you most recent history" << endl;
                 shellInput = handleUpArrow();
             }
+        } else {
+            shellInput += c;
         }
-        shellInput += c;
+        */
     }
     // limit length of terminal input
     checkLength(shellInput);
