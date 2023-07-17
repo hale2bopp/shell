@@ -5,11 +5,37 @@
 #include <string.h>
 #include <vector>
 #include <algorithm>
+#include <termios.h>
 string replaceInput(queue<vector<string>>&cmdList);
+static struct termios oldt, newt;
+void clearInput(void);
 queue<vector<string>> cmdHistory;
 void mainWrapperAddCmdToHistory(vector<string> &cmd){
     addCmdToHistory(cmd, cmdHistory);
 }
+
+void putTerminalInPerCharMode(void){
+    /*tcgetattr gets the parameters of the current terminal
+    STDIN_FILENO will tell tcgetattr that it should write the settings
+    of stdin to oldt*/
+    tcgetattr( STDIN_FILENO, &oldt);
+    /*now the settings will be copied*/
+    newt = oldt;
+
+    /*ICANON normally takes care that one line at a time will be processed
+    that means it will return if it sees a "\n" or an EOF or an EOL*/
+    newt.c_lflag &= ~(ICANON);          
+
+    /*Those new settings will be set to STDIN
+    TCSANOW tells tcsetattr to change attributes immediately. */
+    tcsetattr( STDIN_FILENO, TCSANOW, &newt);
+}
+
+void putTerminalBackInNormalMode(void){
+    /*restore the old settings*/
+    tcsetattr( STDIN_FILENO, TCSANOW, &oldt);
+}
+
 void addCmdToHistory(vector<string> &cmd, queue<vector<string>> &cmdList){
     if (cmdList.size() >= CMD_HISTORY_SIZE){
         cmdList.pop();
@@ -18,6 +44,7 @@ void addCmdToHistory(vector<string> &cmd, queue<vector<string>> &cmdList){
 }
 
 string handleUpArrow(void){
+    clearInput();
     return replaceInput(cmdHistory);
 }
 
@@ -36,27 +63,31 @@ string replaceInput(queue<vector<string>>&cmdList){
     for (string s: cmdList.back()){
         shellInput+= s+" " ;
     }
-//    cout << "replaced string: " << shellInput << endl;
+    cout << shellInput << endl;
     return shellInput;
 }
 
 string getInput(void){ 
     string shellInput;
-    int c = 0;
+    putTerminalInPerCharMode();
+    char c = 0;
     while(c!=10){
         c = getchar();
+//        cin.get(c);
+
         switch(c){
-            case 27:
+            case (char)27:
                 // get 2 more
                 c = getchar();
                 c = getchar();
-                if (c == 65){
-//                    cout << " showing you most recent history" << endl;
+                if (c == (char)65){
+                    cin.clear();
+                    cout.clear();
                     shellInput = handleUpArrow();
                 }
                 break;
 
-            case 10:
+            case (char)10:
                 break;
             default:
                 shellInput += c; 
@@ -65,6 +96,7 @@ string getInput(void){
     }
     // limit length of terminal input
     checkLength(shellInput);
+    putTerminalBackInNormalMode();
     return shellInput;
 }
 
