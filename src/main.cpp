@@ -12,11 +12,10 @@ int main(void){
         mainWrapperAddCmdToHistory(tokens);
         int pid = fork(); 
         if (pid == 0) { 
-            printTokens(tokens);
-            cout << executeProgram(tokens) << endl;
+//            printTokens(tokens);
+            executeProgram(tokens);
             perror("unable to execute");
         } else {
-            cout << "parent" << endl;
             wait(NULL);
         }
     }

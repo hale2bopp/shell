@@ -32,14 +32,11 @@ void clearInput(void){
 }
 
 string replaceInput(queue<vector<string>>&cmdList){
-//    clearInput();
     string shellInput;
     for (string s: cmdList.back()){
         shellInput+= s+" " ;
     }
-    cout << "replaced string: " << shellInput << endl;
-//    string moreShellInput;
-//    getline(cin, moreShellInput);
+//    cout << "replaced string: " << shellInput << endl;
     return shellInput;
 }
 
@@ -54,7 +51,7 @@ string getInput(void){
                 c = getchar();
                 c = getchar();
                 if (c == 65){
-                    cout << " showing you most recent history" << endl;
+//                    cout << " showing you most recent history" << endl;
                     shellInput = handleUpArrow();
                 }
                 break;
@@ -65,20 +62,6 @@ string getInput(void){
                 shellInput += c; 
                 break;
         }
-
-        /*
-        if (c == 27){
-            // get 2 more 
-            c = getchar();
-            c = getchar();
-            if (c == 65){
-                cout << " showing you most recent history" << endl;
-                shellInput = handleUpArrow();
-            }
-        } else {
-            shellInput += c;
-        }
-        */
     }
     // limit length of terminal input
     checkLength(shellInput);
@@ -90,7 +73,6 @@ int executeProgram(vector<string> argv){
     vec_cp.reserve(argv.size() + 1);
     for (auto s : argv){
         vec_cp.push_back(strdup(s.c_str()));
-        cout << "command: " << s << endl;
     }
     vec_cp.push_back(NULL);
     return execvp(argv[0].c_str(), const_cast<char* const*>(vec_cp.data()));           
@@ -126,27 +108,6 @@ vector<string> tokenise(string s, char delimiter){
                 break;
 
         }
-/*
-        if (s[i] != ' '){
-            if ((int) s[i] == BACKSPACE){
-                temp.pop_back();
-            } else {
-                temp.push_back(s[i]);
-            }
-            wordBoundaryFlag = false;
-        } else {
-            // if previous state was false
-            // this is a transition from finding a word
-            // to finding a space 
-            if (!wordBoundaryFlag){
-                // add to tokens
-                tokens.push_back(temp);
-                // empty temp string
-                temp = "";
-                wordBoundaryFlag = true;
-            }
-        }
-*/
     }
     if (!wordBoundaryFlag){
         // if the last word was not a space,
