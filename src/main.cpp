@@ -8,12 +8,15 @@ int main(void){
     while (1) {
         cout << prompt << " ";
         string shellInput = getInput();
-        vector<string> tokens =  tokenise(shellInput, ' ');
-        printTokens(tokens);
+        vector<string> tokens = tokenise(shellInput, ' ');
+        mainWrapperAddCmdToHistory(tokens);
         int pid = fork(); 
         if (pid == 0) { 
-            executeProgram(tokens[0], tokens, env);
+            printTokens(tokens);
+            cout << executeProgram(tokens) << endl;
+            perror("unable to execute");
         } else {
+            cout << "parent" << endl;
             wait(NULL);
         }
     }

@@ -2,9 +2,25 @@
 #include <unistd.h>
 #include "shell.h"
 #include <string>
+#include <curses.h>
 #include <string.h>
 #include <vector>
 #include <algorithm>
+string replaceInput(queue<vector<string>>&cmdList);
+queue<vector<string>> cmdHistory;
+void mainWrapperAddCmdToHistory(vector<string> &cmd){
+    addCmdToHistory(cmd, cmdHistory);
+}
+void addCmdToHistory(vector<string> &cmd, queue<vector<string>> &cmdList){
+    if (cmdList.size() >= CMD_HISTORY_SIZE){
+        cmdList.pop();
+    } 
+    cmdList.push(cmd);
+}
+
+string handleUpArrow(void){
+    return replaceInput(cmdHistory);
+}
 
 void checkLength(string &shellInput){
     if (shellInput.size() > MAX_INPUT){
@@ -12,23 +28,52 @@ void checkLength(string &shellInput){
     }
 }
 
+void clearInput(void){
+    cin.clear();
+}
+
+string replaceInput(queue<vector<string>>&cmdList){
+//    clearInput();
+    string shellInput;
+    for (string s: cmdList.back()){
+        shellInput+= s+" " ;
+    }
+    cout << shellInput << endl;
+//    string moreShellInput;
+//    getline(cin, moreShellInput);
+    return shellInput;
+}
+
 string getInput(void){ 
     string shellInput;
-    getline(cin, shellInput);
+    int c = 0;
+    while(c!= 10){
+        c = getchar();
+        if (c == 27){
+            // get 2 more 
+            c = getchar();
+            c = getchar();
+            if (c == 65){
+                cout << " showing you most recent history" << endl;
+                shellInput = handleUpArrow();
+            }
+        }
+        shellInput += c;
+    }
     // limit length of terminal input
     checkLength(shellInput);
     return shellInput;
 }
 
-void executeProgram(string cmd, vector<string> argv, string env){
+int executeProgram(vector<string> argv){
     std::vector<char *> vec_cp;
     vec_cp.reserve(argv.size() + 1);
     for (auto s : argv){
         vec_cp.push_back(strdup(s.c_str()));
+        cout << "command: " << s << endl;
     }
     vec_cp.push_back(NULL);
-    execvp(cmd.c_str(), const_cast<char* const*>(vec_cp.data()));
-           
+    return execvp(argv[0].c_str(), const_cast<char* const*>(vec_cp.data()));           
 }
 
 vector<string> tokenise(string s, char delimiter){
@@ -50,9 +95,6 @@ vector<string> tokenise(string s, char delimiter){
                     temp = "";
                     wordBoundaryFlag = true;
                 }
-                break;
-            case char(72):
-                cout << "UP Arrow" << endl; 
                 break;
             case BACKSPACE:
                 temp.pop_back();

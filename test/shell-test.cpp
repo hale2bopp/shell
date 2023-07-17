@@ -66,3 +66,42 @@ TEST(tokeniseTest, testMultipleBackspace){
     EXPECT_EQ(outputString, exResult);
 }
 
+TEST(executeCmd, executeCmdStatus){
+    // arrange 
+    vector<string> cmd = {"/bin/s" , "-la"};
+    
+    // act
+    // assert
+    EXPECT_LT(executeProgram(cmd),0);
+}
+
+TEST(cmdHistoryTest, addToCmdHistory){
+    // arrange
+    vector<string> newCmd = {"/bin/ls", "-la" };
+    vector<string> oldCmd1 =  {"cat", "Makefile" };
+    queue<vector<string>> cmdList;
+    cmdList.push(oldCmd1);
+    // act
+    addCmdToHistory(newCmd, cmdList); 
+
+    // assert
+    // act
+    EXPECT_EQ(cmdList.back(), newCmd);
+}
+
+TEST(cmdHistoryTest, testUpArrow){
+    // arrange
+    vector<string> newCmd = {"/bin/ls", "-la" };
+    vector<string> oldCmd1 =  {"cat", "Makefile" };
+    queue<vector<string>> cmdList;
+    cmdList.push(oldCmd1);
+    cmdList.push(newCmd);
+        
+    // act
+    string fullString = ""; 
+    fullString += char(72);
+    vector<string> inputStringVec = cmdList.back();
+    inputStringVec[inputStringVec.size()-1] += "h";
+    int retVal = executeProgram(inputStringVec);
+    EXPECT_LT(retVal, 0);
+}   
