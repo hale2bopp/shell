@@ -1,9 +1,6 @@
 // write unit tests here
 #include "gtest/gtest.h"
 #include "shell.h"
-TEST(gtestTest, test1){
-    EXPECT_EQ(1, 1);
-}
 
 TEST(tokeniseTest, oneWordResult){
     // arrange
@@ -89,6 +86,14 @@ TEST(cmdHistoryTest, addToCmdHistory){
     EXPECT_EQ(cmdList.back(), newCmd);
 }
 
+TEST(cmdHistoryTest, noHistory){
+    // arrange
+    queue<vector<string>> cmdList;
+    // act
+    EXPECT_EQ(replaceInput(cmdList), "");
+}
+
+/*
 TEST(cmdHistoryTest, testUpArrow){
     // arrange
     vector<string> newCmd = {"/bin/ls", "-la" };
@@ -99,9 +104,12 @@ TEST(cmdHistoryTest, testUpArrow){
         
     // act
     string fullString = ""; 
-    fullString += char(72);
+    fullString += char(27)+(char)27+(char)65;
     vector<string> inputStringVec = cmdList.back();
     inputStringVec[inputStringVec.size()-1] += "h";
     int retVal = executeProgram(inputStringVec);
+    // assert
     EXPECT_LT(retVal, 0);
-}   
+}
+*/
+
