@@ -6,7 +6,6 @@
 #include <vector>
 #include <algorithm>
 #include <termios.h>
-string replaceInput(queue<vector<string>>&cmdList);
 static struct termios oldt, newt;
 void clearInput(void);
 queue<vector<string>> cmdHistory;
@@ -60,6 +59,9 @@ void clearInput(void){
 
 string replaceInput(queue<vector<string>>&cmdList){
     string shellInput;
+    if (cmdList.size() == 0){
+        return "";
+    }
     for (string s: cmdList.back()){
         shellInput+= s+" " ;
     }

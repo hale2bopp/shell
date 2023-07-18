@@ -12,6 +12,7 @@ using namespace std;
 
 string getInput(void);
 string handleUpArrow(void);
+string replaceInput(queue<vector<string>>&cmdList);
 void checkLength(string& s);
 vector<string> tokenise(string s, char delimiter);
 void printTokens(const vector<string> &input);
