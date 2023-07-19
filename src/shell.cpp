@@ -1,6 +1,7 @@
 #include <iostream>
 #include <unistd.h>
 #include "shell.h"
+#include "escapeChars.h"
 #include <string>
 #include <string.h>
 #include <vector>
@@ -10,6 +11,12 @@ static struct termios oldt, newt;
 string prompt = "penn-shredder#";
 void clearInput(void);
 queue<vector<string>> cmdHistory;
+static void moveCursorToBackDisplayPrompt(void);
+static void moveCursorToBackDisplayPrompt(void){
+    cout << eraseTillStartOfLine + moveCursorToBeginningOfLine;
+    displayPrompt();
+}
+
 void mainWrapperAddCmdToHistory(vector<string> &cmd){
     addCmdToHistory(cmd, cmdHistory);
 }
@@ -88,11 +95,9 @@ string getInput(void){
                 c = getchar();
                 c = getchar();
                 if (c == (char)65){
-                    cin.clear();
-//                    cout.clear();
-                    //cout << "\033[A\33[2K" << prompt;
-                    cout << "\33[2K\r" << prompt;
-//                    cout << prompt;
+                    //cin.clear();
+                    moveCursorToBackDisplayPrompt();
+//                    cout << "\33[K\r" << prompt;
                     shellInput = handleUpArrow();
                 }
                 break;

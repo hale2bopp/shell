@@ -21,7 +21,8 @@ void printTokens(const vector<string> &input);
 int executeProgram(vector<string> args);
 void addCmdToHistory(vector<string> &cmd, queue<vector<string>> &cmdList);
 void mainWrapperAddCmdToHistory(vector<string> &cmd);
-#endif 
+
+#endif  // SHELL_H
 
 
 
