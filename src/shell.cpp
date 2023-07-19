@@ -86,16 +86,19 @@ string getInput(void){
         c = getchar();
 
         switch(c){
-            case (char)UP_ARROW_1:
+            case (char)ESCAPE_SEQ:
                 // get 2 more
                 c = getchar();
                 c = getchar();
-                if (c == (char)UP_ARROW_3){
+                if (c == (char)UP_ARROW){
                     moveCursorToBackDisplayPrompt();
                     shellInput = handleUpArrow();
-                }
+                } 
                 break;
-
+            case (char) DELETE: 
+                cout << "\b";
+                shellInput += (char)8;
+                break;
             case (char)ENTER:
                 break;
             default:
@@ -140,16 +143,9 @@ vector<string> tokenise(string s, char delimiter){
                     wordBoundaryFlag = true;
                 }
                 break;
-            case BACKSPACE_1:
-                backspace_1_flag = true;
-                break;
-            case BACKSPACE_2:
-                if (backspace_1_flag){
-                    temp.pop_back();
-                    wordBoundaryFlag = false;
-                    backspace_1_flag = false;
-                    cout << BACKSPACE;
-                }
+            case (char)8:
+                temp.pop_back();
+                wordBoundaryFlag = false;
                 break;
             default: 
                 temp.push_back(s[i]);

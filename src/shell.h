@@ -8,8 +8,6 @@ using std::queue;
 using namespace std;
 #define CMD_HISTORY_SIZE 10
 #define MAX_INPUT 100
-#define BACKSPACE_1 '^'
-#define BACKSPACE_2 '?'
 
 void displayPrompt(void);
 string getInput(void);
