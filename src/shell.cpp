@@ -7,10 +7,15 @@
 #include <algorithm>
 #include <termios.h>
 static struct termios oldt, newt;
+string prompt = "penn-shredder#";
 void clearInput(void);
 queue<vector<string>> cmdHistory;
 void mainWrapperAddCmdToHistory(vector<string> &cmd){
     addCmdToHistory(cmd, cmdHistory);
+}
+
+void displayPrompt(void){
+    cout << prompt;
 }
 
 void putTerminalInPerCharMode(void){
@@ -65,14 +70,14 @@ string replaceInput(queue<vector<string>>&cmdList){
     for (string s: cmdList.back()){
         shellInput+= s+" " ;
     }
-    cout << shellInput << endl;
+    cout << shellInput;
     return shellInput;
 }
 
 string getInput(void){ 
     string shellInput;
-    putTerminalInPerCharMode();
     char c = 0;
+    putTerminalInPerCharMode();
     while(c!=10){
         c = getchar();
 //        cin.get(c);
@@ -84,7 +89,10 @@ string getInput(void){
                 c = getchar();
                 if (c == (char)65){
                     cin.clear();
-                    cout.clear();
+//                    cout.clear();
+                    //cout << "\033[A\33[2K" << prompt;
+                    cout << "\33[2K\r" << prompt;
+//                    cout << prompt;
                     shellInput = handleUpArrow();
                 }
                 break;
@@ -115,6 +123,7 @@ int executeProgram(vector<string> argv){
 vector<string> tokenise(string s, char delimiter){
     // ignore whitespaces 
     // end on enter 
+    bool backspace_1_flag = false;
     vector<string> tokens;
     bool wordBoundaryFlag = true;
     string temp;
@@ -132,9 +141,16 @@ vector<string> tokenise(string s, char delimiter){
                     wordBoundaryFlag = true;
                 }
                 break;
-            case BACKSPACE:
-                temp.pop_back();
-                wordBoundaryFlag = false;
+            case BACKSPACE_1:
+                backspace_1_flag = true;
+                break;
+            case BACKSPACE_2:
+                if (backspace_1_flag){
+                    temp.pop_back();
+                    wordBoundaryFlag = false;
+                    backspace_1_flag = false;
+                    cout << "\b";
+                }
                 break;
             default: 
                 temp.push_back(s[i]);

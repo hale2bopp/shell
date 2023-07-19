@@ -41,7 +41,7 @@ TEST(tokeniseTest, testSingleBackspace){
     // arrange
     string part1 = "Dimpj";
     string part2 = "y loves mice";
-    string fullString = part1 + (char) 8 + part2;    
+    string fullString = part1 + '^' + '?' + part2;    
     // act
     // assert 
     //
@@ -53,7 +53,7 @@ TEST(tokeniseTest, testMultipleBackspace){
     // arrange
     string part1 = "Dimpjs";
     string part2 = "y loves mice";
-    string fullString = part1 + (char) 8 + (char) 8 + part2;
+    string fullString = part1 + "^?" + "^?" + part2;
     // act
     vector<string> outputString = tokenise(fullString, ' ');
     printTokens(outputString);
