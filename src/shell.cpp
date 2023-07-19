@@ -9,7 +9,6 @@
 #include <termios.h>
 static struct termios oldt, newt;
 string prompt = "penn-shredder#";
-void clearInput(void);
 queue<vector<string>> cmdHistory;
 static void moveCursorToBackDisplayPrompt(void);
 static void moveCursorToBackDisplayPrompt(void){
@@ -25,6 +24,7 @@ void displayPrompt(void){
     cout << prompt;
 }
 
+// This allows us to process characters as soon as they are typed
 void putTerminalInPerCharMode(void){
     /*tcgetattr gets the parameters of the current terminal
     STDIN_FILENO will tell tcgetattr that it should write the settings
@@ -42,10 +42,12 @@ void putTerminalInPerCharMode(void){
     tcsetattr( STDIN_FILENO, TCSANOW, &newt);
 }
 
+// put it back into normal mode once I receive input
 void putTerminalBackInNormalMode(void){
     /*restore the old settings*/
     tcsetattr( STDIN_FILENO, TCSANOW, &oldt);
 }
+
 
 void addCmdToHistory(vector<string> &cmd, queue<vector<string>> &cmdList){
     if (cmdList.size() >= CMD_HISTORY_SIZE){
@@ -55,7 +57,6 @@ void addCmdToHistory(vector<string> &cmd, queue<vector<string>> &cmdList){
 }
 
 string handleUpArrow(void){
-    clearInput();
     return replaceInput(cmdHistory);
 }
 
@@ -63,10 +64,6 @@ void checkLength(string &shellInput){
     if (shellInput.size() > MAX_INPUT){
         shellInput = shellInput.substr(0, MAX_INPUT);
     }
-}
-
-void clearInput(void){
-    cin.clear();
 }
 
 string replaceInput(queue<vector<string>>&cmdList){
