@@ -7,7 +7,6 @@ const string moveCursorToBeginningOfLine = "\r";
 #define ESCAPE_SEQ 27
 #define UP_ARROW 65
 #define ENTER 10
-#define BACKSPACE_1 '^'
-#define BACKSPACE_2 '?'
+#define ASCII_BACKSPACE 8
 
 #endif // ESCAPE_CHARS_H

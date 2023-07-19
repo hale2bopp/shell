@@ -96,8 +96,8 @@ string getInput(void){
                 } 
                 break;
             case (char) DELETE: 
-                cout << "\b";
-                shellInput += (char)8;
+                cout << "\b\b\b";
+                shellInput += (char)ASCII_BACKSPACE;
                 break;
             case (char)ENTER:
                 break;
@@ -143,7 +143,7 @@ vector<string> tokenise(string s, char delimiter){
                     wordBoundaryFlag = true;
                 }
                 break;
-            case (char)8:
+            case (char)ASCII_BACKSPACE:
                 temp.pop_back();
                 wordBoundaryFlag = false;
                 break;
