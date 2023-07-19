@@ -85,24 +85,21 @@ string getInput(void){
     string shellInput;
     char c = 0;
     putTerminalInPerCharMode();
-    while(c!=10){
+    while(c!=ENTER){
         c = getchar();
-//        cin.get(c);
 
         switch(c){
-            case (char)27:
+            case (char)UP_ARROW_1:
                 // get 2 more
                 c = getchar();
                 c = getchar();
-                if (c == (char)65){
-                    //cin.clear();
+                if (c == (char)UP_ARROW_3){
                     moveCursorToBackDisplayPrompt();
-//                    cout << "\33[K\r" << prompt;
                     shellInput = handleUpArrow();
                 }
                 break;
 
-            case (char)10:
+            case (char)ENTER:
                 break;
             default:
                 shellInput += c; 
@@ -154,7 +151,7 @@ vector<string> tokenise(string s, char delimiter){
                     temp.pop_back();
                     wordBoundaryFlag = false;
                     backspace_1_flag = false;
-                    cout << "\b";
+                    cout << BACKSPACE;
                 }
                 break;
             default: 
