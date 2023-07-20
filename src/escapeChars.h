@@ -8,5 +8,6 @@ const string moveCursorToBeginningOfLine = "\r";
 #define UP_ARROW 65
 #define ENTER 10
 #define ASCII_BACKSPACE 8
+static void moveCursorToBackDisplayPrompt(void);
 
 #endif // ESCAPE_CHARS_H

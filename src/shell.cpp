@@ -8,12 +8,17 @@
 #include <algorithm>
 #include <termios.h>
 static struct termios oldt, newt;
-string prompt = "penn-shredder#";
+string prompt = "penn-shredder# ";
 queue<vector<string>> cmdHistory;
+
 static void moveCursorToBackDisplayPrompt(void);
 static void moveCursorToBackDisplayPrompt(void){
     cout << eraseTillStartOfLine + moveCursorToBeginningOfLine;
     displayPrompt();
+}
+
+static void eraseLastCharacter(void){
+
 }
 
 void mainWrapperAddCmdToHistory(vector<string> &cmd){
@@ -96,8 +101,11 @@ string getInput(void){
                 } 
                 break;
             case (char) DELETE: 
-                cout << "\b\b\b";
+                cout << "del " << endl;
                 shellInput += (char)ASCII_BACKSPACE;
+//                cout << "\33[D\33[K";
+//                cout << "\33[D\33[K";
+//                cout << "\33[D\33[K";
                 break;
             case (char)ENTER:
                 break;
@@ -125,6 +133,12 @@ int executeProgram(vector<string> argv){
 vector<string> tokenise(string s, char delimiter){
     // ignore whitespaces 
     // end on enter 
+    cout  << "received string: " << endl;
+    for (auto ch:s){ 
+        cout << (int) ch<< " ";
+    }
+    cout << "\n";
+
     bool backspace_1_flag = false;
     vector<string> tokens;
     bool wordBoundaryFlag = true;
