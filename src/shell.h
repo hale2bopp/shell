@@ -3,15 +3,24 @@
 
 #include <vector>
 #include<sys/wait.h>
+#include <queue>
+using std::queue;
 using namespace std;
+#define CMD_HISTORY_SIZE 10
 #define MAX_INPUT 100
-#define BACKSPACE 8
+
+void displayPrompt(void);
 string getInput(void);
+string handleUpArrow(void);
+string replaceInput(queue<vector<string>>&cmdList);
 void checkLength(string& s);
 vector<string> tokenise(string s, char delimiter);
 void printTokens(const vector<string> &input);
-void executeProgram(string cmd, vector<string> args, string env);
-#endif 
+int executeProgram(vector<string> args);
+void addCmdToHistory(vector<string> &cmd, queue<vector<string>> &cmdList);
+void mainWrapperAddCmdToHistory(vector<string> &cmd);
+
+#endif  // SHELL_H
 
 
 

@@ -1,18 +1,18 @@
 #include <iostream>
 #include<sys/wait.h>
 #include "shell.h"
-string prompt = "penn-shredder# ";
 
 string env = "PATH=/usr/local/sbin/:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games";
 int main(void){
     while (1) {
-        cout << prompt << " ";
+        displayPrompt();
         string shellInput = getInput();
-        vector<string> tokens =  tokenise(shellInput, ' ');
-        printTokens(tokens);
+        vector<string> tokens = tokenise(shellInput, ' ');
+        mainWrapperAddCmdToHistory(tokens);
         int pid = fork(); 
         if (pid == 0) { 
-            executeProgram(tokens[0], tokens, env);
+            executeProgram(tokens);
+            perror("unable to execute");
         } else {
             wait(NULL);
         }
