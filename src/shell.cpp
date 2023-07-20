@@ -101,11 +101,12 @@ string getInput(void){
                 } 
                 break;
             case (char) DELETE: 
-                cout << "del " << endl;
-                shellInput += (char)ASCII_BACKSPACE;
-//                cout << "\33[D\33[K";
-//                cout << "\33[D\33[K";
-//                cout << "\33[D\33[K";
+//                cout << "del " << endl;
+//                shellInput += (char)ASCII_BACKSPACE;
+                cout << "\33[D\33[K";
+                cout << "\33[D\33[K";
+                cout << "\33[D\33[K";
+                shellInput.pop_back();
                 break;
             case (char)ENTER:
                 break;
@@ -157,10 +158,10 @@ vector<string> tokenise(string s, char delimiter){
                     wordBoundaryFlag = true;
                 }
                 break;
-            case (char)ASCII_BACKSPACE:
-                temp.pop_back();
-                wordBoundaryFlag = false;
-                break;
+//            case (char)ASCII_BACKSPACE:
+//                temp.pop_back();
+//                wordBoundaryFlag = false;
+//                break;
             default: 
                 temp.push_back(s[i]);
                 wordBoundaryFlag = false;

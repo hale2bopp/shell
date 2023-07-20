@@ -37,6 +37,7 @@ TEST(tokeniseTest, initialSpaceAndMultipleSpaceAndEndSpace){
     EXPECT_EQ(tokenise("   Dimpy   loves    mice    ", ' '), exResult);
 }
 
+/*
 TEST(tokeniseTest, testSingleBackspace){
     // arrange
     string part1 = "Dimpj";
@@ -48,6 +49,7 @@ TEST(tokeniseTest, testSingleBackspace){
     vector<string> exResult = {"Dimpy", "loves", "mice"};
     EXPECT_EQ(tokenise(fullString, ' '), exResult);
 }
+
 
 TEST(tokeniseTest, testMultipleBackspace){
     // arrange
@@ -62,6 +64,7 @@ TEST(tokeniseTest, testMultipleBackspace){
     vector<string> exResult = {"Dimpy", "loves", "mice"};
     EXPECT_EQ(outputString, exResult);
 }
+*/
 
 TEST(executeCmd, executeCmdStatus){
     // arrange 
