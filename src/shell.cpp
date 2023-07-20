@@ -1,25 +1,13 @@
 #include <iostream>
 #include <unistd.h>
 #include "shell.h"
-#include "escapeChars.h"
+#include "termBehaviour.h"
 #include <string>
 #include <string.h>
 #include <vector>
 #include <algorithm>
-#include <termios.h>
-static struct termios oldt, newt;
 string prompt = "penn-shredder# ";
 queue<vector<string>> cmdHistory;
-
-static void moveCursorToBackDisplayPrompt(void);
-static void moveCursorToBackDisplayPrompt(void){
-    cout << eraseTillStartOfLine + moveCursorToBeginningOfLine;
-    displayPrompt();
-}
-
-static void eraseLastCharacter(void){
-
-}
 
 void mainWrapperAddCmdToHistory(vector<string> &cmd){
     addCmdToHistory(cmd, cmdHistory);
@@ -29,29 +17,6 @@ void displayPrompt(void){
     cout << prompt;
 }
 
-// This allows us to process characters as soon as they are typed
-void putTerminalInPerCharMode(void){
-    /*tcgetattr gets the parameters of the current terminal
-    STDIN_FILENO will tell tcgetattr that it should write the settings
-    of stdin to oldt*/
-    tcgetattr( STDIN_FILENO, &oldt);
-    /*now the settings will be copied*/
-    newt = oldt;
-
-    /*ICANON normally takes care that one line at a time will be processed
-    that means it will return if it sees a "\n" or an EOF or an EOL*/
-    newt.c_lflag &= ~(ICANON);          
-
-    /*Those new settings will be set to STDIN
-    TCSANOW tells tcsetattr to change attributes immediately. */
-    tcsetattr( STDIN_FILENO, TCSANOW, &newt);
-}
-
-// put it back into normal mode once I receive input
-void putTerminalBackInNormalMode(void){
-    /*restore the old settings*/
-    tcsetattr( STDIN_FILENO, TCSANOW, &oldt);
-}
 
 
 void addCmdToHistory(vector<string> &cmd, queue<vector<string>> &cmdList){
@@ -101,12 +66,7 @@ string getInput(void){
                 } 
                 break;
             case (char) DELETE: 
-//                cout << "del " << endl;
-//                shellInput += (char)ASCII_BACKSPACE;
-                cout << "\33[D\33[K";
-                cout << "\33[D\33[K";
-                cout << "\33[D\33[K";
-                shellInput.pop_back();
+                eraseLastCharacter(shellInput);               
                 break;
             case (char)ENTER:
                 break;
@@ -134,13 +94,6 @@ int executeProgram(vector<string> argv){
 vector<string> tokenise(string s, char delimiter){
     // ignore whitespaces 
     // end on enter 
-    cout  << "received string: " << endl;
-    for (auto ch:s){ 
-        cout << (int) ch<< " ";
-    }
-    cout << "\n";
-
-    bool backspace_1_flag = false;
     vector<string> tokens;
     bool wordBoundaryFlag = true;
     string temp;
@@ -158,10 +111,6 @@ vector<string> tokenise(string s, char delimiter){
                     wordBoundaryFlag = true;
                 }
                 break;
-//            case (char)ASCII_BACKSPACE:
-//                temp.pop_back();
-//                wordBoundaryFlag = false;
-//                break;
             default: 
                 temp.push_back(s[i]);
                 wordBoundaryFlag = false;
