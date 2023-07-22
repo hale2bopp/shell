@@ -5,27 +5,39 @@
 #include <iostream>
 #include <unistd.h>
 #include "shell.h"
-#include "termBehaviour.h"
+#include <termios.h>
 #include <string>
 #include <string.h>
 #include <vector>
 #include <algorithm>
 string prompt = "penn-shredder# ";
 queue<vector<string>> cmdHistory;
+static struct termios oldt, newt;
+
+Shell::Shell(void){
+    this->shellPrompt = prompt;
+    this->maxCmdHistorySize = CMD_HISTORY_SIZE;
+    this->cmdHistoryList = cmdHistory;
+}
+
+Shell::Shell(int maxCmdHistorySize): maxCmdHistorySize(maxCmdHistorySize){
+    this->shellPrompt = prompt;
+    this->cmdHistoryList = cmdHistory;
+}
 
 /**
  * \brief Adds every entered command to history of commands, wrapper
  * for main 
  * @param vector of strings describing a command to enter 
  */
-void mainWrapperAddCmdToHistory(vector<string> &cmd){
+void Shell::mainWrapperAddCmdToHistory(vector<string> &cmd){
     addCmdToHistory(cmd, cmdHistory);
 }
 
 /**
  * \brief Small helper to display prompt
  */
-void displayPrompt(void){
+void Shell::displayPrompt(void){
     cout << prompt;
 }
 
@@ -37,7 +49,7 @@ void displayPrompt(void){
  * @param vector of strings describing a command to enter 
  * @param vector of vector of strings with current command history
  */
-void addCmdToHistory(vector<string> &cmd, queue<vector<string>> &cmdList){
+void Shell::addCmdToHistory(vector<string> &cmd, queue<vector<string>> &cmdList){
     if (cmdList.size() >= CMD_HISTORY_SIZE){
         cmdList.pop();
     } 
@@ -48,7 +60,7 @@ void addCmdToHistory(vector<string> &cmd, queue<vector<string>> &cmdList){
 /**
  * \brief Handles up arrow press
  */
-string handleUpArrow(void){
+string Shell::handleUpArrow(void){
     return replaceInput(cmdHistory);
 }
 
@@ -57,7 +69,7 @@ string handleUpArrow(void){
  * input value. Truncates input string if larger.
  * @param input string 
  */
-void checkLength(string &shellInput){
+void Shell::checkLength(string &shellInput){
     if (shellInput.size() > MAX_INPUT){
         shellInput = shellInput.substr(0, MAX_INPUT);
     }
@@ -70,7 +82,7 @@ void checkLength(string &shellInput){
  * with command from history.
  * @param vector of vector of strings (Command History)
  */
-string replaceInput(queue<vector<string>>&cmdList){
+string Shell::replaceInput(queue<vector<string>>&cmdList){
     string shellInput;
     if (cmdList.size() == 0){
         return "";
@@ -86,7 +98,7 @@ string replaceInput(queue<vector<string>>&cmdList){
  * \brief get Shell input. Immediately handles backspace, arrows
  * passes to tokeniser 
  */
-string getInput(void){ 
+string Shell::getInput(void){ 
     string shellInput;
     char c = 0;
     putTerminalInPerCharMode();
@@ -125,7 +137,7 @@ string getInput(void){
  * by execvp. 
  * @param vector of strings with command to be run
  */
-int executeProgram(vector<string> cmd){
+int Shell::executeProgram(vector<string> cmd){
     std::vector<char *> vec_cp;
     vec_cp.reserve(cmd.size() + 1);
     for (auto s : cmd){
@@ -143,7 +155,7 @@ int executeProgram(vector<string> cmd){
  * @param delimiter character to split string into command and args. 
  *        in normal operation, this should be ' '.
  */
-vector<string> tokenise(string s, char delimiter){
+vector<string> Shell::tokenise(string s, char delimiter){
     // ignore whitespaces 
     // end on enter 
     vector<string> tokens;
@@ -182,9 +194,64 @@ vector<string> tokenise(string s, char delimiter){
  * \brief Simple helper to print out a vector of strings 
  * @param input vector of strings to print
  */
-void printTokens(const vector<string> &input){
+void Shell::printTokens(const vector<string> &input){
     for(int i = 0; i < input.size(); i++){
         cout << input[i] << " " ;
     }
     cout << "\n"; 
+}
+
+
+/*
+ * \brief erases whole line and moves cursor to beginning of line
+ *
+ */
+void Shell::moveCursorToBackDisplayPrompt(void){
+    cout << eraseTillStartOfLine + moveCursorToBeginningOfLine;
+    displayPrompt();
+}
+
+
+/*
+ * \brief erase last character and move the cursor one
+ * step back
+ *
+ */
+void Shell::eraseLastCharacter(string&s){
+    s.pop_back();
+    for (int i = 0; i < 3; i++){
+        cout << moveCursorOneLeft << eraseCursorTillEndOfLine;
+    }
+}
+
+/*
+ * \brief Puts terminal in per character mode
+ * so allows us to respond immediately as soon 
+ * as a character is entered
+ *
+ */
+void Shell::putTerminalInPerCharMode(void){
+    /*tcgetattr gets the parameters of the current terminal
+    STDIN_FILENO will tell tcgetattr that it should write the settings
+    of stdin to oldt*/
+    tcgetattr( STDIN_FILENO, &oldt);
+    /*now the settings will be copied*/
+    newt = oldt;
+
+    /*ICANON normally takes care that one line at a time will be processed
+    that means it will return if it sees a "\n" or an EOF or an EOL*/
+    newt.c_lflag &= ~(ICANON);          
+
+    /*Those new settings will be set to STDIN
+    TCSANOW tells tcsetattr to change attributes immediately. */
+    tcsetattr( STDIN_FILENO, TCSANOW, &newt);
+}
+
+/*
+ * \brief Restore normal terminal
+ *
+ */ 
+void Shell::putTerminalBackInNormalMode(void){
+    /*restore the old settings*/
+    tcsetattr( STDIN_FILENO, TCSANOW, &oldt);
 }

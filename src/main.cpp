@@ -4,14 +4,15 @@
 
 string env = "PATH=/usr/local/sbin/:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games";
 int main(void){
+    Shell shell(CMD_HISTORY_SIZE);
     while (1) {
-        displayPrompt();
-        string shellInput = getInput();
-        vector<string> tokens = tokenise(shellInput, ' ');
-        mainWrapperAddCmdToHistory(tokens);
+        shell.displayPrompt();
+        string shellInput = shell.getInput();
+        vector<string> tokens = shell.tokenise(shellInput, ' ');
+        shell.mainWrapperAddCmdToHistory(tokens);
         int pid = fork(); 
         if (pid == 0) { 
-            executeProgram(tokens);
+            shell.executeProgram(tokens);
             perror("unable to execute");
         } else {
             wait(NULL);
