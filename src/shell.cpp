@@ -1,3 +1,7 @@
+/* \file shell.cpp 
+ * \brief defines a simple shell
+ *
+ */
 #include <iostream>
 #include <unistd.h>
 #include "shell.h"
@@ -9,16 +13,30 @@
 string prompt = "penn-shredder# ";
 queue<vector<string>> cmdHistory;
 
+/**
+ * \brief Adds every entered command to history of commands, wrapper
+ * for main 
+ * @param vector of strings describing a command to enter 
+ */
 void mainWrapperAddCmdToHistory(vector<string> &cmd){
     addCmdToHistory(cmd, cmdHistory);
 }
 
+/**
+ * \brief Small helper to display prompt
+ */
 void displayPrompt(void){
     cout << prompt;
 }
 
 
-
+/**
+ * \brief Adds every entered command to history of commands.
+ * Works as a FIFO, if number of commands exceeds a maximum
+ * defined value, first value entered is discarded.
+ * @param vector of strings describing a command to enter 
+ * @param vector of vector of strings with current command history
+ */
 void addCmdToHistory(vector<string> &cmd, queue<vector<string>> &cmdList){
     if (cmdList.size() >= CMD_HISTORY_SIZE){
         cmdList.pop();
@@ -26,16 +44,32 @@ void addCmdToHistory(vector<string> &cmd, queue<vector<string>> &cmdList){
     cmdList.push(cmd);
 }
 
+
+/**
+ * \brief Handles up arrow press
+ */
 string handleUpArrow(void){
     return replaceInput(cmdHistory);
 }
 
+/**
+ * \brief Ensures that entered command is not larger than a max
+ * input value. Truncates input string if larger.
+ * @param input string 
+ */
 void checkLength(string &shellInput){
     if (shellInput.size() > MAX_INPUT){
         shellInput = shellInput.substr(0, MAX_INPUT);
     }
 }
 
+/**
+ * \brief Handles up arrow press. Replaces currently typed string 
+ * with the string from command history. Allows for 
+ * continued input after replacing currently typed string
+ * with command from history.
+ * @param vector of vector of strings (Command History)
+ */
 string replaceInput(queue<vector<string>>&cmdList){
     string shellInput;
     if (cmdList.size() == 0){
@@ -48,6 +82,10 @@ string replaceInput(queue<vector<string>>&cmdList){
     return shellInput;
 }
 
+/**
+ * \brief get Shell input. Immediately handles backspace, arrows
+ * passes to tokeniser 
+ */
 string getInput(void){ 
     string shellInput;
     char c = 0;
@@ -81,16 +119,30 @@ string getInput(void){
     return shellInput;
 }
 
-int executeProgram(vector<string> argv){
+/**
+ * \brief Executes currently entered command with arguments.
+ * converts vector of strings into a format understandable
+ * by execvp. 
+ * @param vector of strings with command to be run
+ */
+int executeProgram(vector<string> cmd){
     std::vector<char *> vec_cp;
-    vec_cp.reserve(argv.size() + 1);
-    for (auto s : argv){
+    vec_cp.reserve(cmd.size() + 1);
+    for (auto s : cmd){
         vec_cp.push_back(strdup(s.c_str()));
     }
     vec_cp.push_back(NULL);
-    return execvp(argv[0].c_str(), const_cast<char* const*>(vec_cp.data()));           
+    return execvp(cmd[0].c_str(), const_cast<char* const*>(vec_cp.data()));           
 }
 
+
+/**
+ * \brief Tokenise entered input string from shell to extract command
+ * and arguments
+ * @param s input string from shell
+ * @param delimiter character to split string into command and args. 
+ *        in normal operation, this should be ' '.
+ */
 vector<string> tokenise(string s, char delimiter){
     // ignore whitespaces 
     // end on enter 
@@ -126,11 +178,13 @@ vector<string> tokenise(string s, char delimiter){
     return tokens;
 }
 
+/**
+ * \brief Simple helper to print out a vector of strings 
+ * @param input vector of strings to print
+ */
 void printTokens(const vector<string> &input){
     for(int i = 0; i < input.size(); i++){
         cout << input[i] << " " ;
     }
     cout << "\n"; 
 }
-
-

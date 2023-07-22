@@ -1,3 +1,8 @@
+/* \file shell.h
+ * \brief Shell of OS
+ *
+ */
+
 #ifndef SHELL_H
 #define SHELL_H
 
@@ -10,6 +15,7 @@ using namespace std;
 #define MAX_INPUT 100
 
 void displayPrompt(void);
+
 string getInput(void);
 string handleUpArrow(void);
 string replaceInput(queue<vector<string>>&cmdList);

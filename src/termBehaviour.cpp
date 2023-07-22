@@ -1,3 +1,8 @@
+/* 
+ * \file termBehaviour.cpp
+ * \brief defines terminal behaviour
+ *
+ */
 #include <iostream>
 #include <termios.h>
 #include "shell.h"
