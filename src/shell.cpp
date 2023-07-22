@@ -5,13 +5,14 @@
 #include <iostream>
 #include <unistd.h>
 #include "shell.h"
-#include "termBehaviour.h"
+#include <termios.h>
 #include <string>
 #include <string.h>
 #include <vector>
 #include <algorithm>
 string prompt = "penn-shredder# ";
 queue<vector<string>> cmdHistory;
+static struct termios oldt, newt;
 
 Shell::Shell(void){
     this->shellPrompt = prompt;
@@ -68,7 +69,7 @@ string Shell::handleUpArrow(void){
  * input value. Truncates input string if larger.
  * @param input string 
  */
-void checkLength(string &shellInput){
+void Shell::checkLength(string &shellInput){
     if (shellInput.size() > MAX_INPUT){
         shellInput = shellInput.substr(0, MAX_INPUT);
     }
@@ -198,4 +199,59 @@ void Shell::printTokens(const vector<string> &input){
         cout << input[i] << " " ;
     }
     cout << "\n"; 
+}
+
+
+/*
+ * \brief erases whole line and moves cursor to beginning of line
+ *
+ */
+void Shell::moveCursorToBackDisplayPrompt(void){
+    cout << eraseTillStartOfLine + moveCursorToBeginningOfLine;
+    displayPrompt();
+}
+
+
+/*
+ * \brief erase last character and move the cursor one
+ * step back
+ *
+ */
+void Shell::eraseLastCharacter(string&s){
+    s.pop_back();
+    for (int i = 0; i < 3; i++){
+        cout << moveCursorOneLeft << eraseCursorTillEndOfLine;
+    }
+}
+
+/*
+ * \brief Puts terminal in per character mode
+ * so allows us to respond immediately as soon 
+ * as a character is entered
+ *
+ */
+void Shell::putTerminalInPerCharMode(void){
+    /*tcgetattr gets the parameters of the current terminal
+    STDIN_FILENO will tell tcgetattr that it should write the settings
+    of stdin to oldt*/
+    tcgetattr( STDIN_FILENO, &oldt);
+    /*now the settings will be copied*/
+    newt = oldt;
+
+    /*ICANON normally takes care that one line at a time will be processed
+    that means it will return if it sees a "\n" or an EOF or an EOL*/
+    newt.c_lflag &= ~(ICANON);          
+
+    /*Those new settings will be set to STDIN
+    TCSANOW tells tcsetattr to change attributes immediately. */
+    tcsetattr( STDIN_FILENO, TCSANOW, &newt);
+}
+
+/*
+ * \brief Restore normal terminal
+ *
+ */ 
+void Shell::putTerminalBackInNormalMode(void){
+    /*restore the old settings*/
+    tcsetattr( STDIN_FILENO, TCSANOW, &oldt);
 }

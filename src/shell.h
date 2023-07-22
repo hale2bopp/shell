@@ -14,6 +14,11 @@ using namespace std;
 
 #define CMD_HISTORY_SIZE 10
 #define MAX_INPUT 100
+#define DELETE 127
+#define ESCAPE_SEQ 27
+#define UP_ARROW 65
+#define ENTER 10
+#define ASCII_BACKSPACE 8
 
 class Shell{
 private:
@@ -26,6 +31,13 @@ private:
     bool backSpace;
     bool downArrow;
     bool tabComplete;
+
+    // Terminal string constants
+    const string eraseCursorTillEndOfLine = "\33[K";
+    const string moveCursorOneLeft = "\33[D";
+    const string moveCursorOneRight = "\33[C";
+    const string eraseTillStartOfLine = "\33[2K";
+    const string moveCursorToBeginningOfLine = "\r";
 
 public:
     Shell(void);
@@ -42,6 +54,10 @@ public:
     int executeProgram(vector<string> args);
     void addCmdToHistory(vector<string> &cmd, queue<vector<string>> &cmdList);
     void mainWrapperAddCmdToHistory(vector<string> &cmd);	
+    void moveCursorToBackDisplayPrompt(void);
+    void eraseLastCharacter(string& s);
+    void putTerminalInPerCharMode(void);
+    void putTerminalBackInNormalMode(void);
 };
 
 
