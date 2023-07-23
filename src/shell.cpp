@@ -99,7 +99,7 @@ string Shell::replaceInput(queue<vector<string>>&cmdList){
  * \brief get Shell input. Immediately handles backspace, arrows
  * passes to tokeniser 
  */
-string Shell::getInput(std::istream& ifs){ 
+string Shell::getInput(istream& ifs){ 
     string shellInput;
     char c = 0;
     while(c!=ENTER){
