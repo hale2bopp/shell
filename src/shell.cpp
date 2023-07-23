@@ -11,7 +11,7 @@
 #include <vector>
 #include <algorithm>
 string prompt = "penn-shredder# ";
-queue<vector<string>> cmdHistory;
+deque<vector<string>> cmdHistory;
 static struct termios oldt, newt;
 
 Shell::Shell(void){
@@ -32,6 +32,7 @@ Shell::Shell(int maxCmdHistorySize): maxCmdHistorySize(maxCmdHistorySize){
  */
 void Shell::mainWrapperAddCmdToHistory(vector<string> &cmd){
     addCmdToHistory(cmd, cmdHistory);
+    currentHistoryIndex = cmdHistory.size();
 }
 
 /**
@@ -49,11 +50,11 @@ void Shell::displayPrompt(void){
  * @param vector of strings describing a command to enter 
  * @param vector of vector of strings with current command history
  */
-void Shell::addCmdToHistory(vector<string> &cmd, queue<vector<string>> &cmdList){
+void Shell::addCmdToHistory(vector<string> &cmd, deque<vector<string>> &cmdList){
     if (cmdList.size() >= CMD_HISTORY_SIZE){
-        cmdList.pop();
+        cmdList.pop_front();
     } 
-    cmdList.push(cmd);
+    cmdList.push_back(cmd);
 }
 
 
@@ -61,6 +62,19 @@ void Shell::addCmdToHistory(vector<string> &cmd, queue<vector<string>> &cmdList)
  * \brief Handles up arrow press
  */
 string Shell::handleUpArrow(void){
+    if (currentHistoryIndex > 0){
+        currentHistoryIndex--;
+    }
+    return replaceInput(cmdHistory);
+}
+
+/**
+ * \brief Handles down arrow press
+ */
+string Shell::handleDownArrow(void){
+    if (currentHistoryIndex < cmdHistory.size()){
+        currentHistoryIndex++;
+    }
     return replaceInput(cmdHistory);
 }
 
@@ -82,12 +96,17 @@ void Shell::checkLength(string &shellInput){
  * with command from history.
  * @param vector of vector of strings (Command History)
  */
-string Shell::replaceInput(queue<vector<string>>&cmdList){
+string Shell::replaceInput(deque<vector<string>>&cmdList){
     string shellInput;
     if (cmdList.size() == 0){
         return "";
     }
-    for (string s: cmdList.back()){
+
+    if (currentHistoryIndex == cmdList.size()){
+        return "";
+    }
+    
+    for (string s: cmdList[currentHistoryIndex]){
         shellInput+= s+" " ;
     }
     cout << shellInput;
@@ -111,6 +130,10 @@ string Shell::getInput(istream& ifs){
                 if (c == (char)UP_ARROW){
                     moveCursorToBackDisplayPrompt();
                     shellInput = handleUpArrow();
+                }
+                if (c == (char) DOWN_ARROW){
+                    moveCursorToBackDisplayPrompt();
+                    shellInput = handleDownArrow();
                 } 
                 break;
             case (char) DELETE: 

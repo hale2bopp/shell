@@ -9,7 +9,7 @@
 #include <vector>
 #include<sys/wait.h>
 #include <queue>
-using std::queue;
+using std::deque;//queue;
 using namespace std;
 
 #define CMD_HISTORY_SIZE 10
@@ -17,6 +17,7 @@ using namespace std;
 #define DELETE 127
 #define ESCAPE_SEQ 27
 #define UP_ARROW 65
+#define DOWN_ARROW 66
 #define ENTER 10
 #define ASCII_BACKSPACE 8
 
@@ -24,8 +25,8 @@ class Shell{
 private:
     string shellPrompt;
     int maxCmdHistorySize;
-    queue<vector<string>> cmdHistoryList;
-
+    deque<vector<string>> cmdHistoryList;
+    int currentHistoryIndex = 0;
 // potentilaly a list of features the shell has?
     bool upArrow;
     bool backSpace;
@@ -42,7 +43,7 @@ private:
 public:
     Shell(void);
     Shell(int maxCmdHistorySize);
-    Shell(string prompt, int maxCmdHistorySize, queue<vector<string>> cmdHistoryList):shellPrompt(prompt), maxCmdHistorySize(maxCmdHistorySize), cmdHistoryList(cmdHistoryList)   {}
+    Shell(string prompt, int maxCmdHistorySize, deque<vector<string>> cmdHistoryList):shellPrompt(prompt), maxCmdHistorySize(maxCmdHistorySize), cmdHistoryList(cmdHistoryList)   {}
 
 // Getters, Setters 
     int getCmdHistorySize(void){
@@ -53,12 +54,13 @@ public:
     void displayPrompt(void);
     string getInput(std::istream& ifs);
     string handleUpArrow(void);
-    string replaceInput(queue<vector<string>>&cmdList);
+    string handleDownArrow(void);
+    string replaceInput(deque<vector<string>>&cmdList);
     void checkLength(string& s);
     vector<string> tokenise(string s, char delimiter);
     void printTokens(const vector<string> &input);
     int executeProgram(vector<string> args);
-    void addCmdToHistory(vector<string> &cmd, queue<vector<string>> &cmdList);
+    void addCmdToHistory(vector<string> &cmd, deque<vector<string>> &cmdList);
     void mainWrapperAddCmdToHistory(vector<string> &cmd);	
     void moveCursorToBackDisplayPrompt(void);
     void eraseLastCharacter(string& s);
