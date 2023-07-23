@@ -51,7 +51,7 @@ public:
 
 // Shell functionality    
     void displayPrompt(void);
-    string getInput(void);
+    string getInput(std::istream& input);
     string handleUpArrow(void);
     string replaceInput(queue<vector<string>>&cmdList);
     void checkLength(string& s);

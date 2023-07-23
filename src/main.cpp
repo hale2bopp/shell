@@ -8,7 +8,7 @@ int main(void){
     shell.putTerminalInPerCharMode();
     while (1) {
         shell.displayPrompt();
-        string shellInput = shell.getInput();
+        string shellInput = shell.getInput(cin);
         vector<string> tokens = shell.tokenise(shellInput, ' ');
         shell.mainWrapperAddCmdToHistory(tokens);
         int pid = fork(); 

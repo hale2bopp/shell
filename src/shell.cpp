@@ -61,6 +61,7 @@ void Shell::addCmdToHistory(vector<string> &cmd, queue<vector<string>> &cmdList)
  * \brief Handles up arrow press
  */
 string Shell::handleUpArrow(void){
+    cout << " up arrow " << endl;
     return replaceInput(cmdHistory);
 }
 
@@ -98,17 +99,17 @@ string Shell::replaceInput(queue<vector<string>>&cmdList){
  * \brief get Shell input. Immediately handles backspace, arrows
  * passes to tokeniser 
  */
-string Shell::getInput(void){ 
+string Shell::getInput(std::istream& ifs){ 
     string shellInput;
     char c = 0;
     while(c!=ENTER){
-        cin.get(c);
-
+        ifs.get(c);
+        cout << "c: " <<(int) c << " " << c << endl; 
         switch(c){
             case (char)ESCAPE_SEQ:
                 // get 2 more
-                cin.get(c);
-                cin.get(c);
+                ifs.get(c);
+                ifs.get(c);
                 if (c == (char)UP_ARROW){
                     moveCursorToBackDisplayPrompt();
                     shellInput = handleUpArrow();
