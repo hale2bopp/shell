@@ -98,18 +98,16 @@ string Shell::replaceInput(queue<vector<string>>&cmdList){
  * \brief get Shell input. Immediately handles backspace, arrows
  * passes to tokeniser 
  */
-string Shell::getInput(void){ 
+string Shell::getInput(istream& ifs){ 
     string shellInput;
     char c = 0;
-    putTerminalInPerCharMode();
     while(c!=ENTER){
-        c = getchar();
-
+        ifs.get(c);
         switch(c){
             case (char)ESCAPE_SEQ:
                 // get 2 more
-                c = getchar();
-                c = getchar();
+                ifs.get(c);
+                ifs.get(c);
                 if (c == (char)UP_ARROW){
                     moveCursorToBackDisplayPrompt();
                     shellInput = handleUpArrow();
@@ -127,7 +125,6 @@ string Shell::getInput(void){
     }
     // limit length of terminal input
     checkLength(shellInput);
-    putTerminalBackInNormalMode();
     return shellInput;
 }
 
