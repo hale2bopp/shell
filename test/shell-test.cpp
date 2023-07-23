@@ -128,14 +128,14 @@ TEST_F(ShellTest, cinTestMultipleBackspace)
 
 TEST_F(ShellTest, inputTestUpArrow){
     vector<string> newCmd = {"/bin/ls"};
-    vector<string> oldCmd1 =  {"cat", "Makefile"};
-    queue<vector<string>> cmdList;
-    cmdList.push(oldCmd1);
-    cmdList.push(newCmd);
+    vector<string> oldCmd =  {"cat", "Makefile"};
+    shell.mainWrapperAddCmdToHistory(oldCmd);
+    shell.mainWrapperAddCmdToHistory(newCmd);
     string s = "Dimpy";
-    s += (char) 27 + "[[A";
+//    s += (char) 27 + char(91) + char(65);
+    s += "\x1b[A";
     s += "-la\n"; 
     std::istringstream iss(s);
-    EXPECT_EQ(shell.getInput(iss), "ls -la");
+    EXPECT_EQ(shell.getInput(iss), "/bin/ls -la");
 }
 
