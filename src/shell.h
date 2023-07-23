@@ -43,7 +43,13 @@ public:
     Shell(void);
     Shell(int maxCmdHistorySize);
     Shell(string prompt, int maxCmdHistorySize, queue<vector<string>> cmdHistoryList):shellPrompt(prompt), maxCmdHistorySize(maxCmdHistorySize), cmdHistoryList(cmdHistoryList)   {}
-        
+
+// Getters, Setters 
+    int getCmdHistorySize(void){
+        return this->cmdHistoryList.size();
+    }
+
+// Shell functionality    
     void displayPrompt(void);
     string getInput(void);
     string handleUpArrow(void);

@@ -101,15 +101,14 @@ string Shell::replaceInput(queue<vector<string>>&cmdList){
 string Shell::getInput(void){ 
     string shellInput;
     char c = 0;
-    putTerminalInPerCharMode();
     while(c!=ENTER){
-        c = getchar();
+        cin.get(c);
 
         switch(c){
             case (char)ESCAPE_SEQ:
                 // get 2 more
-                c = getchar();
-                c = getchar();
+                cin.get(c);
+                cin.get(c);
                 if (c == (char)UP_ARROW){
                     moveCursorToBackDisplayPrompt();
                     shellInput = handleUpArrow();
@@ -127,7 +126,6 @@ string Shell::getInput(void){
     }
     // limit length of terminal input
     checkLength(shellInput);
-    putTerminalBackInNormalMode();
     return shellInput;
 }
 
