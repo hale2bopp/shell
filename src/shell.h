@@ -21,12 +21,9 @@ using namespace std;
 #define ENTER 10
 #define ASCII_BACKSPACE 8
 
-//typedef deque<vector<string>> _cmdHistoryList CmdHistoryList;
-
 class CommandHistory{
 private:
     int maxCmdHistorySize;
-//    CmdHistoryList cmdHistoryList;
     string savedCurrentInput;
     int currentHistoryIndex = 0;
     bool savedCurrentInputFlag = false;
@@ -50,10 +47,6 @@ class Shell{
 private:
     string shellPrompt;
     CommandHistory commandHistory;    
-//    int maxCmdHistorySize;
-//    deque<vector<string>> cmdHistoryList;
-//    string savedCurrentInput;
-//    int currentHistoryIndex = 0;
 // potentially a list of features the shell has?
     bool upArrow;
     bool backSpace;
@@ -71,14 +64,11 @@ private:
 public:
     Shell(void);
     Shell(CommandHistory cmdHistory);
-    Shell(string prompt):shellPrompt(prompt){} //, int maxCmdHistorySize, deque<vector<string>> cmdHistoryList):shellPrompt(prompt), maxCmdHistorySize(maxCmdHistorySize), cmdHistoryList(cmdHistoryList)   {}
+    Shell(string prompt):shellPrompt(prompt){}
 
 // Getters, Setters 
-//    int getCmdHistorySize(void){
-//        return this->cmdHistoryList.size();
-//    }
-    CommandHistory getCommandHistory(void){
-        return commandHistory;
+    CommandHistory* getCommandHistory(void){
+        return &commandHistory;
     }
 // Shell functionality    
     void displayPrompt(void);
@@ -97,12 +87,4 @@ public:
 };
 
 
-
-
 #endif  // SHELL_H
-
-
-
-
-
-

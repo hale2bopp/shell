@@ -11,7 +11,7 @@ int main(void){
         shell.displayPrompt();
         string shellInput = shell.getInput(cin);
         vector<string> tokens = shell.tokenise(shellInput, ' ');
-        shell.getCommandHistory().mainWrapperAddCmdToHistory(tokens);
+        shell.getCommandHistory()->mainWrapperAddCmdToHistory(tokens);
         int pid = fork(); 
         if (pid == 0) { 
             shell.executeProgram(tokens);

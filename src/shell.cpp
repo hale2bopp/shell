@@ -11,7 +11,6 @@
 #include <vector>
 #include <algorithm>
 string prompt = "penn-shredder# ";
-//deque<vector<string>> cmdHistory;
 static struct termios oldt, newt;
 
 
@@ -33,7 +32,6 @@ CommandHistory::CommandHistory(int maxCmdHistorySize): maxCmdHistorySize(maxCmdH
  * @param vector of strings describing a command to enter 
  */
 void CommandHistory::mainWrapperAddCmdToHistory(vector<string> &cmd){
-    cout << "adding to cmd histrory" << endl;
     addCmdToHistory(cmd, cmdHistoryList);
     currentHistoryIndex = cmdHistoryList.size();
     savedCurrentInput = "";
@@ -82,14 +80,12 @@ void CommandHistory::setSavedCurrentInput(string s){
  * \brief Handles up arrow press
  */
 string Shell::handleUpArrow(string s){
-    CommandHistory cmdHistoryList = getCommandHistory();
-    cmdHistoryList.setSavedCurrentInput(s);
-//    cmdHistoryList.savedCurrentInput = s;
-    cout << "saving input string: " << cmdHistoryList.getSavedCurrentInput() << endl;
-    int chi = cmdHistoryList.getCurrentHistoryIndex();
+    auto cmdHistory = getCommandHistory();
+    cmdHistory->setSavedCurrentInput(s);
+    int chi = cmdHistory->getCurrentHistoryIndex();
     if (chi > 0){
         chi--;        
-        cmdHistoryList.setCurrentHistoryIndex(chi);
+        cmdHistory->setCurrentHistoryIndex(chi);
     }
     return replaceInput();
 }
@@ -98,17 +94,12 @@ string Shell::handleUpArrow(string s){
  * \brief Handles down arrow press
  */
 string Shell::handleDownArrow(string s){
-//    CommandHistory cmdHistoryList = getCommandHistory();
-//    cmdHistoryList.savedCurrentInput = s;
-
-    CommandHistory cmdHistory = getCommandHistory();
-    cmdHistory.setSavedCurrentInput(s);
-//    cout << "saving input string: " << savedCurrentInput << endl;
-    int chi = cmdHistory.getCurrentHistoryIndex();    
-    if (chi < cmdHistory.cmdHistoryList.size()){
+    auto cmdHistory = getCommandHistory();
+    cmdHistory->setSavedCurrentInput(s);
+    int chi = cmdHistory->getCurrentHistoryIndex();
+    if (chi < cmdHistory->cmdHistoryList.size()){
         chi++;
-        cmdHistory.setCurrentHistoryIndex(chi);
-//        cmdHistoryList.currentHistoryIndex++;
+        cmdHistory->setCurrentHistoryIndex(chi);
     }
     return replaceInput();
 }
@@ -132,22 +123,21 @@ void Shell::checkLength(string &shellInput){
  * @param vector of vector of strings (Command History)
  */
 string Shell::replaceInput(void){
-    CommandHistory cmdHistory = getCommandHistory();
+    auto cmdHistory = getCommandHistory();
     string shellInput;
-    if (cmdHistory.cmdHistoryList.size() == 0){
+    if (cmdHistory->cmdHistoryList.size() == 0){
         return "";
     }
 
-    int chi = cmdHistory.getCurrentHistoryIndex();
-    if (chi == cmdHistory.cmdHistoryList.size()){
-        return cmdHistory.getSavedCurrentInput();
-//        return "";        
+    int chi = cmdHistory->getCurrentHistoryIndex();
+    if (chi == cmdHistory->cmdHistoryList.size()){
+        return cmdHistory->getSavedCurrentInput();
     }
-    int n = cmdHistory.cmdHistoryList[chi].size();
+    int n = cmdHistory->cmdHistoryList[chi].size();
     for (int i = 0; i < n-1; i++){
-        shellInput+= cmdHistory.cmdHistoryList[chi][i]+" " ;
+        shellInput+= cmdHistory->cmdHistoryList[chi][i]+" " ;
     }
-    shellInput += cmdHistory.cmdHistoryList[chi][n-1];
+    shellInput += cmdHistory->cmdHistoryList[chi][n-1];
     cout << shellInput;
     return shellInput;
 }
