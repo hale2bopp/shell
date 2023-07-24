@@ -1,6 +1,7 @@
 // write unit tests here
 #include "gtest/gtest.h"
 #include "shell.h"
+#include "shell-test.h"
 #include<sstream>
 
 // The fixture for testing class Shell.
@@ -79,8 +80,8 @@ TEST_F(ShellTest, addToCmdHistory){
     // arrange
     vector<string> newCmd = {"/bin/ls", "-la" };
     vector<string> oldCmd1 =  {"cat", "Makefile" };
-    queue<vector<string>> cmdList;
-    cmdList.push(oldCmd1);
+    deque<vector<string>> cmdList;
+    cmdList.push_back(oldCmd1);
     // act
     shell.addCmdToHistory(newCmd, cmdList); 
 
@@ -91,7 +92,7 @@ TEST_F(ShellTest, addToCmdHistory){
 
 TEST_F(ShellTest, noHistory){
     // arrange
-    queue<vector<string>> cmdList;
+    deque<vector<string>> cmdList;
     // act
     EXPECT_EQ(shell.replaceInput(cmdList), "");
 }
@@ -132,10 +133,35 @@ TEST_F(ShellTest, inputTestUpArrow){
     shell.mainWrapperAddCmdToHistory(oldCmd);
     shell.mainWrapperAddCmdToHistory(newCmd);
     string s = "Dimpy";
-//    s += (char) 27 + char(91) + char(65);
-    s += "\x1b[A";
-    s += "-la\n"; 
+    s += UP_ARROW_SEQ;
+    s += " -la\n"; 
     std::istringstream iss(s);
     EXPECT_EQ(shell.getInput(iss), "/bin/ls -la");
 }
 
+TEST_F(ShellTest, inputTestMultipleArrow){
+    vector<string> oldCmd =  {"cat", "Makefile"};
+    vector<string> newCmd = {"/bin/ls"};
+    shell.mainWrapperAddCmdToHistory(oldCmd);
+    shell.mainWrapperAddCmdToHistory(newCmd);
+    string s = "Dimpy";
+    s += UP_ARROW_SEQ;
+    s += UP_ARROW_SEQ;
+    s += "\n";
+    std::istringstream iss(s);
+    EXPECT_EQ(shell.getInput(iss), "cat Makefile");
+}
+
+TEST_F(ShellTest, inputTestDownArrow){
+    vector<string> oldCmd =  {"cat", "Makefile"};
+    vector<string> newCmd = {"/bin/ls"};
+    shell.mainWrapperAddCmdToHistory(oldCmd);
+    shell.mainWrapperAddCmdToHistory(newCmd);
+    string s = "Dimpy";
+    s += UP_ARROW_SEQ;
+    s += UP_ARROW_SEQ;
+    s += DOWN_ARROW_SEQ;
+    s += "\n";
+    std::istringstream iss(s);
+    EXPECT_EQ(shell.getInput(iss), "/bin/ls");
+}
