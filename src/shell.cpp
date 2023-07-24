@@ -11,18 +11,20 @@
 #include <vector>
 #include <algorithm>
 string prompt = "penn-shredder# ";
-deque<vector<string>> cmdHistory;
+//deque<vector<string>> cmdHistory;
 static struct termios oldt, newt;
+
+
 
 Shell::Shell(void){
     this->shellPrompt = prompt;
-    this->maxCmdHistorySize = CMD_HISTORY_SIZE;
-    this->cmdHistoryList = cmdHistory;
 }
 
-Shell::Shell(int maxCmdHistorySize): maxCmdHistorySize(maxCmdHistorySize){
+Shell::Shell(CommandHistory commandHistory): commandHistory(commandHistory){
     this->shellPrompt = prompt;
-    this->cmdHistoryList = cmdHistory;
+}
+
+CommandHistory::CommandHistory(int maxCmdHistorySize): maxCmdHistorySize(maxCmdHistorySize){
 }
 
 /**
@@ -30,10 +32,10 @@ Shell::Shell(int maxCmdHistorySize): maxCmdHistorySize(maxCmdHistorySize){
  * for main 
  * @param vector of strings describing a command to enter 
  */
-void Shell::mainWrapperAddCmdToHistory(vector<string> &cmd){
+void CommandHistory::mainWrapperAddCmdToHistory(vector<string> &cmd){
     cout << "adding to cmd histrory" << endl;
-    addCmdToHistory(cmd, cmdHistory);
-    currentHistoryIndex = cmdHistory.size();
+    addCmdToHistory(cmd, cmdHistoryList);
+    currentHistoryIndex = cmdHistoryList.size();
     savedCurrentInput = "";
 }
 
@@ -52,36 +54,63 @@ void Shell::displayPrompt(void){
  * @param vector of strings describing a command to enter 
  * @param vector of vector of strings with current command history
  */
-void Shell::addCmdToHistory(vector<string> &cmd, deque<vector<string>> &cmdList){
-    if (cmdList.size() >= CMD_HISTORY_SIZE){
+void CommandHistory::addCmdToHistory(vector<string> &cmd, deque<vector<string>> &cmdList){
+    if (cmdList.size() >= maxCmdHistorySize){
         cmdList.pop_front();
     } 
     cmdList.push_back(cmd);
 }
 
 
+int CommandHistory::getCurrentHistoryIndex(void){
+    return currentHistoryIndex;
+}
+
+string CommandHistory::getSavedCurrentInput(void){
+    return savedCurrentInput;
+}
+
+void CommandHistory::setCurrentHistoryIndex(int val){
+    currentHistoryIndex = val;
+}
+
+void CommandHistory::setSavedCurrentInput(string s){
+    savedCurrentInput = s;
+}
+
 /**
  * \brief Handles up arrow press
  */
 string Shell::handleUpArrow(string s){
-    savedCurrentInput = s;
-    cout << "saving input string: " << savedCurrentInput << endl;
-    if (currentHistoryIndex > 0){
-        currentHistoryIndex--;
+    CommandHistory cmdHistoryList = getCommandHistory();
+    cmdHistoryList.setSavedCurrentInput(s);
+//    cmdHistoryList.savedCurrentInput = s;
+    cout << "saving input string: " << cmdHistoryList.getSavedCurrentInput() << endl;
+    int chi = cmdHistoryList.getCurrentHistoryIndex();
+    if (chi > 0){
+        chi--;        
+        cmdHistoryList.setCurrentHistoryIndex(chi);
     }
-    return replaceInput(cmdHistory);
+    return replaceInput();
 }
 
 /**
  * \brief Handles down arrow press
  */
 string Shell::handleDownArrow(string s){
-    savedCurrentInput = s;
+//    CommandHistory cmdHistoryList = getCommandHistory();
+//    cmdHistoryList.savedCurrentInput = s;
+
+    CommandHistory cmdHistory = getCommandHistory();
+    cmdHistory.setSavedCurrentInput(s);
 //    cout << "saving input string: " << savedCurrentInput << endl;
-    if (currentHistoryIndex < cmdHistory.size()){
-        currentHistoryIndex++;
+    int chi = cmdHistory.getCurrentHistoryIndex();    
+    if (chi < cmdHistory.cmdHistoryList.size()){
+        chi++;
+        cmdHistory.setCurrentHistoryIndex(chi);
+//        cmdHistoryList.currentHistoryIndex++;
     }
-    return replaceInput(cmdHistory);
+    return replaceInput();
 }
 
 /**
@@ -102,22 +131,23 @@ void Shell::checkLength(string &shellInput){
  * with command from history.
  * @param vector of vector of strings (Command History)
  */
-string Shell::replaceInput(deque<vector<string>>&cmdList){
+string Shell::replaceInput(void){
+    CommandHistory cmdHistory = getCommandHistory();
     string shellInput;
-    if (cmdList.size() == 0){
+    if (cmdHistory.cmdHistoryList.size() == 0){
         return "";
     }
 
-    if (currentHistoryIndex == cmdList.size()){
-        cout << "this was what we saved" << endl;
-        return savedCurrentInput;
+    int chi = cmdHistory.getCurrentHistoryIndex();
+    if (chi == cmdHistory.cmdHistoryList.size()){
+        return cmdHistory.getSavedCurrentInput();
 //        return "";        
     }
-    int n = cmdList[currentHistoryIndex].size();
+    int n = cmdHistory.cmdHistoryList[chi].size();
     for (int i = 0; i < n-1; i++){
-        shellInput+= cmdList[currentHistoryIndex][i]+" " ;
+        shellInput+= cmdHistory.cmdHistoryList[chi][i]+" " ;
     }
-    shellInput += cmdList[currentHistoryIndex][n-1];
+    shellInput += cmdHistory.cmdHistoryList[chi][n-1];
     cout << shellInput;
     return shellInput;
 }
