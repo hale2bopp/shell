@@ -26,6 +26,7 @@ private:
     string shellPrompt;
     int maxCmdHistorySize;
     deque<vector<string>> cmdHistoryList;
+    string savedCurrentInput;
     int currentHistoryIndex = 0;
 // potentilaly a list of features the shell has?
     bool upArrow;
@@ -53,8 +54,8 @@ public:
 // Shell functionality    
     void displayPrompt(void);
     string getInput(std::istream& ifs);
-    string handleUpArrow(void);
-    string handleDownArrow(void);
+    string handleUpArrow(string s);
+    string handleDownArrow(string s);
     string replaceInput(deque<vector<string>>&cmdList);
     void checkLength(string& s);
     vector<string> tokenise(string s, char delimiter);

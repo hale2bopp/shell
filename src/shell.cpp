@@ -31,8 +31,10 @@ Shell::Shell(int maxCmdHistorySize): maxCmdHistorySize(maxCmdHistorySize){
  * @param vector of strings describing a command to enter 
  */
 void Shell::mainWrapperAddCmdToHistory(vector<string> &cmd){
+    cout << "adding to cmd histrory" << endl;
     addCmdToHistory(cmd, cmdHistory);
     currentHistoryIndex = cmdHistory.size();
+    savedCurrentInput = "";
 }
 
 /**
@@ -61,7 +63,9 @@ void Shell::addCmdToHistory(vector<string> &cmd, deque<vector<string>> &cmdList)
 /**
  * \brief Handles up arrow press
  */
-string Shell::handleUpArrow(void){
+string Shell::handleUpArrow(string s){
+    savedCurrentInput = s;
+    cout << "saving input string: " << savedCurrentInput << endl;
     if (currentHistoryIndex > 0){
         currentHistoryIndex--;
     }
@@ -71,7 +75,9 @@ string Shell::handleUpArrow(void){
 /**
  * \brief Handles down arrow press
  */
-string Shell::handleDownArrow(void){
+string Shell::handleDownArrow(string s){
+    savedCurrentInput = s;
+//    cout << "saving input string: " << savedCurrentInput << endl;
     if (currentHistoryIndex < cmdHistory.size()){
         currentHistoryIndex++;
     }
@@ -103,7 +109,9 @@ string Shell::replaceInput(deque<vector<string>>&cmdList){
     }
 
     if (currentHistoryIndex == cmdList.size()){
-        return "";
+        cout << "this was what we saved" << endl;
+        return savedCurrentInput;
+//        return "";        
     }
     int n = cmdList[currentHistoryIndex].size();
     for (int i = 0; i < n-1; i++){
@@ -130,11 +138,11 @@ string Shell::getInput(istream& ifs){
                 ifs.get(c);
                 if (c == (char)UP_ARROW){
                     moveCursorToBackDisplayPrompt();
-                    shellInput = handleUpArrow();
+                    shellInput = handleUpArrow(shellInput);
                 }
                 if (c == (char) DOWN_ARROW){
                     moveCursorToBackDisplayPrompt();
-                    shellInput = handleDownArrow();
+                    shellInput = handleDownArrow(shellInput);
                 } 
                 break;
             case (char) DELETE: 
