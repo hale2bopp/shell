@@ -72,8 +72,9 @@ TEST_F(ShellTest, initialSpaceAndMultipleSpaceAndEndSpace){
 }
 
 TEST_F(ShellTest, testEmptyInitially){
-    // arrange 
-    ASSERT_EQ(shell.getCmdHistorySize(), 0);
+    // arrange
+    auto cmdHistory = shell.getCommandHistory(); 
+    ASSERT_EQ(cmdHistory.getCmdHistorySize(), 0);
 }
 
 TEST_F(ShellTest, addToCmdHistory){
@@ -83,7 +84,8 @@ TEST_F(ShellTest, addToCmdHistory){
     deque<vector<string>> cmdList;
     cmdList.push_back(oldCmd1);
     // act
-    shell.addCmdToHistory(newCmd, cmdList); 
+    auto cmdHistory = shell.getCommandHistory();
+    cmdHistory.addCmdToHistory(newCmd, cmdList);
 
     // assert
     // act
@@ -94,7 +96,7 @@ TEST_F(ShellTest, noHistory){
     // arrange
     deque<vector<string>> cmdList;
     // act
-    EXPECT_EQ(shell.replaceInput(cmdList), "");
+    EXPECT_EQ(shell.replaceInput(), "");
 }
 
 TEST_F(ShellTest, inputTestNewline){
@@ -130,8 +132,9 @@ TEST_F(ShellTest, cinTestMultipleBackspace)
 TEST_F(ShellTest, inputTestUpArrow){
     vector<string> newCmd = {"/bin/ls"};
     vector<string> oldCmd =  {"cat", "Makefile"};
-    shell.mainWrapperAddCmdToHistory(oldCmd);
-    shell.mainWrapperAddCmdToHistory(newCmd);
+    auto cmdHistory = shell.getCommandHistory();
+    cmdHistory.mainWrapperAddCmdToHistory(oldCmd);
+    cmdHistory.mainWrapperAddCmdToHistory(newCmd);
     string s = "Dimpy";
     s += UP_ARROW_SEQ;
     s += " -la\n"; 
@@ -142,8 +145,9 @@ TEST_F(ShellTest, inputTestUpArrow){
 TEST_F(ShellTest, inputTestMultipleArrow){
     vector<string> oldCmd =  {"cat", "Makefile"};
     vector<string> newCmd = {"/bin/ls"};
-    shell.mainWrapperAddCmdToHistory(oldCmd);
-    shell.mainWrapperAddCmdToHistory(newCmd);
+    auto cmdHistory = shell.getCommandHistory();
+    cmdHistory.mainWrapperAddCmdToHistory(oldCmd);
+    cmdHistory.mainWrapperAddCmdToHistory(newCmd);
     string s = "Dimpy";
     s += UP_ARROW_SEQ;
     s += UP_ARROW_SEQ;
@@ -155,8 +159,9 @@ TEST_F(ShellTest, inputTestMultipleArrow){
 TEST_F(ShellTest, inputTestDownArrow){
     vector<string> oldCmd =  {"cat", "Makefile"};
     vector<string> newCmd = {"/bin/ls"};
-    shell.mainWrapperAddCmdToHistory(oldCmd);
-    shell.mainWrapperAddCmdToHistory(newCmd);
+    auto cmdHistory = shell.getCommandHistory();
+    cmdHistory.mainWrapperAddCmdToHistory(oldCmd);
+    cmdHistory.mainWrapperAddCmdToHistory(newCmd);
     string s = "Dimpy";
     s += UP_ARROW_SEQ;
     s += UP_ARROW_SEQ;
@@ -169,8 +174,9 @@ TEST_F(ShellTest, inputTestDownArrow){
 TEST_F(ShellTest, inputTestDownArrow2){
     vector<string> oldCmd =  {"cat", "Makefile"};
     vector<string> newCmd = {"/bin/ls"};
-    shell.mainWrapperAddCmdToHistory(oldCmd);
-    shell.mainWrapperAddCmdToHistory(newCmd);
+    auto cmdHistory = shell.getCommandHistory();
+    cmdHistory.mainWrapperAddCmdToHistory(oldCmd);
+    cmdHistory.mainWrapperAddCmdToHistory(newCmd);
     string s = "Dimpy";
     s += UP_ARROW_SEQ;
     s += UP_ARROW_SEQ;
@@ -183,8 +189,9 @@ TEST_F(ShellTest, inputTestDownArrow2){
 TEST_F(ShellTest, inputTestDownArrowPressDownManyTimesEmpty){
     vector<string> oldCmd =  {"cat", "Makefile"};
     vector<string> newCmd = {"/bin/ls"};
-    shell.mainWrapperAddCmdToHistory(oldCmd);
-    shell.mainWrapperAddCmdToHistory(newCmd);
+    auto cmdHistory = shell.getCommandHistory();
+    cmdHistory.mainWrapperAddCmdToHistory(oldCmd);
+    cmdHistory.mainWrapperAddCmdToHistory(newCmd);
     string s = "";
     s += UP_ARROW_SEQ;
     s += DOWN_ARROW_SEQ;
@@ -199,8 +206,9 @@ TEST_F(ShellTest, inputTestDownArrowPressDownManyTimesEmpty){
 TEST_F(ShellTest, inputTestDownArrowPressDownTooManyTimesThenPressUp){
     vector<string> oldCmd =  {"cat", "Makefile"};
     vector<string> newCmd = {"/bin/ls"};
-    shell.mainWrapperAddCmdToHistory(oldCmd);
-    shell.mainWrapperAddCmdToHistory(newCmd);
+    auto cmdHistory = shell.getCommandHistory();
+    cmdHistory.mainWrapperAddCmdToHistory(oldCmd);
+    cmdHistory.mainWrapperAddCmdToHistory(newCmd);
     string s = "Dimpy";
     s += UP_ARROW_SEQ;
     s += DOWN_ARROW_SEQ;
@@ -215,8 +223,9 @@ TEST_F(ShellTest, inputTestDownArrowPressDownTooManyTimesThenPressUp){
 TEST_F(ShellTest, inputTestDownArrowPressDownTooManyTimesWithInputText){
     vector<string> oldCmd =  {"cat", "Makefile"};
     vector<string> newCmd = {"/bin/ls"};
-    shell.mainWrapperAddCmdToHistory(oldCmd);
-    shell.mainWrapperAddCmdToHistory(newCmd);
+    auto cmdHistory = shell.getCommandHistory();
+    cmdHistory.mainWrapperAddCmdToHistory(oldCmd);
+    cmdHistory.mainWrapperAddCmdToHistory(newCmd);
     string s = "Dimpy";
     s += DOWN_ARROW_SEQ;
     s += DOWN_ARROW_SEQ;
