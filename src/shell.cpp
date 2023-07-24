@@ -105,12 +105,12 @@ string Shell::replaceInput(deque<vector<string>>&cmdList){
     if (currentHistoryIndex == cmdList.size()){
         return "";
     }
-    printTokens(cmdList[currentHistoryIndex]);
     int n = cmdList[currentHistoryIndex].size();
     for (int i = 0; i < n-1; i++){
         shellInput+= cmdList[currentHistoryIndex][i]+" " ;
     }
     shellInput += cmdList[currentHistoryIndex][n-1];
+    cout << shellInput;
     return shellInput;
 }
 
