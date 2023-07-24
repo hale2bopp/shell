@@ -165,3 +165,63 @@ TEST_F(ShellTest, inputTestDownArrow){
     std::istringstream iss(s);
     EXPECT_EQ(shell.getInput(iss), "/bin/ls");
 }
+
+TEST_F(ShellTest, inputTestDownArrow2){
+    vector<string> oldCmd =  {"cat", "Makefile"};
+    vector<string> newCmd = {"/bin/ls"};
+    shell.mainWrapperAddCmdToHistory(oldCmd);
+    shell.mainWrapperAddCmdToHistory(newCmd);
+    string s = "Dimpy";
+    s += UP_ARROW_SEQ;
+    s += UP_ARROW_SEQ;
+    s += DOWN_ARROW_SEQ;
+    s += " -la\n";
+    std::istringstream iss(s);
+    EXPECT_EQ(shell.getInput(iss), "/bin/ls -la");
+}
+
+TEST_F(ShellTest, inputTestDownArrowPressDownManyTimesEmpty){
+    vector<string> oldCmd =  {"cat", "Makefile"};
+    vector<string> newCmd = {"/bin/ls"};
+    shell.mainWrapperAddCmdToHistory(oldCmd);
+    shell.mainWrapperAddCmdToHistory(newCmd);
+    string s = "";
+    s += UP_ARROW_SEQ;
+    s += DOWN_ARROW_SEQ;
+    s += DOWN_ARROW_SEQ;
+    s += DOWN_ARROW_SEQ;
+    s += "\n";
+    std::istringstream iss(s);
+    EXPECT_EQ(shell.getInput(iss), "");
+}
+
+
+TEST_F(ShellTest, inputTestDownArrowPressDownTooManyTimesThenPressUp){
+    vector<string> oldCmd =  {"cat", "Makefile"};
+    vector<string> newCmd = {"/bin/ls"};
+    shell.mainWrapperAddCmdToHistory(oldCmd);
+    shell.mainWrapperAddCmdToHistory(newCmd);
+    string s = "Dimpy";
+    s += UP_ARROW_SEQ;
+    s += DOWN_ARROW_SEQ;
+    s += DOWN_ARROW_SEQ;
+    s += DOWN_ARROW_SEQ;
+    s += UP_ARROW_SEQ;
+    s += "\n";
+    std::istringstream iss(s);
+    EXPECT_EQ(shell.getInput(iss), "/bin/ls");
+}
+
+TEST_F(ShellTest, inputTestDownArrowPressDownTooManyTimesWithInputText){
+    vector<string> oldCmd =  {"cat", "Makefile"};
+    vector<string> newCmd = {"/bin/ls"};
+    shell.mainWrapperAddCmdToHistory(oldCmd);
+    shell.mainWrapperAddCmdToHistory(newCmd);
+    string s = "Dimpy";
+    s += DOWN_ARROW_SEQ;
+    s += DOWN_ARROW_SEQ;
+    s += DOWN_ARROW_SEQ;
+    s += "\n";
+    std::istringstream iss(s);
+    EXPECT_EQ(shell.getInput(iss), "Dimpy");
+}
