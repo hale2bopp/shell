@@ -28,7 +28,7 @@ private:
     int currentHistoryIndex = 0;
 
 public: 
-    bool setSavedCurrentInputFlag= false;
+    bool setSavedCurrentInputFlag= true;
     CommandHistory(){}
     CommandHistory(int maxCmdHistorySize);
     deque<vector<string>> cmdHistoryList;   
