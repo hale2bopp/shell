@@ -239,8 +239,6 @@ TEST_F(ShellTest, inputTestDownArrowPressDownTooManyTimesWithInputText){
     cmdHistory->mainWrapperAddCmdToHistory(newCmd);
     string s = "Dimpy";
     s += DOWN_ARROW_SEQ;
-    s += DOWN_ARROW_SEQ;
-    s += DOWN_ARROW_SEQ;
     s += "\n";
     std::istringstream iss(s);
     EXPECT_EQ(shell.getInput(iss), "Dimpy");

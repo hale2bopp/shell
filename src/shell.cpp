@@ -81,7 +81,10 @@ void CommandHistory::setSavedCurrentInput(string s){
  */
 string Shell::handleUpArrow(string s){
     auto cmdHistory = getCommandHistory();
-    cmdHistory->setSavedCurrentInput(s);
+    if (cmdHistory->setSavedCurrentInputFlag){
+        cmdHistory->setSavedCurrentInput(s);
+        cmdHistory->setSavedCurrentInputFlag = false;
+    }
     int chi = cmdHistory->getCurrentHistoryIndex();
     if (chi > 0){
         chi--;        
@@ -95,7 +98,11 @@ string Shell::handleUpArrow(string s){
  */
 string Shell::handleDownArrow(string s){
     auto cmdHistory = getCommandHistory();
-    cmdHistory->setSavedCurrentInput(s);
+    if (cmdHistory->setSavedCurrentInputFlag){
+        cmdHistory->setSavedCurrentInput(s);
+        cmdHistory->setSavedCurrentInputFlag = false;
+    }
+ 
     int chi = cmdHistory->getCurrentHistoryIndex();
     if (chi < cmdHistory->cmdHistoryList.size()){
         chi++;
@@ -131,7 +138,9 @@ string Shell::replaceInput(void){
 
     int chi = cmdHistory->getCurrentHistoryIndex();
     if (chi == cmdHistory->cmdHistoryList.size()){
-        return cmdHistory->getSavedCurrentInput();
+        string s = cmdHistory->getSavedCurrentInput();
+        cout << s;
+        return s;
     }
     int n = cmdHistory->cmdHistoryList[chi].size();
     for (int i = 0; i < n-1; i++){
@@ -147,6 +156,9 @@ string Shell::replaceInput(void){
  * passes to tokeniser 
  */
 string Shell::getInput(istream& ifs){ 
+    auto cmdHistory = getCommandHistory();
+    cmdHistory->setSavedCurrentInputFlag = true;
+
     string shellInput;
     char c = 0;
     while(c!=ENTER){
