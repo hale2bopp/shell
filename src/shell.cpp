@@ -137,7 +137,8 @@ string Shell::replaceInput(void){
     }
 
     int chi = cmdHistory->getCurrentHistoryIndex();
-    if (chi == cmdHistory->cmdHistoryList.size()){
+    int msize = cmdHistory->getCmdHistorySize();
+    if (chi == msize || ((chi == 0) && (msize==0))){
         string s = cmdHistory->getSavedCurrentInput();
         cout << s;
         return s;

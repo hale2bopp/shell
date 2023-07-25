@@ -230,6 +230,16 @@ TEST_F(ShellTest, inputTestDownArrowPressDownTooManyTimesThenPressUp){
     EXPECT_EQ(shell.getInput(iss), "/bin/ls");
 }
 
+TEST_F(ShellTest, inputTestDownArrowPressDownEmptyHistory){
+    Shell shell("no prompt");
+    auto cmdHistory = shell.getCommandHistory();
+    string s = "Dimpy";
+    s += DOWN_ARROW_SEQ;
+    s += "\n";
+    std::istringstream iss(s);
+    EXPECT_EQ(shell.getInput(iss), "Dimpy");
+}
+
 TEST_F(ShellTest, inputTestDownArrowPressDownTooManyTimesWithInputText){
     Shell shell("no prompt");
     vector<string> oldCmd =  {"cat", "Makefile"};
@@ -239,6 +249,18 @@ TEST_F(ShellTest, inputTestDownArrowPressDownTooManyTimesWithInputText){
     cmdHistory->mainWrapperAddCmdToHistory(newCmd);
     string s = "Dimpy";
     s += DOWN_ARROW_SEQ;
+    s += "\n";
+    std::istringstream iss(s);
+    EXPECT_EQ(shell.getInput(iss), "Dimpy");
+}
+
+TEST_F(ShellTest, UpArrow25timesEmpty){
+    Shell shell("no prompt");
+    auto cmdHistory = shell.getCommandHistory();
+    string s = "Dimpy";
+    for(int i = 0; i < 25; i++){
+        s += UP_ARROW_SEQ;
+    }
     s += "\n";
     std::istringstream iss(s);
     EXPECT_EQ(shell.getInput(iss), "Dimpy");
