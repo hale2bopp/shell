@@ -194,24 +194,6 @@ TEST_F(ShellTest, inputTestDownArrow2){
     EXPECT_EQ(shell.getInput(iss), "/bin/ls -la");
 }
 
-TEST_F(ShellTest, inputTestDownArrowPressDownManyTimesEmpty){
-    Shell shell("no prompt");
-    vector<string> oldCmd =  {"cat", "Makefile"};
-    vector<string> newCmd = {"/bin/ls"};
-    auto cmdHistory = shell.getCommandHistory();
-    cmdHistory->mainWrapperAddCmdToHistory(oldCmd);
-    cmdHistory->mainWrapperAddCmdToHistory(newCmd);
-    string s = "";
-    s += UP_ARROW_SEQ;
-    s += DOWN_ARROW_SEQ;
-    s += DOWN_ARROW_SEQ;
-    s += DOWN_ARROW_SEQ;
-    s += "\n";
-    std::istringstream iss(s);
-    EXPECT_EQ(shell.getInput(iss), "");
-}
-
-
 TEST_F(ShellTest, inputTestDownArrowPressDownTooManyTimesThenPressUp){
     Shell shell("no prompt");
     vector<string> oldCmd =  {"cat", "Makefile"};

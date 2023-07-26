@@ -73,6 +73,7 @@ string CommandHistory::getSavedCurrentInput(void){
 void CommandHistory::SaveCurrentEnteredString(string s){
     if ((setSavedCurrentInputFlag) && (s.size()>0)){
         setSavedCurrentInput(s);
+        cout << "Saved string: " << s << endl; 
         setSavedCurrentInputFlag = false;
     }
 }
