@@ -41,6 +41,7 @@ public:
     void setSavedCurrentInput(string val);
     void addCmdToHistory(vector<string> &cmd, deque<vector<string>> &cmdList);
     void mainWrapperAddCmdToHistory(vector<string> &cmd);	
+    void SaveCurrentEnteredString(string s);
 };
 
 class Shell{
@@ -59,7 +60,7 @@ private:
     const string moveCursorOneRight = "\33[C";
     const string eraseTillStartOfLine = "\33[2K";
     const string moveCursorToBeginningOfLine = "\r";
-
+    
 
 public:
     Shell(void);

@@ -32,9 +32,11 @@ CommandHistory::CommandHistory(int maxCmdHistorySize): maxCmdHistorySize(maxCmdH
  * @param vector of strings describing a command to enter 
  */
 void CommandHistory::mainWrapperAddCmdToHistory(vector<string> &cmd){
-    addCmdToHistory(cmd, cmdHistoryList);
-    currentHistoryIndex = cmdHistoryList.size();
-    savedCurrentInput = "";
+    if (cmd.size() !=0){
+        addCmdToHistory(cmd, cmdHistoryList);
+        currentHistoryIndex = cmdHistoryList.size();
+        savedCurrentInput = "";
+    }
 }
 
 /**
@@ -68,6 +70,13 @@ string CommandHistory::getSavedCurrentInput(void){
     return savedCurrentInput;
 }
 
+void CommandHistory::SaveCurrentEnteredString(string s){
+    if ((setSavedCurrentInputFlag) && (s.size()>0)){
+        setSavedCurrentInput(s);
+        setSavedCurrentInputFlag = false;
+    }
+}
+
 void CommandHistory::setCurrentHistoryIndex(int val){
     currentHistoryIndex = val;
 }
@@ -81,10 +90,7 @@ void CommandHistory::setSavedCurrentInput(string s){
  */
 string Shell::handleUpArrow(string s){
     auto cmdHistory = getCommandHistory();
-    if (cmdHistory->setSavedCurrentInputFlag){
-        cmdHistory->setSavedCurrentInput(s);
-        cmdHistory->setSavedCurrentInputFlag = false;
-    }
+    cmdHistory->SaveCurrentEnteredString(s);
     int chi = cmdHistory->getCurrentHistoryIndex();
     if (chi > 0){
         chi--;        
@@ -98,11 +104,7 @@ string Shell::handleUpArrow(string s){
  */
 string Shell::handleDownArrow(string s){
     auto cmdHistory = getCommandHistory();
-    if (cmdHistory->setSavedCurrentInputFlag){
-        cmdHistory->setSavedCurrentInput(s);
-        cmdHistory->setSavedCurrentInputFlag = false;
-    }
- 
+    cmdHistory->SaveCurrentEnteredString(s);
     int chi = cmdHistory->getCurrentHistoryIndex();
     if (chi < cmdHistory->cmdHistoryList.size()){
         chi++;
