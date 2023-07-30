@@ -6,20 +6,20 @@ string env = "PATH=/usr/local/sbin/:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
 int main(void){
     CommandHistory cmdHistory(CMD_HISTORY_SIZE);
     Shell shell(cmdHistory);
-    shell.putTerminalInPerCharMode();
+    shell.PutTerminalInPerCharMode();
     while (1) {
-        shell.displayPrompt();
-        string shellInput = shell.getInput(cin);
-        vector<string> tokens = shell.tokenise(shellInput, ' ');
-        shell.getCommandHistory()->mainWrapperAddCmdToHistory(tokens);
+        shell.DisplayPrompt(cout);
+        string shellInput = shell.GetInput(cin, cout);
+        vector<string> tokens = shell.Tokenise(shellInput, ' ');
+        shell.GetCommandHistory()->MainWrapperAddCmdToHistory(tokens);
         int pid = fork(); 
         if (pid == 0) { 
-            shell.executeProgram(tokens);
+            shell.ExecuteProgram(tokens);
             perror("unable to execute");
         } else {
             wait(NULL);
         }
     }
-    shell.putTerminalBackInNormalMode();
+    shell.PutTerminalBackInNormalMode();
     return 0;
 }
