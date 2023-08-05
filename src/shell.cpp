@@ -244,6 +244,7 @@ vector<string> Shell::Tokenise(string s, char delimiter){
     // end on enter 
     vector<string> tokens;
     bool wordBoundaryFlag = true;
+    int numberOfRedirect = 0;
     bool multipleRedirect = false;
     string temp;
     for(int i = 0; i < s[i]; i++){
@@ -251,27 +252,30 @@ vector<string> Shell::Tokenise(string s, char delimiter){
             case '>':
             case '<':
                 if (multipleRedirect){
-                    string str(2,s[i]);
+                    string str(numberOfRedirect+1,s[i]);
                     tokens.pop_back();
                     tokens.push_back(str);
-                    multipleRedirect = false;
                 } else {
                     tokenHelper(tokens, temp, wordBoundaryFlag);
                     string str(1,s[i]);
                     tokens.push_back(str);
                 }
                 multipleRedirect = true;
+                numberOfRedirect++;
                 break;
             case ' ':
                 // if previous state was false
                 // this is a transition from finding a word
                 // to finding a space
                 tokenHelper(tokens, temp, wordBoundaryFlag);
+                multipleRedirect = false;
+                numberOfRedirect = 0;
                 break;
             default: 
                 temp.push_back(s[i]);
                 wordBoundaryFlag = false;
                 multipleRedirect = false;
+                numberOfRedirect = 0;
                 break;
         }
     }
@@ -285,12 +289,6 @@ vector<string> Shell::Tokenise(string s, char delimiter){
 }
 
 
-void checkForRedirection(vector<string> tokens){
-//    for (auto s: tokens){
-//        switch 
-//    }
-}
-
 /**
  * \brief Simple helper to print out a vector of strings 
  * @param input vector of strings to print
@@ -303,6 +301,11 @@ void Shell::printTokens(const vector<string> &input, ostream& ofs){
     ofs << "\n"; 
 }
 
+//void Shell::PostTokeniseProcessing(vector<string> cmd){
+//    for (auto s: cmd){
+//        ;
+//    }    
+//}
 
 /*
  * \brief erases whole line and moves cursor to beginning of line

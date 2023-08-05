@@ -111,6 +111,11 @@ TEST_F(ShellTest, inputRedirectTokens4){
     EXPECT_EQ(shell.Tokenise("Dimpy<<loves", ' '), exResult);
 }
 
+TEST_F(ShellTest, inputRedirectTokensThreeInput){
+    vector<string> exResult = {"Dimpy", "<<<", "loves"};
+    EXPECT_EQ(shell.Tokenise("Dimpy<<<loves", ' '), exResult);
+}
+
 TEST_F(ShellTest, testEmptyInitially){
     // arrange
     auto cmdHistory = shell.GetCommandHistory(); 
