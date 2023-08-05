@@ -3,13 +3,17 @@
  *
  */
 #include <iostream>
+#include <fstream>
 #include <unistd.h>
 #include "shell.h"
+#include "redirection.h"
 #include <termios.h>
 #include <string>
 #include <string.h>
 #include <vector>
 #include <algorithm>
+#include <sys/stat.h>
+#include <fcntl.h>
 string prompt = "penn-shredder# ";
 static struct termios oldt, newt;
 
@@ -301,11 +305,85 @@ void Shell::printTokens(const vector<string> &input, ostream& ofs){
     ofs << "\n"; 
 }
 
-//void Shell::PostTokeniseProcessing(vector<string> cmd){
-//    for (auto s: cmd){
-//        ;
-//    }    
-//}
+vector<string> Shell::PostTokeniseProcessing(vector<string> cmd){
+    vector<string> inputCmd;
+    RedirectionType redirectionType;
+    int outputFileIndex = 0;
+    int inputFileIndex = 0;
+    ofstream outputFile;
+    int cmdStart = 0;
+    int cmdEnd = cmd.size();
+    ifstream inputFile;
+    for (int i = 0; i < cmd.size(); i++){
+        if (cmd[i] == ">"){
+                redirectionType = OutputCreate;
+                outputFileIndex = i+1;
+        } else if (cmd[i] == ">>"){
+//            case ">>":
+           
+                redirectionType = OutputAppend;
+                outputFileIndex = i+1;
+                cmdEnd = i-1;
+        } else if (cmd[i] == "<") {
+//                break;
+//            case "<":
+                    
+                redirectionType = Input;
+                inputFileIndex = i-1;
+        } else if (cmd[i] == "<<"){
+//                break;
+//            case "<<": 
+                redirectionType = Input;
+//                break;
+        } else {
+//            default:
+                cout <<"not a redirection flag"<< endl;
+//                break;
+//                
+
+        }
+    }
+
+    switch(redirectionType){
+        case (OutputCreate):
+            {
+                fflush(stdout);
+                int newstdout = open(cmd[outputFileIndex].c_str(), O_WRONLY | O_CREAT, S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH);
+                dup2(newstdout, fileno(stdout));
+                close(newstdout);
+
+                outputFile.open(cmd[outputFileIndex]);
+                if (!outputFile){
+                    cout << "unable to create file" << endl;
+                }
+            }
+            break;
+        case(OutputAppend):
+            {
+                fflush(stdout);
+                int newstdout = open(cmd[outputFileIndex].c_str(), O_WRONLY | O_CREAT | O_APPEND, S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH);
+                dup2(newstdout, fileno(stdout));
+                close(newstdout);
+
+                outputFile.open(cmd[outputFileIndex], ios::app);
+                if (!outputFile){
+                    cout << "unable to create file" << endl;
+                }
+            }
+            break;
+        case(Input):
+            break;
+        default:
+            break;
+
+    }
+    inputCmd.assign(cmd.begin()+cmdStart, cmd.begin()+cmdEnd);
+    cout << "cmdStart: " << cmdStart << endl;
+    cout << "cmdEnd: " << cmdEnd << endl;
+    printTokens(inputCmd, cout);
+
+    return inputCmd;
+}
 
 /*
  * \brief erases whole line and moves cursor to beginning of line

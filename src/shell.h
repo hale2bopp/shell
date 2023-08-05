@@ -88,6 +88,7 @@ public:
     void PutTerminalInPerCharMode(void);
     void PutTerminalBackInNormalMode(void);
     vector<string> Tokenise(string s, char delimiter);
+    vector<string> PostTokeniseProcessing(vector<string> cmd);
 };
 
 

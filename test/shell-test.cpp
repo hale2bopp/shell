@@ -313,3 +313,24 @@ TEST_F(ShellTest, UpArrow25times){
     std::ostringstream oss("");
     EXPECT_EQ(shell.GetInput(iss, oss), "cat Makefile");
 }
+
+TEST_F(ShellTest, NoRedirectInputCmdFullCommand){
+    Shell shell("no prompt");
+    string s = "echo \"hello\"\n";
+    std::istringstream iss(s);
+    std::ostringstream oss("");
+    vector<string> Cmd = {"echo", "\"hello\""};
+    EXPECT_EQ(shell.Tokenise(s, ' '), Cmd);
+    EXPECT_EQ(shell.PostTokeniseProcessing(Cmd), Cmd);
+}
+
+TEST_F(ShellTest, WithRedirectInputCmd){
+    Shell shell("no prompt");
+    string s = "echo \"hello\">test.txt\n";
+    std::istringstream iss(s);
+    std::ostringstream oss("");
+    vector<string> fullCmd = {"echo", "\"hello\"", ">", "test.txt"};
+    vector<string> Cmd = {"echo", "\"hello\""};
+    EXPECT_EQ(shell.Tokenise(s, ' '), fullCmd);
+    EXPECT_EQ(shell.PostTokeniseProcessing(fullCmd), Cmd);
+}
