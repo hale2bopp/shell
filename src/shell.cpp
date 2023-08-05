@@ -60,15 +60,23 @@ void CommandHistory::AddCmdToHistory(vector<string> &cmd, deque<vector<string>> 
     cmdList.push_back(cmd);
 }
 
-
+/**
+ * \brief Getter for current history index
+ */
 int CommandHistory::GetCurrentHistoryIndex(void){
     return currentHistoryIndex;
 }
 
+/**
+ * \brief Getter for currently saved input string
+ */
 string CommandHistory::GetSavedCurrentInput(void){
     return savedCurrentInput;
 }
 
+/**
+ * \brief Save currently entered string
+ */
 void CommandHistory::SaveCurrentEnteredString(string s){
     if ((SetSavedCurrentInputFlag) && (s.size()>0)){
         SetSavedCurrentInput(s);
@@ -76,10 +84,16 @@ void CommandHistory::SaveCurrentEnteredString(string s){
     }
 }
 
+/**
+ * \brief Sets index in the command history vector
+ */
 void CommandHistory::SetCurrentHistoryIndex(int val){
     currentHistoryIndex = val;
 }
 
+/**
+ * \brief Saves current input string before being replaced by up arrow
+ */
 void CommandHistory::SetSavedCurrentInput(string s){
     savedCurrentInput = s;
 }
@@ -208,6 +222,16 @@ int Shell::ExecuteProgram(vector<string> cmd){
 }
 
 
+void Shell::tokenHelper(vector<string>& tokens, string& temp, bool& wordBoundary){
+    if (!wordBoundary){
+        // add to tokens
+        tokens.push_back(temp);
+        // empty temp string
+        temp = "";
+        wordBoundary = true;
+    }
+}
+
 /**
  * \brief Tokenise entered input string from shell to extract command
  * and arguments
@@ -220,26 +244,34 @@ vector<string> Shell::Tokenise(string s, char delimiter){
     // end on enter 
     vector<string> tokens;
     bool wordBoundaryFlag = true;
+    bool multipleRedirect = false;
     string temp;
     for(int i = 0; i < s[i]; i++){
         switch(s[i]){
+            case '>':
+            case '<':
+                if (multipleRedirect){
+                    string str(2,s[i]);
+                    tokens.push_back(str);
+                    multipleRedirect = false;
+                } else {
+                    tokenHelper(tokens, temp, wordBoundaryFlag);
+                    string str(1,s[i]);
+                    tokens.push_back(str);
+                }
+                multipleRedirect = true;
+                break;
             case ' ':
                 // if previous state was false
                 // this is a transition from finding a word
                 // to finding a space
-                if (!wordBoundaryFlag){
-                    // add to tokens
-                    tokens.push_back(temp);
-                    // empty temp string
-                    temp = "";
-                    wordBoundaryFlag = true;
-                }
+                tokenHelper(tokens, temp, wordBoundaryFlag);
                 break;
             default: 
                 temp.push_back(s[i]);
                 wordBoundaryFlag = false;
+                multipleRedirect = false;
                 break;
-
         }
     }
     if (!wordBoundaryFlag){
@@ -248,6 +280,13 @@ vector<string> Shell::Tokenise(string s, char delimiter){
         tokens.push_back(temp);
     }
     return tokens;
+}
+
+
+void checkForRedirection(vector<string> tokens){
+//    for (auto s: tokens){
+//        switch 
+//    }
 }
 
 /**
