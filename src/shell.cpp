@@ -252,6 +252,7 @@ vector<string> Shell::Tokenise(string s, char delimiter){
             case '<':
                 if (multipleRedirect){
                     string str(2,s[i]);
+                    tokens.pop_back();
                     tokens.push_back(str);
                     multipleRedirect = false;
                 } else {
@@ -279,6 +280,7 @@ vector<string> Shell::Tokenise(string s, char delimiter){
         // need to add the temp at the end
         tokens.push_back(temp);
     }
+    printTokens(tokens, cout);
     return tokens;
 }
 

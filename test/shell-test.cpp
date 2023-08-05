@@ -71,6 +71,46 @@ TEST_F(ShellTest, initialSpaceAndMultipleSpaceAndEndSpace){
     EXPECT_EQ(shell.Tokenise("   Dimpy   loves    mice    ", ' '), exResult);
 }
 
+TEST_F(ShellTest, outputRedirectTokens){
+    vector<string> exResult = {"Dimpy", ">", "loves"};
+    EXPECT_EQ(shell.Tokenise("Dimpy > loves", ' '), exResult);
+}
+
+TEST_F(ShellTest, outputRedirectTokens_2){
+    vector<string> exResult = {"Dimpy", ">", "loves"};
+    EXPECT_EQ(shell.Tokenise("Dimpy>loves", ' '), exResult);
+}
+
+TEST_F(ShellTest, outputRedirectTokens_3){
+    vector<string> exResult = {"Dimpy", ">>", "loves"};
+    EXPECT_EQ(shell.Tokenise("Dimpy >> loves", ' '), exResult);
+}
+
+TEST_F(ShellTest, outputRedirectTokens_4){
+    vector<string> exResult = {"Dimpy", ">>", "loves"};
+    EXPECT_EQ(shell.Tokenise("Dimpy>>loves", ' '), exResult);
+}
+
+TEST_F(ShellTest, inputRedirectTokens){
+    vector<string> exResult = {"Dimpy", "<", "loves"};
+    EXPECT_EQ(shell.Tokenise("Dimpy < loves", ' '), exResult);
+}
+
+TEST_F(ShellTest, inputRedirectTokens2){
+    vector<string> exResult = {"Dimpy", "<", "loves"};
+    EXPECT_EQ(shell.Tokenise("Dimpy<loves", ' '), exResult);
+}
+
+TEST_F(ShellTest, inputRedirectTokens3){
+    vector<string> exResult = {"Dimpy", "<<", "loves"};
+    EXPECT_EQ(shell.Tokenise("Dimpy << loves", ' '), exResult);
+}
+
+TEST_F(ShellTest, inputRedirectTokens4){
+    vector<string> exResult = {"Dimpy", "<<", "loves"};
+    EXPECT_EQ(shell.Tokenise("Dimpy<<loves", ' '), exResult);
+}
+
 TEST_F(ShellTest, testEmptyInitially){
     // arrange
     auto cmdHistory = shell.GetCommandHistory(); 

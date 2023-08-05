@@ -69,7 +69,7 @@ private:
     void moveCursorToBackDisplayPrompt(ostream& ofs);
     void eraseLastCharacter(string& s, ostream& ofs);
     void printTokens(const vector<string> &input, ostream& ofs);   
-
+    void tokenHelper(vector<string>& tokens, string& temp, bool& wordBoundary);
 public:
     Shell(void);
     Shell(CommandHistory cmdHistory);
