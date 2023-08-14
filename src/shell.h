@@ -68,7 +68,6 @@ private:
     string replaceInput(ostream& ofs);
     void moveCursorToBackDisplayPrompt(ostream& ofs);
     void eraseLastCharacter(string& s, ostream& ofs);
-    void printTokens(const vector<string> &input, ostream& ofs);   
     void tokenHelper(vector<string>& tokens, string& temp, bool& wordBoundary);
 public:
     Shell(void);
@@ -84,11 +83,12 @@ public:
     void CheckLength(string& s);
     string GetInput(istream& ifs, ostream& ofs);
     void PrintTokens(const vector<string> &input);
-    int ExecuteProgram(vector<string> args);
+    int ExecuteProgram(vector<string>& args);
     void PutTerminalInPerCharMode(void);
     void PutTerminalBackInNormalMode(void);
     vector<string> Tokenise(string s, char delimiter);
-    vector<string> PostTokeniseProcessing(vector<string> cmd);
+    vector<string> PostTokeniseProcessing(vector<string>& cmd);
+    void printTokens(const vector<string> &input, ostream& ofs);   
 };
 
 

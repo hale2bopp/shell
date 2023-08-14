@@ -215,14 +215,14 @@ string Shell::GetInput(istream& ifs, ostream& ofs){
  * by execvp. 
  * @param vector of strings with command to be run
  */
-int Shell::ExecuteProgram(vector<string> cmd){
+int Shell::ExecuteProgram(vector<string>& cmd){
     vector<char *> vec_cp;
     vec_cp.reserve(cmd.size() + 1);
     for (auto s : cmd){
         vec_cp.push_back(strdup(s.c_str()));
     }
     vec_cp.push_back(NULL);
-    return execvp(cmd[0].c_str(), const_cast<char* const*>(vec_cp.data()));           
+    return execvp(cmd[0].c_str(), const_cast<char* const*>(vec_cp.data()));
 }
 
 
@@ -288,7 +288,6 @@ vector<string> Shell::Tokenise(string s, char delimiter){
         // need to add the temp at the end
         tokens.push_back(temp);
     }
-    printTokens(tokens, cout);
     return tokens;
 }
 
@@ -305,7 +304,7 @@ void Shell::printTokens(const vector<string> &input, ostream& ofs){
     ofs << "\n"; 
 }
 
-vector<string> Shell::PostTokeniseProcessing(vector<string> cmd){
+vector<string> Shell::PostTokeniseProcessing(vector<string>& cmd){
     vector<string> inputCmd;
     RedirectionType redirectionType;
     int outputFileIndex = 0;
@@ -318,44 +317,34 @@ vector<string> Shell::PostTokeniseProcessing(vector<string> cmd){
         if (cmd[i] == ">"){
                 redirectionType = OutputCreate;
                 outputFileIndex = i+1;
+                cmdEnd = i;
         } else if (cmd[i] == ">>"){
-//            case ">>":
-           
                 redirectionType = OutputAppend;
                 outputFileIndex = i+1;
-                cmdEnd = i-1;
+                cmdEnd = i;
         } else if (cmd[i] == "<") {
-//                break;
-//            case "<":
                     
                 redirectionType = Input;
                 inputFileIndex = i-1;
         } else if (cmd[i] == "<<"){
-//                break;
-//            case "<<": 
                 redirectionType = Input;
-//                break;
-        } else {
-//            default:
-                cout <<"not a redirection flag"<< endl;
-//                break;
-//                
+        } 
 
-        }
     }
 
     switch(redirectionType){
         case (OutputCreate):
             {
-                fflush(stdout);
+                //fflush(stdout);
                 int newstdout = open(cmd[outputFileIndex].c_str(), O_WRONLY | O_CREAT, S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH);
+                                
                 dup2(newstdout, fileno(stdout));
                 close(newstdout);
 
-                outputFile.open(cmd[outputFileIndex]);
-                if (!outputFile){
-                    cout << "unable to create file" << endl;
-                }
+//                outputFile.open(cmd[outputFileIndex]);
+//                if (!outputFile){
+//                    cout << "unable to create file" << endl;
+//                }
             }
             break;
         case(OutputAppend):
@@ -378,10 +367,6 @@ vector<string> Shell::PostTokeniseProcessing(vector<string> cmd){
 
     }
     inputCmd.assign(cmd.begin()+cmdStart, cmd.begin()+cmdEnd);
-    cout << "cmdStart: " << cmdStart << endl;
-    cout << "cmdEnd: " << cmdEnd << endl;
-    printTokens(inputCmd, cout);
-
     return inputCmd;
 }
 
