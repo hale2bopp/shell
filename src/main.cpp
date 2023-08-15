@@ -16,8 +16,9 @@ int main(void){
         fflush(stdout);
         int pid = fork(); 
         if (pid == 0) {
-            vector<string> cmd = shell.PostTokeniseProcessing(tokens);
-            shell.ExecuteProgram(cmd);
+            RedirectionParams redirParams = shell.PostTokeniseProcessing(tokens);
+            shell.HandleRedirection(redirParams);
+            shell.ExecuteProgram(redirParams.cmd);
             perror("unable to execute");
         } else {
             wait(NULL);

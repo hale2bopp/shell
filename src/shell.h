@@ -9,6 +9,7 @@
 #include <vector>
 #include<sys/wait.h>
 #include <queue>
+#include "redirection.h"
 using std::deque;//queue;
 using namespace std;
 
@@ -87,7 +88,8 @@ public:
     void PutTerminalInPerCharMode(void);
     void PutTerminalBackInNormalMode(void);
     vector<string> Tokenise(string s, char delimiter);
-    vector<string> PostTokeniseProcessing(vector<string>& cmd);
+    RedirectionParams PostTokeniseProcessing(vector<string>& cmd);
+    void HandleRedirection(RedirectionParams& redirParams);
     void printTokens(const vector<string> &input, ostream& ofs);   
 };
 

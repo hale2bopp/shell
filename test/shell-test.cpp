@@ -3,6 +3,8 @@
 #include "shell.h"
 #include "shell-test.h"
 #include<sstream>
+#include <fstream>
+
 
 // The fixture for testing class Shell.
 class ShellTest : public ::testing::Test {
@@ -314,6 +316,7 @@ TEST_F(ShellTest, UpArrow25times){
     EXPECT_EQ(shell.GetInput(iss, oss), "cat Makefile");
 }
 
+
 TEST_F(ShellTest, NoRedirectInputCmdFullCommand){
     Shell shell("no prompt");
     string s = "echo \"hello\"\n";
@@ -321,8 +324,10 @@ TEST_F(ShellTest, NoRedirectInputCmdFullCommand){
     std::ostringstream oss("");
     vector<string> Cmd = {"echo", "\"hello\""};
     EXPECT_EQ(shell.Tokenise(s, ' '), Cmd);
-    EXPECT_EQ(shell.PostTokeniseProcessing(Cmd), Cmd);
+    RedirectionParams redirParams = shell.PostTokeniseProcessing(Cmd);
+    EXPECT_EQ(redirParams.cmd, Cmd);
 }
+
 
 TEST_F(ShellTest, WithRedirectInputCmd){
     Shell shell("no prompt");
@@ -332,5 +337,28 @@ TEST_F(ShellTest, WithRedirectInputCmd){
     vector<string> fullCmd = {"echo", "\"hello\"", ">", "test.txt"};
     vector<string> Cmd = {"echo", "\"hello\""};
     EXPECT_EQ(shell.Tokenise(s, ' '), fullCmd);
-    EXPECT_EQ(shell.PostTokeniseProcessing(fullCmd), Cmd);
+    RedirectionParams redirParams = shell.PostTokeniseProcessing(fullCmd);
+    EXPECT_EQ(redirParams.cmd, Cmd);
+}
+
+
+TEST_F(ShellTest, LastOutPutReDirection){
+    Shell shell("no prompt");
+    string s = "echo \"hello\">test.txt\n";
+    std::istringstream iss(s);
+    std::ostringstream oss("");
+    vector<string> fullCmd = {"echo", "\"hello\"", ">", "test.txt"};
+    vector<string> Cmd = {"echo", "\"hello\""};
+    EXPECT_EQ(shell.Tokenise(s, ' '), fullCmd);
+//    shell.ExecuteProgram(processedCmd);
+    RedirectionParams redirParams = shell.PostTokeniseProcessing(fullCmd);
+    EXPECT_EQ(redirParams.cmd, Cmd);
+    shell.HandleRedirection(redirParams);   
+    std::ifstream testFile ("test.txt");
+    string cmdOut;
+    if ( testFile.is_open() ) { // always check whether the file is open
+        testFile >> cmdOut; // pipe file's content into stream
+    }
+
+    EXPECT_EQ("hello", cmdOut);
 }
