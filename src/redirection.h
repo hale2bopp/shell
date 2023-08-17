@@ -16,12 +16,13 @@ enum RedirectionType
 };
 
 typedef struct _RedirectionParams{
-    std::vector<std::string> cmd;
     int outputFileIndex;
     int inputFileIndex;
     int cmdStart;
     int cmdEnd;
     RedirectionType redirectionType;
+    std::string outfilename;
+    std::vector<std::string> cmd;
 } RedirectionParams;
 
 #endif  // REDIRECTION_H

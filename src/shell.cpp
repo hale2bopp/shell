@@ -308,8 +308,9 @@ void Shell::printTokens(const vector<string> &input, ostream& ofs){
  * \brief Check for Redirection and split out command
  * @param input vector of strings
  */
+//std::tuple <RedirectionParams, vector<string>> Shell::PostTokeniseProcessing(vector<string>& cmd){
 RedirectionParams Shell::PostTokeniseProcessing(vector<string>& cmd){
-    RedirectionParams redirParams;
+    RedirectionParams redirParams = {0};
     redirParams.cmdEnd = cmd.size();
     ofstream outputFile;
     ifstream inputFile;
@@ -330,7 +331,10 @@ RedirectionParams Shell::PostTokeniseProcessing(vector<string>& cmd){
                 redirParams.redirectionType = Input;
         } 
     }
+    vector<string> inputCmd;
     redirParams.cmd.assign(cmd.begin()+redirParams.cmdStart, cmd.begin()+redirParams.cmdEnd);
+    
+    redirParams.outfilename = cmd[redirParams.outputFileIndex];
     return redirParams; 
 }
 
@@ -338,12 +342,13 @@ RedirectionParams Shell::PostTokeniseProcessing(vector<string>& cmd){
  * \brief Handle Redirection 
  * @param input command, redirectionType
  */
+//void Shell::HandleRedirection(RedirectionParams& redirParams, vector<string>& cmd){
 void Shell::HandleRedirection(RedirectionParams& redirParams){
     switch(redirParams.redirectionType){
         case (OutputCreate):
             {
                 fflush(stdout);
-                int newstdout = open(redirParams.cmd[redirParams.outputFileIndex].c_str(), O_WRONLY | O_CREAT, S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH);
+                int newstdout = open(redirParams.outfilename.c_str(), O_WRONLY | O_CREAT, S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH);
                 dup2(newstdout, fileno(stdout));
                 close(newstdout);
             }
@@ -351,7 +356,7 @@ void Shell::HandleRedirection(RedirectionParams& redirParams){
         case(OutputAppend):
             {
                 fflush(stdout);
-                int newstdout = open(redirParams.cmd[redirParams.outputFileIndex].c_str(), O_WRONLY | O_CREAT | O_APPEND, S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH);
+                int newstdout = open(redirParams.outfilename.c_str(), O_WRONLY | O_CREAT | O_APPEND, S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH);
                 dup2(newstdout, fileno(stdout));
                 close(newstdout);
             }
@@ -362,8 +367,6 @@ void Shell::HandleRedirection(RedirectionParams& redirParams){
             break;
 
     }
-//    inputCmd.assign(cmd.begin()+redirParams.cmdStart, cmd.begin()+redirParams.cmdEnd);
-//    return inputCmd;
 }
 
 /*

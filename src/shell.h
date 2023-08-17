@@ -8,6 +8,7 @@
 
 #include <vector>
 #include<sys/wait.h>
+#include <tuple>
 #include <queue>
 #include "redirection.h"
 using std::deque;//queue;
