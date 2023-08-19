@@ -348,7 +348,7 @@ void Shell::HandleRedirection(RedirectionParams& redirParams){
         case (OutputCreate):
             {
                 fflush(stdout);
-                int newstdout = open(redirParams.outfilename.c_str(), O_WRONLY | O_CREAT, S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH);
+                int newstdout = open(redirParams.outfilename.c_str(), O_WRONLY | O_CREAT| O_TRUNC, S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH);
                 dup2(newstdout, fileno(stdout));
                 close(newstdout);
             }
