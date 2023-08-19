@@ -1,25 +1,34 @@
 #include <iostream>
 #include<sys/wait.h>
 #include "shell.h"
-
+#include <string.h>
+const char* err_msg = "unable to execute";
 string env = "PATH=/usr/local/sbin/:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games";
 int main(void){
     CommandHistory cmdHistory(CMD_HISTORY_SIZE);
     Shell shell(cmdHistory);
-    shell.putTerminalInPerCharMode();
+    shell.PutTerminalInPerCharMode();
     while (1) {
-        shell.displayPrompt();
-        string shellInput = shell.getInput(cin);
-        vector<string> tokens = shell.tokenise(shellInput, ' ');
-        shell.getCommandHistory()->mainWrapperAddCmdToHistory(tokens);
+        shell.DisplayPrompt(cout);
+        string shellInput = shell.GetInput(cin, cout);
+        vector<string> tokens = shell.Tokenise(shellInput, ' ');
+        shell.GetCommandHistory()->MainWrapperAddCmdToHistory(tokens);
+        fflush(stdout);
         int pid = fork(); 
-        if (pid == 0) { 
-            shell.executeProgram(tokens);
+        if (pid == 0) {
+//            RedirectionParams redirParams;
+//            vector<string> cmd;
+            //tie(redirParams, cmd) = shell.PostTokeniseProcessing(tokens);
+            RedirectionParams redirParams = shell.PostTokeniseProcessing(tokens);
+            //shell.HandleRedirection(redirParams, cmd);
+            shell.HandleRedirection(redirParams);
+//            shell.ExecuteProgram(cmd)//
+            shell.ExecuteProgram(redirParams.cmd);
             perror("unable to execute");
         } else {
             wait(NULL);
         }
     }
-    shell.putTerminalBackInNormalMode();
+    shell.PutTerminalBackInNormalMode();
     return 0;
 }

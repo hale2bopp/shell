@@ -3,13 +3,17 @@
  *
  */
 #include <iostream>
+#include <fstream>
 #include <unistd.h>
 #include "shell.h"
+#include "redirection.h"
 #include <termios.h>
 #include <string>
 #include <string.h>
 #include <vector>
 #include <algorithm>
+#include <sys/stat.h>
+#include <fcntl.h>
 string prompt = "penn-shredder# ";
 static struct termios oldt, newt;
 
@@ -31,9 +35,9 @@ CommandHistory::CommandHistory(int maxCmdHistorySize): maxCmdHistorySize(maxCmdH
  * for main 
  * @param vector of strings describing a command to enter 
  */
-void CommandHistory::mainWrapperAddCmdToHistory(vector<string> &cmd){
+void CommandHistory::MainWrapperAddCmdToHistory(vector<string> &cmd){
     if (cmd.size() !=0){
-        addCmdToHistory(cmd, cmdHistoryList);
+        AddCmdToHistory(cmd, cmdHistoryList);
         currentHistoryIndex = cmdHistoryList.size();
         savedCurrentInput = "";
     }
@@ -42,10 +46,9 @@ void CommandHistory::mainWrapperAddCmdToHistory(vector<string> &cmd){
 /**
  * \brief Small helper to display prompt
  */
-void Shell::displayPrompt(void){
-    cout << prompt;
+void Shell::DisplayPrompt(ostream& ofs){
+    ofs << prompt;
 }
-
 
 /**
  * \brief Adds every entered command to history of commands.
@@ -54,64 +57,77 @@ void Shell::displayPrompt(void){
  * @param vector of strings describing a command to enter 
  * @param vector of vector of strings with current command history
  */
-void CommandHistory::addCmdToHistory(vector<string> &cmd, deque<vector<string>> &cmdList){
+void CommandHistory::AddCmdToHistory(vector<string> &cmd, deque<vector<string>> &cmdList){
     if (cmdList.size() >= maxCmdHistorySize){
         cmdList.pop_front();
     } 
     cmdList.push_back(cmd);
 }
 
-
-int CommandHistory::getCurrentHistoryIndex(void){
+/**
+ * \brief Getter for current history index
+ */
+int CommandHistory::GetCurrentHistoryIndex(void){
     return currentHistoryIndex;
 }
 
-string CommandHistory::getSavedCurrentInput(void){
+/**
+ * \brief Getter for currently saved input string
+ */
+string CommandHistory::GetSavedCurrentInput(void){
     return savedCurrentInput;
 }
 
+/**
+ * \brief Save currently entered string
+ */
 void CommandHistory::SaveCurrentEnteredString(string s){
-    if ((setSavedCurrentInputFlag) && (s.size()>0)){
-        setSavedCurrentInput(s);
-        cout << "Saved string: " << s << endl; 
-        setSavedCurrentInputFlag = false;
+    if ((SetSavedCurrentInputFlag) && (s.size()>0)){
+        SetSavedCurrentInput(s);
+        SetSavedCurrentInputFlag = false;
     }
 }
 
-void CommandHistory::setCurrentHistoryIndex(int val){
+/**
+ * \brief Sets index in the command history vector
+ */
+void CommandHistory::SetCurrentHistoryIndex(int val){
     currentHistoryIndex = val;
 }
 
-void CommandHistory::setSavedCurrentInput(string s){
+/**
+ * \brief Saves current input string before being replaced by up arrow
+ */
+void CommandHistory::SetSavedCurrentInput(string s){
     savedCurrentInput = s;
 }
 
 /**
  * \brief Handles up arrow press
  */
-string Shell::handleUpArrow(string s){
-    auto cmdHistory = getCommandHistory();
+string Shell::handleUpArrow(string s, ostream& ofs){
+    auto cmdHistory = GetCommandHistory();
     cmdHistory->SaveCurrentEnteredString(s);
-    int chi = cmdHistory->getCurrentHistoryIndex();
+    int chi = cmdHistory->GetCurrentHistoryIndex();
     if (chi > 0){
         chi--;        
-        cmdHistory->setCurrentHistoryIndex(chi);
+        cmdHistory->SetCurrentHistoryIndex(chi);
     }
-    return replaceInput();
+    return replaceInput(ofs);
 }
 
 /**
  * \brief Handles down arrow press
  */
-string Shell::handleDownArrow(string s){
-    auto cmdHistory = getCommandHistory();
+string Shell::handleDownArrow(string s, ostream& ofs){
+    auto cmdHistory = GetCommandHistory();
     cmdHistory->SaveCurrentEnteredString(s);
-    int chi = cmdHistory->getCurrentHistoryIndex();
+    int chi = cmdHistory->GetCurrentHistoryIndex();
     if (chi < cmdHistory->cmdHistoryList.size()){
         chi++;
-        cmdHistory->setCurrentHistoryIndex(chi);
+        cmdHistory->SetCurrentHistoryIndex(chi);
     }
-    return replaceInput();
+    return replaceInput(ofs);
 }
 
 /**
@@ -119,7 +135,7 @@ string Shell::handleDownArrow(string s){
  * input value. Truncates input string if larger.
  * @param input string 
  */
-void Shell::checkLength(string &shellInput){
+void Shell::CheckLength(string &shellInput){
     if (shellInput.size() > MAX_INPUT){
         shellInput = shellInput.substr(0, MAX_INPUT);
     }
@@ -132,15 +148,15 @@ void Shell::checkLength(string &shellInput){
  * with command from history.
  * @param vector of vector of strings (Command History)
  */
-string Shell::replaceInput(void){
-    auto cmdHistory = getCommandHistory();
+string Shell::replaceInput(ostream& ofs){
+    auto cmdHistory = GetCommandHistory();
     string shellInput;
 
-    int chi = cmdHistory->getCurrentHistoryIndex();
-    int msize = cmdHistory->getCmdHistorySize();
+    int chi = cmdHistory->GetCurrentHistoryIndex();
+    int msize = cmdHistory->GetCmdHistorySize();
     if (chi == msize || ((chi == 0) && (msize==0))){
-        string s = cmdHistory->getSavedCurrentInput();
-        cout << s;
+        string s = cmdHistory->GetSavedCurrentInput();
+        ofs << s;
         return s;
     }
     int n = cmdHistory->cmdHistoryList[chi].size();
@@ -148,7 +164,7 @@ string Shell::replaceInput(void){
         shellInput+= cmdHistory->cmdHistoryList[chi][i]+" " ;
     }
     shellInput += cmdHistory->cmdHistoryList[chi][n-1];
-    cout << shellInput;
+    ofs << shellInput;
     return shellInput;
 }
 
@@ -156,9 +172,9 @@ string Shell::replaceInput(void){
  * \brief get Shell input. Immediately handles backspace, arrows
  * passes to tokeniser 
  */
-string Shell::getInput(istream& ifs){ 
-    auto cmdHistory = getCommandHistory();
-    cmdHistory->setSavedCurrentInputFlag = true;
+string Shell::GetInput(istream& ifs, ostream& ofs){ 
+    auto cmdHistory = GetCommandHistory();
+    cmdHistory->SetSavedCurrentInputFlag = true;
 
     string shellInput;
     char c = 0;
@@ -170,16 +186,16 @@ string Shell::getInput(istream& ifs){
                 ifs.get(c);
                 ifs.get(c);
                 if (c == (char)UP_ARROW){
-                    moveCursorToBackDisplayPrompt();
-                    shellInput = handleUpArrow(shellInput);
+                    moveCursorToBackDisplayPrompt(ofs);
+                    shellInput = handleUpArrow(shellInput, ofs);
                 }
                 if (c == (char) DOWN_ARROW){
-                    moveCursorToBackDisplayPrompt();
-                    shellInput = handleDownArrow(shellInput);
+                    moveCursorToBackDisplayPrompt(ofs);
+                    shellInput = handleDownArrow(shellInput, ofs);
                 } 
                 break;
             case (char) DELETE: 
-                eraseLastCharacter(shellInput);               
+                eraseLastCharacter(shellInput, ofs);
                 break;
             case (char)ENTER:
                 break;
@@ -189,7 +205,7 @@ string Shell::getInput(istream& ifs){
         }
     }
     // limit length of terminal input
-    checkLength(shellInput);
+    CheckLength(shellInput);
     return shellInput;
 }
 
@@ -199,16 +215,26 @@ string Shell::getInput(istream& ifs){
  * by execvp. 
  * @param vector of strings with command to be run
  */
-int Shell::executeProgram(vector<string> cmd){
-    std::vector<char *> vec_cp;
+int Shell::ExecuteProgram(vector<string>& cmd){
+    vector<char *> vec_cp;
     vec_cp.reserve(cmd.size() + 1);
     for (auto s : cmd){
         vec_cp.push_back(strdup(s.c_str()));
     }
     vec_cp.push_back(NULL);
-    return execvp(cmd[0].c_str(), const_cast<char* const*>(vec_cp.data()));           
+    return execvp(cmd[0].c_str(), const_cast<char* const*>(vec_cp.data()));
 }
 
+
+void Shell::tokenHelper(vector<string>& tokens, string& temp, bool& wordBoundary){
+    if (!wordBoundary){
+        // add to tokens
+        tokens.push_back(temp);
+        // empty temp string
+        temp = "";
+        wordBoundary = true;
+    }
+}
 
 /**
  * \brief Tokenise entered input string from shell to extract command
@@ -217,31 +243,44 @@ int Shell::executeProgram(vector<string> cmd){
  * @param delimiter character to split string into command and args. 
  *        in normal operation, this should be ' '.
  */
-vector<string> Shell::tokenise(string s, char delimiter){
+vector<string> Shell::Tokenise(string s, char delimiter){
     // ignore whitespaces 
     // end on enter 
     vector<string> tokens;
     bool wordBoundaryFlag = true;
+    int numberOfRedirect = 0;
+    bool multipleRedirect = false;
     string temp;
     for(int i = 0; i < s[i]; i++){
         switch(s[i]){
+            case '>':
+            case '<':
+                if (multipleRedirect){
+                    string str(numberOfRedirect+1,s[i]);
+                    tokens.pop_back();
+                    tokens.push_back(str);
+                } else {
+                    tokenHelper(tokens, temp, wordBoundaryFlag);
+                    string str(1,s[i]);
+                    tokens.push_back(str);
+                }
+                multipleRedirect = true;
+                numberOfRedirect++;
+                break;
             case ' ':
                 // if previous state was false
                 // this is a transition from finding a word
                 // to finding a space
-                if (!wordBoundaryFlag){
-                    // add to tokens
-                    tokens.push_back(temp);
-                    // empty temp string
-                    temp = "";
-                    wordBoundaryFlag = true;
-                }
+                tokenHelper(tokens, temp, wordBoundaryFlag);
+                multipleRedirect = false;
+                numberOfRedirect = 0;
                 break;
             default: 
                 temp.push_back(s[i]);
                 wordBoundaryFlag = false;
+                multipleRedirect = false;
+                numberOfRedirect = 0;
                 break;
-
         }
     }
     if (!wordBoundaryFlag){
@@ -252,25 +291,91 @@ vector<string> Shell::tokenise(string s, char delimiter){
     return tokens;
 }
 
+
 /**
  * \brief Simple helper to print out a vector of strings 
  * @param input vector of strings to print
  */
-void Shell::printTokens(const vector<string> &input){
+void Shell::printTokens(const vector<string> &input, ostream& ofs){
     for(int i = 0; i < input.size(); i++){
-        cout << input[i] << " " ;
+        ofs << input[i];
+        ofs << " ";
     }
-    cout << "\n"; 
+    ofs << "\n"; 
 }
 
+/**
+ * \brief Check for Redirection and split out command
+ * @param input vector of strings
+ */
+//std::tuple <RedirectionParams, vector<string>> Shell::PostTokeniseProcessing(vector<string>& cmd){
+RedirectionParams Shell::PostTokeniseProcessing(vector<string>& cmd){
+    RedirectionParams redirParams = {0};
+    redirParams.cmdEnd = cmd.size();
+    ofstream outputFile;
+    ifstream inputFile;
+    for (int i = 0; i < cmd.size(); i++){
+        if (cmd[i] == ">"){
+                redirParams.redirectionType = OutputCreate;
+                redirParams.outputFileIndex = i+1;
+                redirParams.cmdEnd = i;
+        } else if (cmd[i] == ">>"){
+                redirParams.redirectionType = OutputAppend;
+                redirParams.outputFileIndex = i+1;
+                redirParams.cmdEnd = i;
+        } else if (cmd[i] == "<") {
+                    
+                redirParams.redirectionType = Input;
+                redirParams.inputFileIndex = i-1;
+        } else if (cmd[i] == "<<"){
+                redirParams.redirectionType = Input;
+        } 
+    }
+    vector<string> inputCmd;
+    redirParams.cmd.assign(cmd.begin()+redirParams.cmdStart, cmd.begin()+redirParams.cmdEnd);
+    
+    redirParams.outfilename = cmd[redirParams.outputFileIndex];
+    return redirParams; 
+}
+
+/**
+ * \brief Handle Redirection 
+ * @param input command, redirectionType
+ */
+//void Shell::HandleRedirection(RedirectionParams& redirParams, vector<string>& cmd){
+void Shell::HandleRedirection(RedirectionParams& redirParams){
+    switch(redirParams.redirectionType){
+        case (OutputCreate):
+            {
+                fflush(stdout);
+                int newstdout = open(redirParams.outfilename.c_str(), O_WRONLY | O_CREAT| O_TRUNC, S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH);
+                dup2(newstdout, fileno(stdout));
+                close(newstdout);
+            }
+            break;
+        case(OutputAppend):
+            {
+                fflush(stdout);
+                int newstdout = open(redirParams.outfilename.c_str(), O_WRONLY | O_CREAT | O_APPEND, S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH);
+                dup2(newstdout, fileno(stdout));
+                close(newstdout);
+            }
+            break;
+        case(Input):
+            break;
+        default:
+            break;
+
+    }
+}
 
 /*
  * \brief erases whole line and moves cursor to beginning of line
  *
  */
-void Shell::moveCursorToBackDisplayPrompt(void){
-    cout << eraseTillStartOfLine + moveCursorToBeginningOfLine;
-    displayPrompt();
+void Shell::moveCursorToBackDisplayPrompt(ostream& ofs){
+    ofs << eraseTillStartOfLine + moveCursorToBeginningOfLine;
+    DisplayPrompt(ofs);
 }
 
 
@@ -279,10 +384,10 @@ void Shell::moveCursorToBackDisplayPrompt(void){
  * step back
  *
  */
-void Shell::eraseLastCharacter(string&s){
+void Shell::eraseLastCharacter(string&s, ostream& ofs){
     s.pop_back();
     for (int i = 0; i < 3; i++){
-        cout << moveCursorOneLeft << eraseCursorTillEndOfLine;
+        ofs << moveCursorOneLeft << eraseCursorTillEndOfLine;
     }
 }
 
@@ -292,7 +397,7 @@ void Shell::eraseLastCharacter(string&s){
  * as a character is entered
  *
  */
-void Shell::putTerminalInPerCharMode(void){
+void Shell::PutTerminalInPerCharMode(void){
     /*tcgetattr gets the parameters of the current terminal
     STDIN_FILENO will tell tcgetattr that it should write the settings
     of stdin to oldt*/
@@ -313,7 +418,7 @@ void Shell::putTerminalInPerCharMode(void){
  * \brief Restore normal terminal
  *
  */ 
-void Shell::putTerminalBackInNormalMode(void){
+void Shell::PutTerminalBackInNormalMode(void){
     /*restore the old settings*/
     tcsetattr( STDIN_FILENO, TCSANOW, &oldt);
 }

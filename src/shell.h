@@ -8,7 +8,9 @@
 
 #include <vector>
 #include<sys/wait.h>
+#include <tuple>
 #include <queue>
+#include "redirection.h"
 using std::deque;//queue;
 using namespace std;
 
@@ -28,26 +30,27 @@ private:
     int currentHistoryIndex = 0;
 
 public: 
-    bool setSavedCurrentInputFlag= true;
+    bool SetSavedCurrentInputFlag= true;
     CommandHistory(){}
     CommandHistory(int maxCmdHistorySize);
     deque<vector<string>> cmdHistoryList;   
-    int getCmdHistorySize(void){
+    int GetCmdHistorySize(void){
         return this->cmdHistoryList.size();
     }
-    int getCurrentHistoryIndex(void);
-    string getSavedCurrentInput(void);
-    void setCurrentHistoryIndex(int val);
-    void setSavedCurrentInput(string val);
-    void addCmdToHistory(vector<string> &cmd, deque<vector<string>> &cmdList);
-    void mainWrapperAddCmdToHistory(vector<string> &cmd);	
+    int GetCurrentHistoryIndex(void);
+    string GetSavedCurrentInput(void);
+    void SetCurrentHistoryIndex(int val);
     void SaveCurrentEnteredString(string s);
+    void SetSavedCurrentInput(string val);
+    void AddCmdToHistory(vector<string> &cmd, deque<vector<string>> &cmdList);
+    void MainWrapperAddCmdToHistory(vector<string> &cmd);	
 };
 
 class Shell{
 private:
     string shellPrompt;
-    CommandHistory commandHistory;    
+    CommandHistory commandHistory;
+
 // potentially a list of features the shell has?
     bool upArrow;
     bool backSpace;
@@ -61,30 +64,34 @@ private:
     const string eraseTillStartOfLine = "\33[2K";
     const string moveCursorToBeginningOfLine = "\r";
     
-
+    // Functions
+    string handleUpArrow(string s, ostream& ofs);
+    string handleDownArrow(string s, ostream& ofs);
+    string replaceInput(ostream& ofs);
+    void moveCursorToBackDisplayPrompt(ostream& ofs);
+    void eraseLastCharacter(string& s, ostream& ofs);
+    void tokenHelper(vector<string>& tokens, string& temp, bool& wordBoundary);
 public:
     Shell(void);
     Shell(CommandHistory cmdHistory);
     Shell(string prompt):shellPrompt(prompt){}
 
 // Getters, Setters 
-    CommandHistory* getCommandHistory(void){
+    CommandHistory* GetCommandHistory(void){
         return &commandHistory;
     }
 // Shell functionality    
-    void displayPrompt(void);
-    string getInput(std::istream& ifs);
-    string handleUpArrow(string s);
-    string handleDownArrow(string s);
-    string replaceInput(void);
-    void checkLength(string& s);
-    vector<string> tokenise(string s, char delimiter);
-    void printTokens(const vector<string> &input);
-    int executeProgram(vector<string> args);
-    void moveCursorToBackDisplayPrompt(void);
-    void eraseLastCharacter(string& s);
-    void putTerminalInPerCharMode(void);
-    void putTerminalBackInNormalMode(void);
+    void DisplayPrompt(ostream& ofs);
+    void CheckLength(string& s);
+    string GetInput(istream& ifs, ostream& ofs);
+    void PrintTokens(const vector<string> &input);
+    int ExecuteProgram(vector<string>& args);
+    void PutTerminalInPerCharMode(void);
+    void PutTerminalBackInNormalMode(void);
+    vector<string> Tokenise(string s, char delimiter);
+    RedirectionParams PostTokeniseProcessing(vector<string>& cmd);
+    void HandleRedirection(RedirectionParams& redirParams);
+    void printTokens(const vector<string> &input, ostream& ofs);   
 };
 
 
