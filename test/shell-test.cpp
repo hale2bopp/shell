@@ -393,7 +393,19 @@ TEST_F(ShellTest, TestOutputfilename){
     RedirectionParams redirParams = shell.PostTokeniseProcessing(fullCmd);
     EXPECT_EQ(redirParams.outfilename, "test.txt");
 }
+TEST_F(ShellTest, InputRedirectionArgsTest){
 
+    Shell shell("no prompt");
+    string s = "cat < cmd.txt\n";
+    std::istringstream iss(s);
+    std::ostringstream oss("");
+    vector<string> fullCmd = {"cat", "<", "cmd.txt"};
+    vector<string> cutCmd = {"cat"};
+    EXPECT_EQ(shell.Tokenise(s, ' '), fullCmd);
+    RedirectionParams redirParams = shell.PostTokeniseProcessing(fullCmd);
+    EXPECT_EQ(redirParams.cmd, cutCmd);
+    EXPECT_EQ(redirParams.infilename, "cmd.txt");
+}
 TEST_F(ShellTest, LastOutPutReDirection){
     Shell shell("no prompt");
     string s = "echo \"hello\">test.txt\n";
@@ -414,3 +426,5 @@ TEST_F(ShellTest, LastOutPutReDirection){
     }
     EXPECT_EQ("hello", cmdOut);
 }
+
+

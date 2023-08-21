@@ -22,6 +22,7 @@ typedef struct _RedirectionParams{
     int cmdEnd;
     RedirectionType redirectionType;
     std::string outfilename;
+    std::string infilename;
     std::vector<std::string> cmd;
 } RedirectionParams;
 
