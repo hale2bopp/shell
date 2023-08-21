@@ -71,6 +71,7 @@ private:
     void moveCursorToBackDisplayPrompt(ostream& ofs);
     void eraseLastCharacter(string& s, ostream& ofs);
     void tokenHelper(vector<string>& tokens, string& temp, bool& wordBoundary);
+    void setCmdEnd(RedirectionParams& redirParams, int index);
 public:
     Shell(void);
     Shell(CommandHistory cmdHistory);
@@ -89,7 +90,7 @@ public:
     void PutTerminalInPerCharMode(void);
     void PutTerminalBackInNormalMode(void);
     vector<string> Tokenise(string s, char delimiter);
-    RedirectionParams PostTokeniseProcessing(vector<string>& cmd);
+    RedirErr PostTokeniseProcessing(RedirectionParams& redirParams, vector<string>& cmd);
     void HandleRedirection(RedirectionParams& redirParams);
     void printTokens(const vector<string> &input, ostream& ofs);   
 };

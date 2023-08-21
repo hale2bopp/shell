@@ -16,13 +16,13 @@ int main(void){
         fflush(stdout);
         int pid = fork(); 
         if (pid == 0) {
-//            RedirectionParams redirParams;
-//            vector<string> cmd;
-            //tie(redirParams, cmd) = shell.PostTokeniseProcessing(tokens);
-            RedirectionParams redirParams = shell.PostTokeniseProcessing(tokens);
-            //shell.HandleRedirection(redirParams, cmd);
+            RedirectionParams redirParams = {0};
+            RedirErr err = shell.PostTokeniseProcessing(redirParams, tokens);
+            if (err!=RedirErrNone){
+                perror("Wrong Redirection");
+                continue;
+            }
             shell.HandleRedirection(redirParams);
-//            shell.ExecuteProgram(cmd)//
             shell.ExecuteProgram(redirParams.cmd);
             perror("unable to execute");
         } else {
