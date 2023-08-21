@@ -319,22 +319,24 @@ RedirectionParams Shell::PostTokeniseProcessing(vector<string>& cmd){
                 redirParams.redirectionType = OutputCreate;
                 redirParams.outputFileIndex = i+1;
                 redirParams.cmdEnd = i;
+                redirParams.outfilename = cmd[redirParams.outputFileIndex];
         } else if (cmd[i] == ">>"){
                 redirParams.redirectionType = OutputAppend;
                 redirParams.outputFileIndex = i+1;
                 redirParams.cmdEnd = i;
+                redirParams.outfilename = cmd[redirParams.outputFileIndex];
         } else if (cmd[i] == "<") {
-                    
                 redirParams.redirectionType = Input;
-                redirParams.inputFileIndex = i-1;
+                redirParams.inputFileIndex = i+1;
+                redirParams.cmdEnd = i;
+                redirParams.infilename = cmd[redirParams.inputFileIndex];
         } else if (cmd[i] == "<<"){
                 redirParams.redirectionType = Input;
+                redirParams.infilename = cmd[redirParams.inputFileIndex];
         } 
     }
     vector<string> inputCmd;
     redirParams.cmd.assign(cmd.begin()+redirParams.cmdStart, cmd.begin()+redirParams.cmdEnd);
-    
-    redirParams.outfilename = cmd[redirParams.outputFileIndex];
     return redirParams; 
 }
 
@@ -362,6 +364,12 @@ void Shell::HandleRedirection(RedirectionParams& redirParams){
             }
             break;
         case(Input):
+            {
+                fflush(stdin);
+                int newstdin = open(redirParams.infilename.c_str(), O_RDONLY , S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH);
+                dup2(newstdin, fileno(stdin));
+                close(newstdin);
+            }
             break;
         default:
             break;
