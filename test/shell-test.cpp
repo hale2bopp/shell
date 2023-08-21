@@ -337,7 +337,8 @@ TEST_F(ShellTest, NoRedirectInputCmdFullCommand){
     std::ostringstream oss("");
     vector<string> Cmd = {"echo", "\"hello\""};
     EXPECT_EQ(shell.Tokenise(s, ' '), Cmd);
-    RedirectionParams redirParams = shell.PostTokeniseProcessing(Cmd);
+    RedirectionParams redirParams = {0};
+    RedirErr err = shell.PostTokeniseProcessing(redirParams, Cmd);
     EXPECT_EQ(redirParams.cmd, Cmd);
 }
 
@@ -350,8 +351,10 @@ TEST_F(ShellTest, WithRedirectInputCmd){
     vector<string> fullCmd = {"echo", "\"hello\"", ">", "test.txt"};
     vector<string> Cmd = {"echo", "\"hello\""};
     EXPECT_EQ(shell.Tokenise(s, ' '), fullCmd);
-    RedirectionParams redirParams = shell.PostTokeniseProcessing(fullCmd);
+    RedirectionParams redirParams = {0};
+    RedirErr err = shell.PostTokeniseProcessing(redirParams, fullCmd);
     EXPECT_EQ(redirParams.cmd, Cmd);
+    EXPECT_EQ(err, RedirErrNone);
 }
 
 TEST_F(ShellTest, PostTokeniseProcessingBoundsTest){
@@ -362,7 +365,9 @@ TEST_F(ShellTest, PostTokeniseProcessingBoundsTest){
     vector<string> fullCmd = {"echo", "\"hello\"", ">", "test.txt"};
     vector<string> Cmd = {"echo", "\"hello\""};
     EXPECT_EQ(shell.Tokenise(s, ' '), fullCmd);
-    RedirectionParams redirParams = shell.PostTokeniseProcessing(fullCmd);
+    RedirectionParams redirParams = {0};
+    RedirErr err = shell.PostTokeniseProcessing(redirParams, fullCmd);
+    EXPECT_EQ(err, RedirErrNone);
     EXPECT_EQ(redirParams.cmd.size(), 2);
     EXPECT_EQ(redirParams.cmd, Cmd);
     EXPECT_EQ(redirParams.cmdStart, 0);
@@ -378,7 +383,9 @@ TEST_F(ShellTest, TestTriggerRedirection){
     vector<string> fullCmd = {"echo", "\"hello\"", ">", "test.txt"};
     vector<string> Cmd = {"echo", "\"hello\""};
     EXPECT_EQ(shell.Tokenise(s, ' '), fullCmd);
-    RedirectionParams redirParams = shell.PostTokeniseProcessing(fullCmd);
+    RedirectionParams redirParams = {0};
+    RedirErr err = shell.PostTokeniseProcessing(redirParams, fullCmd);
+    EXPECT_EQ(err, RedirErrNone);
     EXPECT_EQ(redirParams.outputRedirectionType, OutputCreate);
     EXPECT_EQ(redirParams.inputRedirectionType, RedirNone);
 }
@@ -391,7 +398,9 @@ TEST_F(ShellTest, TestOutputfilename){
     vector<string> fullCmd = {"echo", "\"hello\"", ">>", "test.txt"};
     vector<string> Cmd = {"echo", "\"hello\""};
     EXPECT_EQ(shell.Tokenise(s, ' '), fullCmd);
-    RedirectionParams redirParams = shell.PostTokeniseProcessing(fullCmd);
+    RedirectionParams redirParams = {0};
+    RedirErr err = shell.PostTokeniseProcessing(redirParams, fullCmd);
+    EXPECT_EQ(err, RedirErrNone);
     EXPECT_EQ(redirParams.outfilename, "test.txt");
 }
 TEST_F(ShellTest, InputRedirectionArgsTest){
@@ -403,7 +412,11 @@ TEST_F(ShellTest, InputRedirectionArgsTest){
     vector<string> fullCmd = {"cat", "<", "cmd.txt"};
     vector<string> cutCmd = {"cat"};
     EXPECT_EQ(shell.Tokenise(s, ' '), fullCmd);
-    RedirectionParams redirParams = shell.PostTokeniseProcessing(fullCmd);
+
+    RedirectionParams redirParams = {0};
+    RedirErr err = shell.PostTokeniseProcessing(redirParams, fullCmd);
+
+    EXPECT_EQ(err, RedirErrNone);
     EXPECT_EQ(redirParams.cmd, cutCmd);
     EXPECT_EQ(redirParams.infilename, "cmd.txt");
 }
@@ -417,9 +430,27 @@ TEST_F(ShellTest, MultipleRedirectionArgsTest){
     vector<string> fullCmd = {"cat", "<", "cmd.txt", ">" , "test.txt"};
     vector<string> cutCmd = {"cat"};
     EXPECT_EQ(shell.Tokenise(s, ' '), fullCmd);
-    RedirectionParams redirParams = shell.PostTokeniseProcessing(fullCmd);
+    RedirectionParams redirParams = {0};
+    RedirErr err = shell.PostTokeniseProcessing(redirParams, fullCmd);
+    EXPECT_EQ(err, RedirErrNone);
     EXPECT_EQ(redirParams.infilename, "cmd.txt");
     EXPECT_EQ(redirParams.outfilename, "test.txt");
     EXPECT_EQ(redirParams.cmd, cutCmd);
 }
-    
+
+// This tests that the shell returns an error when 
+TEST_F(ShellTest, WrongOrderRedirectionTest){
+
+    Shell shell("no prompt");
+    string s = "cat > cmd.txt < test.txt\n";
+    std::istringstream iss(s);
+    std::ostringstream oss("");
+    vector<string> fullCmd = {"cat", ">", "cmd.txt", "<" , "test.txt"};
+    vector<string> cutCmd = {"cat"};
+    EXPECT_EQ(shell.Tokenise(s, ' '), fullCmd);
+
+    RedirectionParams redirParams = {0};
+    RedirErr err = shell.PostTokeniseProcessing(redirParams, fullCmd);
+    EXPECT_EQ(err, RedirErrWrongOrder);
+}
+   

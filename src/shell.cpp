@@ -315,8 +315,7 @@ void Shell::setCmdEnd(RedirectionParams& redirParams, int index){
  * \brief Check for Redirection and split out command
  * @param input vector of strings
  */
-RedirectionParams Shell::PostTokeniseProcessing(vector<string>& cmd){
-    RedirectionParams redirParams = {0};
+RedirErr Shell::PostTokeniseProcessing(RedirectionParams& redirParams, vector<string>& cmd){
     redirParams.cmdEnd = cmd.size();
     ofstream outputFile;
     ifstream inputFile;
@@ -342,9 +341,12 @@ RedirectionParams Shell::PostTokeniseProcessing(vector<string>& cmd){
                 redirParams.infilename = cmd[redirParams.inputFileIndex];
         } 
     }
+    if ((redirParams.outputFileIndex != 0) && (redirParams.inputFileIndex != 0) &&(redirParams.outputFileIndex <= redirParams.inputFileIndex)){
+        return RedirErrWrongOrder; 
+    }
     vector<string> inputCmd;
     redirParams.cmd.assign(cmd.begin()+redirParams.cmdStart, cmd.begin()+redirParams.cmdEnd);
-    return redirParams; 
+    return RedirErrNone; 
 }
 
 /**

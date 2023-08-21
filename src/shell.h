@@ -90,7 +90,7 @@ public:
     void PutTerminalInPerCharMode(void);
     void PutTerminalBackInNormalMode(void);
     vector<string> Tokenise(string s, char delimiter);
-    RedirectionParams PostTokeniseProcessing(vector<string>& cmd);
+    RedirErr PostTokeniseProcessing(RedirectionParams& redirParams, vector<string>& cmd);
     void HandleRedirection(RedirectionParams& redirParams);
     void printTokens(const vector<string> &input, ostream& ofs);   
 };
