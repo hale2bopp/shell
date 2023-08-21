@@ -9,7 +9,7 @@
 #include <vector>
 enum RedirectionType
 {
-    None = 0,   
+    RedirNone = 0,   
     OutputCreate = 1, 
     OutputAppend = 2, 
     Input = 3,
@@ -20,7 +20,9 @@ typedef struct _RedirectionParams{
     int inputFileIndex;
     int cmdStart;
     int cmdEnd;
-    RedirectionType redirectionType;
+    bool foundRedirectionParam;
+    RedirectionType outputRedirectionType;
+    RedirectionType inputRedirectionType;
     std::string outfilename;
     std::string infilename;
     std::vector<std::string> cmd;

@@ -304,11 +304,17 @@ void Shell::printTokens(const vector<string> &input, ostream& ofs){
     ofs << "\n"; 
 }
 
+void Shell::setCmdEnd(RedirectionParams& redirParams, int index){
+    if (!redirParams.foundRedirectionParam){
+        redirParams.cmdEnd = index;
+        redirParams.foundRedirectionParam = true;
+    }
+}
+
 /**
  * \brief Check for Redirection and split out command
  * @param input vector of strings
  */
-//std::tuple <RedirectionParams, vector<string>> Shell::PostTokeniseProcessing(vector<string>& cmd){
 RedirectionParams Shell::PostTokeniseProcessing(vector<string>& cmd){
     RedirectionParams redirParams = {0};
     redirParams.cmdEnd = cmd.size();
@@ -316,22 +322,23 @@ RedirectionParams Shell::PostTokeniseProcessing(vector<string>& cmd){
     ifstream inputFile;
     for (int i = 0; i < cmd.size(); i++){
         if (cmd[i] == ">"){
-                redirParams.redirectionType = OutputCreate;
+                redirParams.outputRedirectionType = OutputCreate;
                 redirParams.outputFileIndex = i+1;
-                redirParams.cmdEnd = i;
+                setCmdEnd(redirParams,i);
                 redirParams.outfilename = cmd[redirParams.outputFileIndex];
         } else if (cmd[i] == ">>"){
-                redirParams.redirectionType = OutputAppend;
+                redirParams.outputRedirectionType = OutputAppend;
                 redirParams.outputFileIndex = i+1;
-                redirParams.cmdEnd = i;
+                setCmdEnd(redirParams,i);
                 redirParams.outfilename = cmd[redirParams.outputFileIndex];
         } else if (cmd[i] == "<") {
-                redirParams.redirectionType = Input;
+                redirParams.inputRedirectionType = Input;
                 redirParams.inputFileIndex = i+1;
-                redirParams.cmdEnd = i;
+                setCmdEnd(redirParams,i);
                 redirParams.infilename = cmd[redirParams.inputFileIndex];
         } else if (cmd[i] == "<<"){
-                redirParams.redirectionType = Input;
+                setCmdEnd(redirParams,i);
+                redirParams.inputRedirectionType = Input;
                 redirParams.infilename = cmd[redirParams.inputFileIndex];
         } 
     }
@@ -344,9 +351,9 @@ RedirectionParams Shell::PostTokeniseProcessing(vector<string>& cmd){
  * \brief Handle Redirection 
  * @param input command, redirectionType
  */
-//void Shell::HandleRedirection(RedirectionParams& redirParams, vector<string>& cmd){
 void Shell::HandleRedirection(RedirectionParams& redirParams){
-    switch(redirParams.redirectionType){
+    // Note there could be multiple redirection flags in a single command 
+    switch(redirParams.outputRedirectionType){
         case (OutputCreate):
             {
                 fflush(stdout);
@@ -363,6 +370,11 @@ void Shell::HandleRedirection(RedirectionParams& redirParams){
                 close(newstdout);
             }
             break;
+        default:
+            break;
+
+    }
+    switch (redirParams.inputRedirectionType){
         case(Input):
             {
                 fflush(stdin);

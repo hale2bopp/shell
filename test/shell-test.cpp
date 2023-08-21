@@ -379,7 +379,8 @@ TEST_F(ShellTest, TestTriggerRedirection){
     vector<string> Cmd = {"echo", "\"hello\""};
     EXPECT_EQ(shell.Tokenise(s, ' '), fullCmd);
     RedirectionParams redirParams = shell.PostTokeniseProcessing(fullCmd);
-    EXPECT_EQ(redirParams.redirectionType, OutputCreate);
+    EXPECT_EQ(redirParams.outputRedirectionType, OutputCreate);
+    EXPECT_EQ(redirParams.inputRedirectionType, RedirNone);
 }
 
 TEST_F(ShellTest, TestOutputfilename){
@@ -417,8 +418,8 @@ TEST_F(ShellTest, MultipleRedirectionArgsTest){
     vector<string> cutCmd = {"cat"};
     EXPECT_EQ(shell.Tokenise(s, ' '), fullCmd);
     RedirectionParams redirParams = shell.PostTokeniseProcessing(fullCmd);
-    EXPECT_EQ(redirParams.cmd, cutCmd);
     EXPECT_EQ(redirParams.infilename, "cmd.txt");
-    EXPECT_EQ(redirParams.outfilename, "cmd.txt");
+    EXPECT_EQ(redirParams.outfilename, "test.txt");
+    EXPECT_EQ(redirParams.cmd, cutCmd);
 }
     

@@ -71,6 +71,7 @@ private:
     void moveCursorToBackDisplayPrompt(ostream& ofs);
     void eraseLastCharacter(string& s, ostream& ofs);
     void tokenHelper(vector<string>& tokens, string& temp, bool& wordBoundary);
+    void setCmdEnd(RedirectionParams& redirParams, int index);
 public:
     Shell(void);
     Shell(CommandHistory cmdHistory);
