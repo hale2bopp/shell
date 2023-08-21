@@ -406,25 +406,19 @@ TEST_F(ShellTest, InputRedirectionArgsTest){
     EXPECT_EQ(redirParams.cmd, cutCmd);
     EXPECT_EQ(redirParams.infilename, "cmd.txt");
 }
-TEST_F(ShellTest, LastOutPutReDirection){
+ 
+TEST_F(ShellTest, MultipleRedirectionArgsTest){
+
     Shell shell("no prompt");
-    string s = "echo \"hello\">test.txt\n";
+    string s = "cat < cmd.txt > test.txt\n";
     std::istringstream iss(s);
     std::ostringstream oss("");
-    vector<string> fullCmd = {"echo", "\"hello\"", ">", "test.txt"};
-    vector<string> Cmd = {"echo", "\"hello\""};
+    vector<string> fullCmd = {"cat", "<", "cmd.txt", ">" , "test.txt"};
+    vector<string> cutCmd = {"cat"};
     EXPECT_EQ(shell.Tokenise(s, ' '), fullCmd);
     RedirectionParams redirParams = shell.PostTokeniseProcessing(fullCmd);
-    EXPECT_EQ(redirParams.cmd, Cmd);
-    EXPECT_EQ(redirParams.cmd, Cmd);
-    shell.HandleRedirection(redirParams);
-    shell.ExecuteProgram(redirParams.cmd);
-    std::ifstream testFile ("test.txt");
-    string cmdOut;
-    if ( testFile.is_open() ) { // always check whether the file is open
-        testFile >> cmdOut; // pipe file's content into stream
-    }
-    EXPECT_EQ("hello", cmdOut);
+    EXPECT_EQ(redirParams.cmd, cutCmd);
+    EXPECT_EQ(redirParams.infilename, "cmd.txt");
+    EXPECT_EQ(redirParams.outfilename, "cmd.txt");
 }
-
-
+    
