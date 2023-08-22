@@ -11,8 +11,8 @@ int main(void){
     while (1) {
         shell.DisplayPrompt(cout);
         string shellInput = shell.GetInput(cin, cout);
-        vector<string> tokens = shell.Tokenise(shellInput, ' ');
-        shell.GetCommandHistory()->MainWrapperAddCmdToHistory(tokens);
+        vector<vector<string>> pipes = shell.Tokenise(shellInput, ' ');
+//        shell.GetCommandHistory()->MainWrapperAddCmdToHistory(pipes);
         fflush(stdout);
         int pid = fork(); 
         if (pid == 0) {

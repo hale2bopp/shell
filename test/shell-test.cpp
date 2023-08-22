@@ -439,6 +439,7 @@ TEST_F(ShellTest, MultipleRedirectionArgsTest){
 }
 
 // This tests that the shell returns an error when 
+// multiple redirections are involved
 TEST_F(ShellTest, WrongOrderRedirectionTest){
 
     Shell shell("no prompt");
@@ -452,5 +453,20 @@ TEST_F(ShellTest, WrongOrderRedirectionTest){
     RedirectionParams redirParams = {0};
     RedirErr err = shell.PostTokeniseProcessing(redirParams, fullCmd);
     EXPECT_EQ(err, RedirErrWrongOrder);
+}
+ 
+
+TEST_F(ShellTest, PipeProcessingTest){
+
+    Shell shell("no prompt");
+    string s = "cat README.md | sort\n";
+    std::istringstream iss(s);
+    std::ostringstream oss("");
+    vector<string> fullCmd = {"cat", "README.md", "|", "sort"};
+    vector<vector<string>> pipes;
+
+    EXPECT_EQ(shell.Tokenise(s, ' '), fullCmd);
+    EXPECT_EQ(shell.Tokenise(s, ' '), fullCmd);
+    EXPECT_EQ(shell.numPipes, 1);
 }
    

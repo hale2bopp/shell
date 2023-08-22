@@ -11,7 +11,7 @@
 #include <tuple>
 #include <queue>
 #include "redirection.h"
-using std::deque;//queue;
+using std::deque;
 using namespace std;
 
 #define CMD_HISTORY_SIZE 10
@@ -50,8 +50,8 @@ class Shell{
 private:
     string shellPrompt;
     CommandHistory commandHistory;
-
-// potentially a list of features the shell has?
+    int numPipes;
+    vector<vector<string>> pipes;
     bool upArrow;
     bool backSpace;
     bool downArrow;
@@ -89,8 +89,8 @@ public:
     int ExecuteProgram(vector<string>& args);
     void PutTerminalInPerCharMode(void);
     void PutTerminalBackInNormalMode(void);
-    vector<string> Tokenise(string s, char delimiter);
-    RedirErr PostTokeniseProcessing(RedirectionParams& redirParams, vector<string>& cmd);
+    vector<vector<string>> Tokenise(string s, char delimiter);
+    RedirErr PostTokeniseProcessing(RedirectionParams& redirParams, vector<<vector<string>>& cmd);
     void HandleRedirection(RedirectionParams& redirParams);
     void printTokens(const vector<string> &input, ostream& ofs);   
 };
