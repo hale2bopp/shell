@@ -33,17 +33,12 @@ public:
     bool SetSavedCurrentInputFlag= true;
     CommandHistory(){}
     CommandHistory(int maxCmdHistorySize);
-//     // Copy assignment operator
-//    CommandHistory& operator=(const CommandHistory& cmdHistory) {
-//        if (this != &cmdHistory) {
-//            // Perform member-wise copy
-//            // ...
-//            this->maxCmdHistorySize = cmdHistory.maxCmdHistorySize;
-//            this->savedCurrentInput = cmdHistory.savedCurrentInput;
-//            this->currentHistoryIndex = cmdHistory.currentHistoryIndex;
-//        }
-//        return *this;
-//    }
+    CommandHistory(const CommandHistory& cmdHistory)
+    {
+        this->maxCmdHistorySize = cmdHistory.maxCmdHistorySize;
+        this->savedCurrentInput = cmdHistory.savedCurrentInput;
+        this->currentHistoryIndex = cmdHistory.currentHistoryIndex;
+    }
     deque<string> cmdHistoryList;   
     int GetCmdHistorySize(void){
         return this->cmdHistoryList.size();
@@ -87,6 +82,12 @@ public:
     Shell(void);
     Shell(CommandHistory& cmdHistory);
     Shell(const string& prompt):shellPrompt(prompt){}
+    Shell(const string& prompt, const int cmdHistorySize): shellPrompt(prompt), commandHistory(cmdHistorySize){} 
+//    Shell(const Shell& shell)
+//    {
+//        this->commandHistory = shell.commandHistory;
+//        this->shellPrompt = shell.shellPrompt;
+//    }
     Shell(const string& prompt, CommandHistory& cmdHistory): shellPrompt(prompt), commandHistory(cmdHistory){}
 // Getters, Setters 
     CommandHistory* GetCommandHistory(void){

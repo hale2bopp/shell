@@ -7,12 +7,29 @@
 
 
 // The fixture for testing class Shell.
+//
+class ShellTest : public ::testing::Test {
+protected:
+    ShellTest() {}
+    virtual ~ShellTest() {}
+    void SetUp(const std::string & prompt, const int size) {
+        cmdHistory = CommandHistory(size);
+        shell = Shell(prompt, cmdHistory);
+    }
+    virtual void TearDown() {
+    }
+
+    CommandHistory cmdHistory;
+    Shell shell;
+};
+
+/*
 class ShellTest : public ::testing::Test {
  protected:
   // You can remove any or all of the following functions if their bodies would
   // be empty.
   CommandHistory cmdHistory;
-  Shell shell;
+  Shell :shell;
   ShellTest() {
      // You can do set-up work for each test here.
   }
@@ -36,6 +53,7 @@ class ShellTest : public ::testing::Test {
   // Class members declared here can be used by all tests in the test suite
   // for Shell.
 };
+*/
 
 TEST_F(ShellTest, oneWordResult){
     // arrange

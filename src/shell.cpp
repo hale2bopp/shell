@@ -153,10 +153,6 @@ void Shell::CheckLength(string &shellInput){
  */
 string Shell::replaceInput(ostream& ofs){
     auto cmdHistory = GetCommandHistory();
-<<<<<<< HEAD
-//    string shellInput;
-=======
->>>>>>> main
 
     int chi = cmdHistory->GetCurrentHistoryIndex();
     int msize = cmdHistory->GetCmdHistorySize();
