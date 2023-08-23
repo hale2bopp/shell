@@ -33,12 +33,6 @@ public:
     bool SetSavedCurrentInputFlag= true;
     CommandHistory(){}
     CommandHistory(int maxCmdHistorySize);
-    CommandHistory(const CommandHistory& cmdHistory)
-    {
-        this->maxCmdHistorySize = cmdHistory.maxCmdHistorySize;
-        this->savedCurrentInput = cmdHistory.savedCurrentInput;
-        this->currentHistoryIndex = cmdHistory.currentHistoryIndex;
-    }
     deque<string> cmdHistoryList;   
     int GetCmdHistorySize(void){
         return this->cmdHistoryList.size();
