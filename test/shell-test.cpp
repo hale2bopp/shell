@@ -143,10 +143,10 @@ TEST_F(ShellTest, testEmptyInitially){
 TEST_F(ShellTest, addToCmdHistory){
     SetUp();
     // arrange
-    string oldCmd = "cat Makefile";
-    string newCmd = "/bin/ls -la";
+    string newCmd = "/bin/ls -la" ;
+    string oldCmd1 = "cat Makefile";
     deque<string> cmdList;
-    cmdList.push_back(oldCmd);
+    cmdList.push_back(oldCmd1);
     // act
     auto cmdHistory = shell.GetCommandHistory();
     cmdHistory->AddCmdToHistory(newCmd, cmdList);
@@ -291,7 +291,6 @@ TEST_F(ShellTest, inputTestDownArrowPressDownEmptyHistory){
 }
 
 TEST_F(ShellTest, inputTestDownArrowPressDownTooManyTimesWithInputText){
-//    Shell shell("no prompt");
     SetUp();
     string oldCmd = "cat Makefile";
     string newCmd = "/bin/ls";
@@ -307,7 +306,8 @@ TEST_F(ShellTest, inputTestDownArrowPressDownTooManyTimesWithInputText){
 }
 
 TEST_F(ShellTest, UpArrow25timesEmpty){
-    Shell shell("no prompt");
+    CommandHistory cmdHist(10);
+    Shell shell("no prompt", cmdHist);
     auto cmdHistory = shell.GetCommandHistory();
     string s = "Dimpy";
     for(int i = 0; i < 25; i++){
@@ -337,7 +337,8 @@ TEST_F(ShellTest, UpArrow25times){
 }
 
 TEST_F(ShellTest, CheckRedirParamsInitState){
-    Shell shell("no prompt");
+    CommandHistory cmdHist(10);
+    Shell shell("no prompt", cmdHist);
     RedirectionParams redirParams = {0};
     EXPECT_EQ(redirParams.cmdStart, 0);
     EXPECT_EQ(redirParams.cmdEnd, 0);
@@ -351,7 +352,8 @@ TEST_F(ShellTest, CheckRedirParamsInitState){
 }
 
 TEST_F(ShellTest, NoRedirectInputCmdFullCommand){
-    Shell shell("no prompt");
+    CommandHistory cmdHist(10);
+    Shell shell("no prompt", cmdHist);
     string s = "echo \"hello\"\n";
     std::istringstream iss(s);
     std::ostringstream oss("");
@@ -364,7 +366,8 @@ TEST_F(ShellTest, NoRedirectInputCmdFullCommand){
 
 
 TEST_F(ShellTest, WithRedirectInputCmd){
-    Shell shell("no prompt");
+    CommandHistory cmdHist(10);
+    Shell shell("no prompt", cmdHist);
     string s = "echo \"hello\">test.txt\n";
     std::istringstream iss(s);
     std::ostringstream oss("");
@@ -378,7 +381,8 @@ TEST_F(ShellTest, WithRedirectInputCmd){
 }
 
 TEST_F(ShellTest, PostTokeniseProcessingBoundsTest){
-    Shell shell("no prompt");
+    CommandHistory cmdHist(10);
+    Shell shell("no prompt", cmdHist);
     string s = "echo \"hello\">test.txt\n";
     std::istringstream iss(s);
     std::ostringstream oss("");
@@ -396,7 +400,8 @@ TEST_F(ShellTest, PostTokeniseProcessingBoundsTest){
 }
 
 TEST_F(ShellTest, TestTriggerRedirection){
-    Shell shell("no prompt");
+    CommandHistory cmdHist(10);
+    Shell shell("no prompt", cmdHist);
     string s = "echo \"hello\">test.txt\n";
     std::istringstream iss(s);
     std::ostringstream oss("");
@@ -411,7 +416,8 @@ TEST_F(ShellTest, TestTriggerRedirection){
 }
 
 TEST_F(ShellTest, TestOutputfilename){
-    Shell shell("no prompt");
+    CommandHistory cmdHist(10);
+    Shell shell("no prompt", cmdHist);
     string s = "echo \"hello\">>test.txt\n";
     std::istringstream iss(s);
     std::ostringstream oss("");
@@ -424,8 +430,8 @@ TEST_F(ShellTest, TestOutputfilename){
     EXPECT_EQ(redirParams.outfilename, "test.txt");
 }
 TEST_F(ShellTest, InputRedirectionArgsTest){
-
-    Shell shell("no prompt");
+    CommandHistory cmdHist(10);
+    Shell shell("no prompt", cmdHist);
     string s = "cat < cmd.txt\n";
     std::istringstream iss(s);
     std::ostringstream oss("");
@@ -442,8 +448,8 @@ TEST_F(ShellTest, InputRedirectionArgsTest){
 }
  
 TEST_F(ShellTest, MultipleRedirectionArgsTest){
-
-    Shell shell("no prompt");
+    CommandHistory cmdHist(10);
+    Shell shell("no prompt", cmdHist);
     string s = "cat < cmd.txt > test.txt\n";
     std::istringstream iss(s);
     std::ostringstream oss("");
@@ -460,8 +466,8 @@ TEST_F(ShellTest, MultipleRedirectionArgsTest){
 
 // This tests that the shell returns an error when 
 TEST_F(ShellTest, WrongOrderRedirectionTest){
-
-    Shell shell("no prompt");
+    CommandHistory cmdHist(10);
+    Shell shell("no prompt", cmdHist);
     string s = "cat > cmd.txt < test.txt\n";
     std::istringstream iss(s);
     std::ostringstream oss("");
