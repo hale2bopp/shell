@@ -126,9 +126,9 @@ TEST_F(ShellTest, testEmptyInitially){
 
 TEST_F(ShellTest, addToCmdHistory){
     // arrange
-    vector<string> newCmd = {"/bin/ls", "-la" };
-    vector<string> oldCmd1 =  {"cat", "Makefile" };
-    deque<vector<string>> cmdList;
+    string newCmd = "/bin/ls -la" ;
+    string oldCmd1 = "cat Makefile";
+    deque<string> cmdList;
     cmdList.push_back(oldCmd1);
     // act
     auto cmdHistory = shell.GetCommandHistory();
@@ -173,14 +173,14 @@ TEST_F(ShellTest, cinTestMultipleBackspace)
 }
 
 TEST_F(ShellTest, inputTestUpArrow){
-    Shell shell("no prompt");
-    vector<string> newCmd = {"/bin/ls"};
-    vector<string> oldCmd =  {"cat", "Makefile"};
-    auto cmdHistory = shell.GetCommandHistory();
+    SetUp();
+    string oldCmd =  "cat Makefile";
+    string newCmd = "/bin/ls";
+    auto cmdHist = shell.GetCommandHistory();
     cout <<"step1" << endl;
-    cmdHistory->MainWrapperAddCmdToHistory(oldCmd);
+    cmdHist->MainWrapperAddCmdToHistory(oldCmd);
     cout <<"step2" << endl;
-    cmdHistory->MainWrapperAddCmdToHistory(newCmd);
+    cmdHist->MainWrapperAddCmdToHistory(newCmd);
     cout <<"step3" << endl;
     string s = "Dimpy";
     s += UP_ARROW_SEQ;
@@ -192,9 +192,9 @@ TEST_F(ShellTest, inputTestUpArrow){
 }
 
 TEST_F(ShellTest, inputTestMultipleArrow){
-    Shell shell("no prompt");
-    vector<string> oldCmd =  {"cat", "Makefile"};
-    vector<string> newCmd = {"/bin/ls"};
+    SetUp();
+    string oldCmd =  "cat Makefile";
+    string newCmd = "/bin/ls";
     auto cmdHistory = shell.GetCommandHistory();
     cmdHistory->MainWrapperAddCmdToHistory(oldCmd);
     cmdHistory->MainWrapperAddCmdToHistory(newCmd);
@@ -208,9 +208,9 @@ TEST_F(ShellTest, inputTestMultipleArrow){
 }
 
 TEST_F(ShellTest, inputTestDownArrow){
-    Shell shell("no prompt");
-    vector<string> oldCmd =  {"cat", "Makefile"};
-    vector<string> newCmd = {"/bin/ls"};
+    SetUp();
+    string oldCmd =  "cat Makefile";
+    string newCmd = "/bin/ls";
     auto cmdHistory = shell.GetCommandHistory();
     cmdHistory->MainWrapperAddCmdToHistory(oldCmd);
     cmdHistory->MainWrapperAddCmdToHistory(newCmd);
@@ -225,9 +225,9 @@ TEST_F(ShellTest, inputTestDownArrow){
 }
 
 TEST_F(ShellTest, inputTestDownArrow2){
-    Shell shell("no prompt");
-    vector<string> oldCmd =  {"cat", "Makefile"};
-    vector<string> newCmd = {"/bin/ls"};
+    SetUp();
+    string oldCmd =  "cat Makefile";
+    string newCmd = "/bin/ls";
     auto cmdHistory = shell.GetCommandHistory();
     cmdHistory->MainWrapperAddCmdToHistory(oldCmd);
     cmdHistory->MainWrapperAddCmdToHistory(newCmd);
@@ -242,9 +242,9 @@ TEST_F(ShellTest, inputTestDownArrow2){
 }
 
 TEST_F(ShellTest, inputTestDownArrowPressDownTooManyTimesThenPressUp){
-    Shell shell("no prompt");
-    vector<string> oldCmd =  {"cat", "Makefile"};
-    vector<string> newCmd = {"/bin/ls"};
+    SetUp();
+    string oldCmd = "cat Makefile";
+    string newCmd = "/bin/ls";
     auto cmdHistory = shell.GetCommandHistory();
     cmdHistory->MainWrapperAddCmdToHistory(oldCmd);
     cmdHistory->MainWrapperAddCmdToHistory(newCmd);
@@ -261,7 +261,7 @@ TEST_F(ShellTest, inputTestDownArrowPressDownTooManyTimesThenPressUp){
 }
 
 TEST_F(ShellTest, inputTestDownArrowPressDownEmptyHistory){
-    Shell shell("no prompt");
+    SetUp();
     auto cmdHistory = shell.GetCommandHistory();
     string s = "Dimpy";
     s += DOWN_ARROW_SEQ;
@@ -272,9 +272,10 @@ TEST_F(ShellTest, inputTestDownArrowPressDownEmptyHistory){
 }
 
 TEST_F(ShellTest, inputTestDownArrowPressDownTooManyTimesWithInputText){
-    Shell shell("no prompt");
-    vector<string> oldCmd =  {"cat", "Makefile"};
-    vector<string> newCmd = {"/bin/ls"};
+//    Shell shell("no prompt");
+    SetUp();
+    string oldCmd = "cat Makefile";
+    string newCmd = "/bin/ls";
     auto cmdHistory = shell.GetCommandHistory();
     cmdHistory->MainWrapperAddCmdToHistory(oldCmd);
     cmdHistory->MainWrapperAddCmdToHistory(newCmd);
@@ -301,8 +302,8 @@ TEST_F(ShellTest, UpArrow25timesEmpty){
 
 TEST_F(ShellTest, UpArrow25times){
     Shell shell("no prompt");
-    vector<string> oldCmd =  {"cat", "Makefile"};
-    vector<string> newCmd = {"/bin/ls"};
+    string oldCmd = "cat Makefile";
+    string newCmd = "/bin/ls";
     auto cmdHistory = shell.GetCommandHistory();
     cmdHistory->MainWrapperAddCmdToHistory(oldCmd);
     cmdHistory->MainWrapperAddCmdToHistory(newCmd);
