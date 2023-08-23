@@ -11,7 +11,7 @@
 #include <tuple>
 #include <queue>
 #include "redirection.h"
-using std::deque;//queue;
+using std::deque;
 using namespace std;
 
 #define CMD_HISTORY_SIZE 10
@@ -83,11 +83,6 @@ public:
     Shell(CommandHistory& cmdHistory);
     Shell(const string& prompt):shellPrompt(prompt){}
     Shell(const string& prompt, const int cmdHistorySize): shellPrompt(prompt), commandHistory(cmdHistorySize){} 
-//    Shell(const Shell& shell)
-//    {
-//        this->commandHistory = shell.commandHistory;
-//        this->shellPrompt = shell.shellPrompt;
-//    }
     Shell(const string& prompt, CommandHistory& cmdHistory): shellPrompt(prompt), commandHistory(cmdHistory){}
 // Getters, Setters 
     CommandHistory* GetCommandHistory(void){
