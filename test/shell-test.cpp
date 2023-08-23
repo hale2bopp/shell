@@ -11,6 +11,7 @@ class ShellTest : public ::testing::Test {
  protected:
   // You can remove any or all of the following functions if their bodies would
   // be empty.
+  CommandHistory cmdHistory;
   Shell shell;
   ShellTest() {
      // You can do set-up work for each test here.
@@ -19,13 +20,12 @@ class ShellTest : public ::testing::Test {
   ~ShellTest() override {
      // You can do clean-up work that doesn't throw exceptions here.
   }
-
-  // If the constructor and destructor are not enough for setting up
-  // and cleaning up each test, you can define the following methods:
-
+  
   void SetUp() override {
      // Code here will be called immediately after the constructor (right
      // before each test).
+     cmdHistory = CommandHistory(10);
+     shell = Shell("no prompt", cmdHistory);
   }
 
   void TearDown() override {
@@ -39,6 +39,7 @@ class ShellTest : public ::testing::Test {
 
 TEST_F(ShellTest, oneWordResult){
     // arrange
+    SetUp();
     vector<string> exResult = {"hi"};
     // act
     // assert 
@@ -46,6 +47,7 @@ TEST_F(ShellTest, oneWordResult){
 }
 
 TEST_F(ShellTest, tooLongInput){
+    SetUp();
     string tooLong(MAX_INPUT+1, 'a');
     string justRight(MAX_INPUT, 'a');
     shell.CheckLength(tooLong);
@@ -53,83 +55,98 @@ TEST_F(ShellTest, tooLongInput){
 }
 
 TEST_F(ShellTest, multipleWords){
+    SetUp();
     vector<string> exResult = {"Dimpy", "loves", "mice"};
     EXPECT_EQ(shell.Tokenise("Dimpy loves mice ", ' '), exResult);
 }
 
 
 TEST_F(ShellTest, initialSpace){
+    SetUp();
     vector<string> exResult = {"hi"};
     EXPECT_EQ(shell.Tokenise(" hi", ' '), exResult);
 }
 
 TEST_F(ShellTest, initialSpaceAndMultipleSpace){
+    SetUp();
     vector<string> exResult = {"Dimpy", "loves", "mice"};
     EXPECT_EQ(shell.Tokenise(" Dimpy   loves    mice", ' '), exResult);
 }
 
 TEST_F(ShellTest, initialSpaceAndMultipleSpaceAndEndSpace){
+    SetUp();
     vector<string> exResult = {"Dimpy", "loves", "mice"};
     EXPECT_EQ(shell.Tokenise("   Dimpy   loves    mice    ", ' '), exResult);
 }
 
 TEST_F(ShellTest, outputRedirectTokens){
+    SetUp();
     vector<string> exResult = {"Dimpy", ">", "loves"};
     EXPECT_EQ(shell.Tokenise("Dimpy > loves", ' '), exResult);
 }
 
 TEST_F(ShellTest, outputRedirectTokens_2){
+    SetUp();
     vector<string> exResult = {"Dimpy", ">", "loves"};
     EXPECT_EQ(shell.Tokenise("Dimpy>loves", ' '), exResult);
 }
 
 TEST_F(ShellTest, outputRedirectTokens_3){
+    SetUp();
     vector<string> exResult = {"Dimpy", ">>", "loves"};
     EXPECT_EQ(shell.Tokenise("Dimpy >> loves", ' '), exResult);
 }
 
 TEST_F(ShellTest, outputRedirectTokens_4){
+    SetUp();
     vector<string> exResult = {"Dimpy", ">>", "loves"};
     EXPECT_EQ(shell.Tokenise("Dimpy>>loves", ' '), exResult);
 }
 
 TEST_F(ShellTest, inputRedirectTokens){
+    SetUp();
     vector<string> exResult = {"Dimpy", "<", "loves"};
     EXPECT_EQ(shell.Tokenise("Dimpy < loves", ' '), exResult);
 }
 
 TEST_F(ShellTest, inputRedirectTokens2){
+    SetUp();
     vector<string> exResult = {"Dimpy", "<", "loves"};
     EXPECT_EQ(shell.Tokenise("Dimpy<loves", ' '), exResult);
 }
 
 TEST_F(ShellTest, inputRedirectTokens3){
+    SetUp();
     vector<string> exResult = {"Dimpy", "<<", "loves"};
     EXPECT_EQ(shell.Tokenise("Dimpy << loves", ' '), exResult);
 }
 
 TEST_F(ShellTest, inputRedirectTokens4){
+    SetUp();
     vector<string> exResult = {"Dimpy", "<<", "loves"};
     EXPECT_EQ(shell.Tokenise("Dimpy<<loves", ' '), exResult);
 }
 
 TEST_F(ShellTest, inputRedirectTokensThreeInput){
+    SetUp();
     vector<string> exResult = {"Dimpy", "<<<", "loves"};
     EXPECT_EQ(shell.Tokenise("Dimpy<<<loves", ' '), exResult);
 }
 
 TEST_F(ShellTest, testEmptyInitially){
+    SetUp();
     // arrange
     auto cmdHistory = shell.GetCommandHistory(); 
     ASSERT_EQ(cmdHistory->GetCmdHistorySize(), 0);
 }
 
 TEST_F(ShellTest, addToCmdHistory){
+    SetUp();
     // arrange
-    vector<string> newCmd = {"/bin/ls", "-la" };
-    vector<string> oldCmd1 =  {"cat", "Makefile" };
-    deque<vector<string>> cmdList;
-    cmdList.push_back(oldCmd1);
+    string oldCmd = "cat Makefile";
+    string newCmd = "/bin/ls -la";
+    deque<string> cmdList;
+    cmdList.push_back(oldCmd);
     // act
     auto cmdHistory = shell.GetCommandHistory();
     cmdHistory->AddCmdToHistory(newCmd, cmdList);
@@ -140,7 +157,7 @@ TEST_F(ShellTest, addToCmdHistory){
 }
 
 TEST_F(ShellTest, inputTestNewline){
-    Shell shell;
+    SetUp();
     //Note that std::unique_ptr is better that raw pointers
     std::istringstream is("ls -la\n");
     std::ostringstream os("");
@@ -150,6 +167,7 @@ TEST_F(ShellTest, inputTestNewline){
 
 TEST_F(ShellTest, cinTestBackspace)
 {
+    SetUp();
     // Create payload
     string part1 = "Dimpj";
     string part2 = "y loves Mice\n";
@@ -162,6 +180,7 @@ TEST_F(ShellTest, cinTestBackspace)
 
 TEST_F(ShellTest, cinTestMultipleBackspace)
 {
+    SetUp();
     // Create payload
     string part1 = "Dimpjsdjk";
     string backSpaces(5, (char) 127);
@@ -173,14 +192,14 @@ TEST_F(ShellTest, cinTestMultipleBackspace)
 }
 
 TEST_F(ShellTest, inputTestUpArrow){
-    Shell shell("no prompt");
-    vector<string> newCmd = {"/bin/ls"};
-    vector<string> oldCmd =  {"cat", "Makefile"};
-    auto cmdHistory = shell.GetCommandHistory();
+    SetUp();
+    string oldCmd =  "cat Makefile";
+    string newCmd = "/bin/ls";
+    auto cmdHist = shell.GetCommandHistory();
     cout <<"step1" << endl;
-    cmdHistory->MainWrapperAddCmdToHistory(oldCmd);
+    cmdHist->MainWrapperAddCmdToHistory(oldCmd);
     cout <<"step2" << endl;
-    cmdHistory->MainWrapperAddCmdToHistory(newCmd);
+    cmdHist->MainWrapperAddCmdToHistory(newCmd);
     cout <<"step3" << endl;
     string s = "Dimpy";
     s += UP_ARROW_SEQ;
@@ -192,9 +211,9 @@ TEST_F(ShellTest, inputTestUpArrow){
 }
 
 TEST_F(ShellTest, inputTestMultipleArrow){
-    Shell shell("no prompt");
-    vector<string> oldCmd =  {"cat", "Makefile"};
-    vector<string> newCmd = {"/bin/ls"};
+    SetUp();
+    string oldCmd =  "cat Makefile";
+    string newCmd = "/bin/ls";
     auto cmdHistory = shell.GetCommandHistory();
     cmdHistory->MainWrapperAddCmdToHistory(oldCmd);
     cmdHistory->MainWrapperAddCmdToHistory(newCmd);
@@ -208,9 +227,9 @@ TEST_F(ShellTest, inputTestMultipleArrow){
 }
 
 TEST_F(ShellTest, inputTestDownArrow){
-    Shell shell("no prompt");
-    vector<string> oldCmd =  {"cat", "Makefile"};
-    vector<string> newCmd = {"/bin/ls"};
+    SetUp();
+    string oldCmd =  "cat Makefile";
+    string newCmd = "/bin/ls";
     auto cmdHistory = shell.GetCommandHistory();
     cmdHistory->MainWrapperAddCmdToHistory(oldCmd);
     cmdHistory->MainWrapperAddCmdToHistory(newCmd);
@@ -225,9 +244,9 @@ TEST_F(ShellTest, inputTestDownArrow){
 }
 
 TEST_F(ShellTest, inputTestDownArrow2){
-    Shell shell("no prompt");
-    vector<string> oldCmd =  {"cat", "Makefile"};
-    vector<string> newCmd = {"/bin/ls"};
+    SetUp();
+    string oldCmd =  "cat Makefile";
+    string newCmd = "/bin/ls";
     auto cmdHistory = shell.GetCommandHistory();
     cmdHistory->MainWrapperAddCmdToHistory(oldCmd);
     cmdHistory->MainWrapperAddCmdToHistory(newCmd);
@@ -242,9 +261,9 @@ TEST_F(ShellTest, inputTestDownArrow2){
 }
 
 TEST_F(ShellTest, inputTestDownArrowPressDownTooManyTimesThenPressUp){
-    Shell shell("no prompt");
-    vector<string> oldCmd =  {"cat", "Makefile"};
-    vector<string> newCmd = {"/bin/ls"};
+    SetUp();
+    string oldCmd = "cat Makefile";
+    string newCmd = "/bin/ls";
     auto cmdHistory = shell.GetCommandHistory();
     cmdHistory->MainWrapperAddCmdToHistory(oldCmd);
     cmdHistory->MainWrapperAddCmdToHistory(newCmd);
@@ -261,7 +280,7 @@ TEST_F(ShellTest, inputTestDownArrowPressDownTooManyTimesThenPressUp){
 }
 
 TEST_F(ShellTest, inputTestDownArrowPressDownEmptyHistory){
-    Shell shell("no prompt");
+    SetUp();
     auto cmdHistory = shell.GetCommandHistory();
     string s = "Dimpy";
     s += DOWN_ARROW_SEQ;
@@ -272,9 +291,10 @@ TEST_F(ShellTest, inputTestDownArrowPressDownEmptyHistory){
 }
 
 TEST_F(ShellTest, inputTestDownArrowPressDownTooManyTimesWithInputText){
-    Shell shell("no prompt");
-    vector<string> oldCmd =  {"cat", "Makefile"};
-    vector<string> newCmd = {"/bin/ls"};
+//    Shell shell("no prompt");
+    SetUp();
+    string oldCmd = "cat Makefile";
+    string newCmd = "/bin/ls";
     auto cmdHistory = shell.GetCommandHistory();
     cmdHistory->MainWrapperAddCmdToHistory(oldCmd);
     cmdHistory->MainWrapperAddCmdToHistory(newCmd);
@@ -301,8 +321,8 @@ TEST_F(ShellTest, UpArrow25timesEmpty){
 
 TEST_F(ShellTest, UpArrow25times){
     Shell shell("no prompt");
-    vector<string> oldCmd =  {"cat", "Makefile"};
-    vector<string> newCmd = {"/bin/ls"};
+    string oldCmd = "cat Makefile";
+    string newCmd = "/bin/ls";
     auto cmdHistory = shell.GetCommandHistory();
     cmdHistory->MainWrapperAddCmdToHistory(oldCmd);
     cmdHistory->MainWrapperAddCmdToHistory(newCmd);
