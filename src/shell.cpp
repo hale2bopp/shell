@@ -23,7 +23,7 @@ Shell::Shell(void){
     this->shellPrompt = prompt;
 }
 
-Shell::Shell(CommandHistory commandHistory): commandHistory(commandHistory){
+Shell::Shell(CommandHistory& commandHistory): commandHistory(commandHistory){
     this->shellPrompt = prompt;
 }
 
@@ -35,7 +35,7 @@ CommandHistory::CommandHistory(int maxCmdHistorySize): maxCmdHistorySize(maxCmdH
  * for main 
  * @param vector of strings describing a command to enter 
  */
-void CommandHistory::MainWrapperAddCmdToHistory(vector<string> &cmd){
+void CommandHistory::MainWrapperAddCmdToHistory(string &cmd){
     if (cmd.size() !=0){
         AddCmdToHistory(cmd, cmdHistoryList);
         currentHistoryIndex = cmdHistoryList.size();
@@ -57,7 +57,7 @@ void Shell::DisplayPrompt(ostream& ofs){
  * @param vector of strings describing a command to enter 
  * @param vector of vector of strings with current command history
  */
-void CommandHistory::AddCmdToHistory(vector<string> &cmd, deque<vector<string>> &cmdList){
+void CommandHistory::AddCmdToHistory(string &cmd, deque<string> &cmdList){
     if (cmdList.size() >= maxCmdHistorySize){
         cmdList.pop_front();
     } 
@@ -150,7 +150,6 @@ void Shell::CheckLength(string &shellInput){
  */
 string Shell::replaceInput(ostream& ofs){
     auto cmdHistory = GetCommandHistory();
-    string shellInput;
 
     int chi = cmdHistory->GetCurrentHistoryIndex();
     int msize = cmdHistory->GetCmdHistorySize();
@@ -159,13 +158,8 @@ string Shell::replaceInput(ostream& ofs){
         ofs << s;
         return s;
     }
-    int n = cmdHistory->cmdHistoryList[chi].size();
-    for (int i = 0; i < n-1; i++){
-        shellInput+= cmdHistory->cmdHistoryList[chi][i]+" " ;
-    }
-    shellInput += cmdHistory->cmdHistoryList[chi][n-1];
-    ofs << shellInput;
-    return shellInput;
+    ofs << cmdHistory->cmdHistoryList[chi];
+    return cmdHistory->cmdHistoryList[chi];
 }
 
 /**
@@ -304,6 +298,10 @@ void Shell::printTokens(const vector<string> &input, ostream& ofs){
     ofs << "\n"; 
 }
 
+/**
+ * \brief Simple helper to set the end of a commnand sent to execvp
+ * @param input redirection Param struct, index
+ */
 void Shell::setCmdEnd(RedirectionParams& redirParams, int index){
     if (!redirParams.foundRedirectionParam){
         redirParams.cmdEnd = index;
