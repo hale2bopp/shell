@@ -37,11 +37,8 @@ CommandHistory::CommandHistory(int maxCmdHistorySize): maxCmdHistorySize(maxCmdH
  */
 void CommandHistory::MainWrapperAddCmdToHistory(string &cmd){
     if (cmd.size() !=0){
-        cout << "cmd is not empty" << endl;
         AddCmdToHistory(cmd, cmdHistoryList);
-        cout << "added to history list" << endl;
         currentHistoryIndex = cmdHistoryList.size();
-        cout << "update history index" << endl;
         savedCurrentInput = "";
     }
 }
