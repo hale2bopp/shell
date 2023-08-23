@@ -25,9 +25,9 @@ using namespace std;
 
 class CommandHistory{
 private:
-    int maxCmdHistorySize = 10;
-    string savedCurrentInput = "";
-    int currentHistoryIndex = 0;
+    int maxCmdHistorySize;
+    string savedCurrentInput;
+    int currentHistoryIndex;
 
 public: 
     bool SetSavedCurrentInputFlag= true;
