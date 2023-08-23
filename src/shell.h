@@ -33,7 +33,7 @@ public:
     bool SetSavedCurrentInputFlag= true;
     CommandHistory(){}
     CommandHistory(int maxCmdHistorySize);
-    deque<vector<string>> cmdHistoryList;   
+    deque<string> cmdHistoryList;   
     int GetCmdHistorySize(void){
         return this->cmdHistoryList.size();
     }
@@ -42,8 +42,8 @@ public:
     void SetCurrentHistoryIndex(int val);
     void SaveCurrentEnteredString(string s);
     void SetSavedCurrentInput(string val);
-    void AddCmdToHistory(vector<string> &cmd, deque<vector<string>> &cmdList);
-    void MainWrapperAddCmdToHistory(vector<string> &cmd);	
+    void AddCmdToHistory(string &cmd, deque<string> &cmdList);
+    void MainWrapperAddCmdToHistory(string &cmd);	
 };
 
 class Shell{
@@ -74,9 +74,9 @@ private:
     void setCmdEnd(RedirectionParams& redirParams, int index);
 public:
     Shell(void);
-    Shell(CommandHistory cmdHistory);
-    Shell(string prompt):shellPrompt(prompt){}
-
+    Shell(CommandHistory& cmdHistory);
+    Shell(const string& prompt):shellPrompt(prompt){}
+    Shell(const string& prompt, CommandHistory& cmdHistory): shellPrompt(prompt), commandHistory(cmdHistory){}
 // Getters, Setters 
     CommandHistory* GetCommandHistory(void){
         return &commandHistory;
