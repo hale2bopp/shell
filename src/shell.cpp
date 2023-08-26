@@ -220,14 +220,13 @@ int Shell::ExecuteProgram(vector<string>& cmd){
 }
 
 
-void Shell::tokenHelper(vector<string>& tokens, string& temp, bool& wordBoundary, int& wordIndex){
+void Shell::tokenHelper(vector<string>& tokens, string& temp, bool& wordBoundary){
     if (!wordBoundary){
         // add to tokens
         tokens.push_back(temp);
         // empty temp string
         temp = "";
         wordBoundary = true;
-        wordIndex++;
     }
 }
 
@@ -238,16 +237,14 @@ void Shell::tokenHelper(vector<string>& tokens, string& temp, bool& wordBoundary
  * @param delimiter character to split string into command and args. 
  *        in normal operation, this should be ' '.
  */
-vector<vector<string>> Shell::Tokenise(string s, char delimiter){
+vector<string> Shell::Tokenise(string s, char delimiter){
     // ignore whitespaces 
     // end on enter 
     vector<string> tokens;
     bool wordBoundaryFlag = true;
     int numberOfRedirect = 0;
     bool multipleRedirect = false;
-    int wordIndex = 0;
     string temp;
-    int pipeIndex = 0;
     for(int i = 0; i < s[i]; i++){
         switch(s[i]){
             case '>':
@@ -257,7 +254,7 @@ vector<vector<string>> Shell::Tokenise(string s, char delimiter){
                     tokens.pop_back();
                     tokens.push_back(str);
                 } else {
-                    tokenHelper(tokens, temp, wordBoundaryFlag, wordIndex);
+                    tokenHelper(tokens, temp, wordBoundaryFlag);
                     string str(1,s[i]);
                     tokens.push_back(str);
                 }
@@ -268,15 +265,9 @@ vector<vector<string>> Shell::Tokenise(string s, char delimiter){
                 // if previous state was false
                 // this is a transition from finding a word
                 // to finding a space
-                tokenHelper(tokens, temp, wordBoundaryFlag, wordIndex);
+                tokenHelper(tokens, temp, wordBoundaryFlag);
                 multipleRedirect = false;
                 numberOfRedirect = 0;
-                break;
-            case '|':
-                // pipes 
-                numPipes++;
-                pipes.push_back(tokens(tokens.begin()+pipeIndex, tokens.begin()+tokens.size()));
-                pipeIndex = tokens.size();
                 break;
             default: 
                 temp.push_back(s[i]);
