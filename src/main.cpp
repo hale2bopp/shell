@@ -12,12 +12,12 @@ int main(void){
         shell.DisplayPrompt(cout);
         string shellInput = shell.GetInput(cin, cout);
         vector<vector<string>> pipes = shell.Tokenise(shellInput, ' ');
-//        shell.GetCommandHistory()->MainWrapperAddCmdToHistory(pipes);
+        shell.GetCommandHistory()->MainWrapperAddCmdToHistory(shellInput);
         fflush(stdout);
         int pid = fork(); 
         if (pid == 0) {
             RedirectionParams redirParams = {0};
-            RedirErr err = shell.PostTokeniseProcessing(redirParams, tokens);
+            RedirErr err = shell.PostTokeniseProcessing(redirParams, pipes);
             if (err!=RedirErrNone){
                 perror("Wrong Redirection");
                 continue;
