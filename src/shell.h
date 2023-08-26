@@ -27,7 +27,7 @@ class CommandHistory{
 private:
     int maxCmdHistorySize;
     string savedCurrentInput;
-    int currentHistoryIndex = 0;
+    int currentHistoryIndex;
 
 public: 
     bool SetSavedCurrentInputFlag= true;
@@ -76,6 +76,7 @@ public:
     Shell(void);
     Shell(CommandHistory& cmdHistory);
     Shell(const string& prompt):shellPrompt(prompt){}
+    Shell(const string& prompt, const int cmdHistorySize): shellPrompt(prompt), commandHistory(cmdHistorySize){} 
     Shell(const string& prompt, CommandHistory& cmdHistory): shellPrompt(prompt), commandHistory(cmdHistory){}
 // Getters, Setters 
     CommandHistory* GetCommandHistory(void){
