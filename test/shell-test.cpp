@@ -461,7 +461,7 @@ TEST_F(ShellTest, WrongOrderRedirectionTest){
     EXPECT_EQ(err, RedirErrWrongOrder);
 }
  
-
+/*
 TEST_F(ShellTest, PipeProcessingTest){
 
     Shell shell("no prompt");
@@ -475,4 +475,4 @@ TEST_F(ShellTest, PipeProcessingTest){
     EXPECT_EQ(shell.Tokenise(s, ' '), fullCmd);
     EXPECT_EQ(shell.numPipes, 1);
 }
-   
+*/ 

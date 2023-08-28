@@ -39,11 +39,11 @@ public:
     }
     int GetCurrentHistoryIndex(void);
     string GetSavedCurrentInput(void);
-    void SetCurrentHistoryIndex(int val);
-    void SaveCurrentEnteredString(string s);
-    void SetSavedCurrentInput(string val);
-    void AddCmdToHistory(string &cmd, deque<string> &cmdList);
-    void MainWrapperAddCmdToHistory(string &cmd);	
+    void SetCurrentHistoryIndex(const int& val);
+    void SaveCurrentEnteredString(const string& s);
+    void SetSavedCurrentInput(const string& val);
+    void AddCmdToHistory(const string &cmd, deque<string> &cmdList);
+    void MainWrapperAddCmdToHistory(const string &cmd);	
 };
 
 class Shell{
@@ -65,13 +65,13 @@ private:
     const string moveCursorToBeginningOfLine = "\r";
     
     // Functions
-    string handleUpArrow(string s, ostream& ofs);
-    string handleDownArrow(string s, ostream& ofs);
+    string handleUpArrow(const string& s, ostream& ofs);
+    string handleDownArrow(const string& s, ostream& ofs);
     string replaceInput(ostream& ofs);
     void moveCursorToBackDisplayPrompt(ostream& ofs);
     void eraseLastCharacter(string& s, ostream& ofs);
     void tokenHelper(vector<string>& tokens, string& temp, bool& wordBoundary);
-    void setCmdEnd(RedirectionParams& redirParams, int index);
+    void setCmdEnd(RedirectionParams& redirParams, const int& index);
 public:
     Shell(void);
     Shell(CommandHistory& cmdHistory);
@@ -87,12 +87,13 @@ public:
     void CheckLength(string& s);
     string GetInput(istream& ifs, ostream& ofs);
     void PrintTokens(const vector<string> &input);
-    int ExecuteProgram(vector<string>& args);
+    int ExecuteProgram(const vector<string>& args);
     void PutTerminalInPerCharMode(void);
     void PutTerminalBackInNormalMode(void);
-    vector<string> Tokenise(string s, char delimiter);
-    RedirErr PostTokeniseProcessing(RedirectionParams& redirParams, vector<string>& cmd);
-    void HandleRedirection(RedirectionParams& redirParams);
+    vector<string> Tokenise(const string& s, const char &delimiter);
+//    vector<vector<string>> ParsePipes();
+    RedirErr PostTokeniseProcessing(RedirectionParams& redirParams, const vector<string>& cmd);
+    void HandleRedirection(const RedirectionParams& redirParams);
     void printTokens(const vector<string> &input, ostream& ofs);   
 };
 
