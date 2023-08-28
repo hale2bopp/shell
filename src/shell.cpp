@@ -270,12 +270,12 @@ vector<string> Shell::Tokenise(const string& s, const char& delimiter){
                 numberOfRedirect = 0;
                 break;
             case '|':
+                tokenHelper(tokens, temp, wordBoundaryFlag);
                 numPipes++;
                 {
                     string str(1,s[i]);
                     tokens.push_back(str);
                 }
-                tokenHelper(tokens, temp, wordBoundaryFlag);
                 break;
             default: 
                 temp.push_back(s[i]);
