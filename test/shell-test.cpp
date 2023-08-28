@@ -461,18 +461,53 @@ TEST_F(ShellTest, WrongOrderRedirectionTest){
     EXPECT_EQ(err, RedirErrWrongOrder);
 }
  
-/*
-TEST_F(ShellTest, PipeProcessingTest){
 
-    Shell shell("no prompt");
+TEST_F(ShellTest, PipeProcessingTestTokenise){
+
+    SetUp("no prompt", 10);
     string s = "cat README.md | sort\n";
     std::istringstream iss(s);
     std::ostringstream oss("");
     vector<string> fullCmd = {"cat", "README.md", "|", "sort"};
-    vector<vector<string>> pipes;
 
-    EXPECT_EQ(shell.Tokenise(s, ' '), fullCmd);
-    EXPECT_EQ(shell.Tokenise(s, ' '), fullCmd);
-    EXPECT_EQ(shell.numPipes, 1);
+    EXPECT_EQ(shell->Tokenise(s, ' '), fullCmd);
+    EXPECT_EQ(shell->getNumPipes(), 1);
 }
-*/ 
+ 
+TEST_F(ShellTest, MultiplePipeProcessingTestTokenise){
+
+    SetUp("no prompt", 10);
+    string s = "cat README.md | sort | give \n";
+    std::istringstream iss(s);
+    std::ostringstream oss("");
+    vector<string> fullCmd = {"cat", "README.md", "|", "sort", "|" , "give"};
+
+    EXPECT_EQ(shell->Tokenise(s, ' '), fullCmd);
+    EXPECT_EQ(shell->getNumPipes(), 2);
+}
+ 
+TEST_F(ShellTest, NoSpacesPipeTokenise){
+
+    SetUp("no prompt", 10);
+    string s = "cat README.md|sort|give\n";
+    std::istringstream iss(s);
+    std::ostringstream oss("");
+    vector<string> fullCmd = {"cat", "README.md", "|", "sort", "|" , "give"};
+
+    EXPECT_EQ(shell->Tokenise(s, ' '), fullCmd);
+    EXPECT_EQ(shell->getNumPipes(), 2);
+}
+
+/*
+TEST_F(ShellTest, InvalidPipeConfigError){
+
+    SetUp("no prompt", 10);
+    string s = "cat README.md | sort | \n";
+    std::istringstream iss(s);
+    std::ostringstream oss("");
+    vector<string> fullCmd = {"cat", "README.md", "|", "sort", "|" , "give"};
+
+    EXPECT_EQ(shell->Tokenise(s, ' '), fullCmd);
+    EXPECT_EQ(shell->getNumPipes(), 2);
+}
+*/

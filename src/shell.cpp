@@ -269,6 +269,14 @@ vector<string> Shell::Tokenise(const string& s, const char& delimiter){
                 multipleRedirect = false;
                 numberOfRedirect = 0;
                 break;
+            case '|':
+                numPipes++;
+                {
+                    string str(1,s[i]);
+                    tokens.push_back(str);
+                }
+                tokenHelper(tokens, temp, wordBoundaryFlag);
+                break;
             default: 
                 temp.push_back(s[i]);
                 wordBoundaryFlag = false;
@@ -308,6 +316,17 @@ void Shell::setCmdEnd(RedirectionParams& redirParams, const int& index){
         redirParams.foundRedirectionParam = true;
     }
 }
+
+/**
+ * \brief Separate tokens out into pipes
+ * @param input vector of strings 
+ */
+vector<vector<string>> Shell::ParsePipes(vector<string> tokens){
+    
+    vector<vector<string>> pipes;
+    return pipes;
+}
+
 
 /**
  * \brief Check for Redirection and split out command
