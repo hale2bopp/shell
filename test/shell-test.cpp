@@ -498,6 +498,18 @@ TEST_F(ShellTest, NoSpacesPipeTokenise){
     EXPECT_EQ(shell->getNumPipes(), 2);
 }
 
+TEST_F(ShellTest, ManyPipesTokenise){
+
+    SetUp("no prompt", 10);
+    string s = "cat README.md|sort|give|take|help\n";
+    std::istringstream iss(s);
+    std::ostringstream oss("");
+    vector<string> fullCmd = {"cat", "README.md", "|", "sort", "|" , "give", "|", "take" , "|","help"};
+
+    EXPECT_EQ(shell->Tokenise(s, ' '), fullCmd);
+    EXPECT_EQ(shell->getNumPipes(), 4);
+}
+
 /*
 TEST_F(ShellTest, InvalidPipeConfigError){
 
