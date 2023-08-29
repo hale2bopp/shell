@@ -72,7 +72,7 @@ private:
     void moveCursorToBackDisplayPrompt(ostream& ofs);
     void eraseLastCharacter(string& s, ostream& ofs);
     void tokenHelper(vector<string>& tokens, string& temp, bool& wordBoundary);
-    bool detectDoubleChar(const char& charDetect, int& numChar, vector<string>& tokens, string& temp, bool& wordBoundaryFlag, bool& multipleChar);
+    void detectDoubleChar(const char& charDetect, int& numChar, vector<string>& tokens, string& temp, bool& wordBoundaryFlag, bool& multipleChar);
     void setCmdEnd(RedirectionParams& redirParams, const int& index);
 public:
     Shell(void);

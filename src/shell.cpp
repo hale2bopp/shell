@@ -230,7 +230,7 @@ void Shell::tokenHelper(vector<string>& tokens, string& temp, bool& wordBoundary
     }
 }
 
-bool Shell::detectDoubleChar(const char& charDetect, int& numChar, vector<string>& tokens, string& temp, bool& wordBoundaryFlag, bool& multipleChar){
+void Shell::detectDoubleChar(const char& charDetect, int& numChar, vector<string>& tokens, string& temp, bool& wordBoundaryFlag, bool& multipleChar){
     if (multipleChar){
         string str(numChar+1,charDetect);
         tokens.pop_back();
@@ -242,6 +242,7 @@ bool Shell::detectDoubleChar(const char& charDetect, int& numChar, vector<string
     }
     multipleChar = true;
     numChar++;
+
 }
 
 /**
@@ -339,12 +340,13 @@ PipesErr Shell::ParsePipes(vector<string> tokens, vector<vector<string>>& pipes)
             // open input and output pipes
             pipes.push_back(temp);
             temp.clear();
-        } else if (tokens[i] == "||") {
+        } else if (count(tokens[i].begin(), tokens[i].end(), '|') > 1) {
             return PipesDoublePipe;
         } else {
             temp.push_back(tokens[i]);
         }
     }
+    pipes.push_back(temp);
     return PipesErrNone;
 }
 

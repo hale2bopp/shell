@@ -550,3 +550,33 @@ TEST_F(ShellTest, InvalidPipeConfigError){
     EXPECT_EQ(shell->ParsePipes(fullCmd, pipes), PipesEndsWithPipe);
 }
 
+TEST_F(ShellTest, TriplePipe){
+
+    SetUp("no prompt", 10);
+    string s = "cat README.md |||\n";
+    std::istringstream iss(s);
+    std::ostringstream oss("");
+    vector<string> fullCmd = {"cat", "README.md", "|||"};
+
+    EXPECT_EQ(shell->Tokenise(s, ' '), fullCmd);
+    EXPECT_EQ(shell->getNumPipes(), 3);
+    vector<vector<string>> pipes;
+    EXPECT_EQ(shell->ParsePipes(fullCmd, pipes), PipesDoublePipe);
+}
+
+TEST_F(ShellTest, ManyPipesProcessTest){
+
+    SetUp("no prompt", 10);
+    string s = "cat README.md|sort|give|take|help\n";
+    std::istringstream iss(s);
+    std::ostringstream oss("");
+    vector<string> fullCmd = {"cat", "README.md", "|", "sort", "|" , "give", "|", "take" , "|","help"};
+    
+    EXPECT_EQ(shell->Tokenise(s, ' '), fullCmd);
+    EXPECT_EQ(shell->getNumPipes(), 4);
+    vector<vector<string>> pipes;
+    vector<vector<string>> correctPipes = {{"cat", "README.md"}, {"sort"}, {"give"}, {"take"}, {"help"}};
+    EXPECT_EQ(shell->ParsePipes(fullCmd, pipes), PipesErrNone);
+    EXPECT_EQ(pipes, correctPipes);
+}
+
