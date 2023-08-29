@@ -98,6 +98,7 @@ public:
     void PutTerminalBackInNormalMode(void);
     vector<string> Tokenise(const string& s, const char &delimiter);
     PipesErr ParsePipes(vector<string> tokens, vector<vector<string>>&pipes);
+    PipesErr HandlePipes(const vector<vector<string>>& pipes, RedirectionParams& redirPrams);
     RedirErr PostTokeniseProcessing(RedirectionParams& redirParams, const vector<string>& cmd);
     void HandleRedirection(const RedirectionParams& redirParams);
     void printTokens(const vector<string> &input, ostream& ofs);   

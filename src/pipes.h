@@ -11,6 +11,7 @@ enum PipesErr{
     PipesErrNone = 0,
     PipesDoublePipe = 1,
     PipesEndsWithPipe = 2,
+    PipesExecErr = 3,
 };
 
 #endif  // PIPES_H

@@ -14,6 +14,19 @@ int main(void){
         vector<string> tokens = shell.Tokenise(shellInput, ' ');
         shell.GetCommandHistory()->MainWrapperAddCmdToHistory(shellInput);
         fflush(stdout);
+        vector<vector<string>> pipes;
+        PipesErr pipesErr = shell.ParsePipes(tokens, pipes);
+        if (pipesErr!=PipesErrNone){
+            perror("error in parsing pipes");
+            continue;
+        }
+        RedirectionParams redirParams = {0};
+        pipesErr = shell.HandlePipes(pipes, redirParams);
+        if (pipesErr!=PipesErrNone){
+            perror("error in handling pipes");
+            continue;
+        } 
+/*
         int pid = fork(); 
         if (pid == 0) {
             RedirectionParams redirParams = {0};
@@ -28,6 +41,7 @@ int main(void){
         } else {
             wait(NULL);
         }
+*/
     }
     shell.PutTerminalBackInNormalMode();
     return 0;
