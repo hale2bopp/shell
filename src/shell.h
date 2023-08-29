@@ -11,6 +11,7 @@
 #include <tuple>
 #include <queue>
 #include "redirection.h"
+#include "pipes.h"
 using std::deque;
 using namespace std;
 
@@ -50,7 +51,7 @@ class Shell{
 private:
     string shellPrompt;
     CommandHistory commandHistory;
-    int numPipes;
+    int numPipes = 0;
 // potentially a list of features the shell has?
     bool upArrow;
     bool backSpace;
@@ -71,6 +72,7 @@ private:
     void moveCursorToBackDisplayPrompt(ostream& ofs);
     void eraseLastCharacter(string& s, ostream& ofs);
     void tokenHelper(vector<string>& tokens, string& temp, bool& wordBoundary);
+    bool detectDoubleChar(const char& charDetect, int& numChar, vector<string>& tokens, string& temp, bool& wordBoundaryFlag, bool& multipleChar);
     void setCmdEnd(RedirectionParams& redirParams, const int& index);
 public:
     Shell(void);
@@ -95,7 +97,7 @@ public:
     void PutTerminalInPerCharMode(void);
     void PutTerminalBackInNormalMode(void);
     vector<string> Tokenise(const string& s, const char &delimiter);
-    vector<vector<string>> ParsePipes(vector<string> tokens);
+    PipesErr ParsePipes(vector<string> tokens, vector<vector<string>>&pipes);
     RedirErr PostTokeniseProcessing(RedirectionParams& redirParams, const vector<string>& cmd);
     void HandleRedirection(const RedirectionParams& redirParams);
     void printTokens(const vector<string> &input, ostream& ofs);   

@@ -230,6 +230,20 @@ void Shell::tokenHelper(vector<string>& tokens, string& temp, bool& wordBoundary
     }
 }
 
+bool Shell::detectDoubleChar(const char& charDetect, int& numChar, vector<string>& tokens, string& temp, bool& wordBoundaryFlag, bool& multipleChar){
+    if (multipleChar){
+        string str(numChar+1,charDetect);
+        tokens.pop_back();
+        tokens.push_back(str);
+    } else {
+        tokenHelper(tokens, temp, wordBoundaryFlag);
+        string str(1,charDetect);
+        tokens.push_back(str);
+    }
+    multipleChar = true;
+    numChar++;
+}
+
 /**
  * \brief Tokenise entered input string from shell to extract command
  * and arguments
@@ -243,23 +257,15 @@ vector<string> Shell::Tokenise(const string& s, const char& delimiter){
     vector<string> tokens;
     bool wordBoundaryFlag = true;
     int numberOfRedirect = 0;
+    int numberOfPipe = 0;
+    bool multiplePipe = false;
     bool multipleRedirect = false;
     string temp;
     for(int i = 0; i < s[i]; i++){
         switch(s[i]){
             case '>':
             case '<':
-                if (multipleRedirect){
-                    string str(numberOfRedirect+1,s[i]);
-                    tokens.pop_back();
-                    tokens.push_back(str);
-                } else {
-                    tokenHelper(tokens, temp, wordBoundaryFlag);
-                    string str(1,s[i]);
-                    tokens.push_back(str);
-                }
-                multipleRedirect = true;
-                numberOfRedirect++;
+                detectDoubleChar(s[i], numberOfRedirect, tokens, temp, wordBoundaryFlag, multipleRedirect);
                 break;
             case ' ':
                 // if previous state was false
@@ -267,20 +273,20 @@ vector<string> Shell::Tokenise(const string& s, const char& delimiter){
                 // to finding a space
                 tokenHelper(tokens, temp, wordBoundaryFlag);
                 multipleRedirect = false;
+                multiplePipe = false;
                 numberOfRedirect = 0;
+                numberOfPipe = 0;
                 break;
             case '|':
-                tokenHelper(tokens, temp, wordBoundaryFlag);
+                detectDoubleChar(s[i], numberOfPipe, tokens, temp, wordBoundaryFlag, multiplePipe);
                 numPipes++;
-                {
-                    string str(1,s[i]);
-                    tokens.push_back(str);
-                }
                 break;
             default: 
                 temp.push_back(s[i]);
                 wordBoundaryFlag = false;
                 multipleRedirect = false;
+                multiplePipe = false;
+                numberOfPipe = 0;
                 numberOfRedirect = 0;
                 break;
         }
@@ -321,10 +327,25 @@ void Shell::setCmdEnd(RedirectionParams& redirParams, const int& index){
  * \brief Separate tokens out into pipes
  * @param input vector of strings 
  */
-vector<vector<string>> Shell::ParsePipes(vector<string> tokens){
-    
-    vector<vector<string>> pipes;
-    return pipes;
+PipesErr Shell::ParsePipes(vector<string> tokens, vector<vector<string>>& pipes){    
+    vector<string> temp;
+    for (int i = 0; i < tokens.size(); i++){
+        if (tokens[i] == "|"){
+            if (i == tokens.size()-1){
+                perror("invalid pipe");
+                return PipesEndsWithPipe;
+            }
+            // create a new set of commands 
+            // open input and output pipes
+            pipes.push_back(temp);
+            temp.clear();
+        } else if (tokens[i] == "||") {
+            return PipesDoublePipe;
+        } else {
+            temp.push_back(tokens[i]);
+        }
+    }
+    return PipesErrNone;
 }
 
 
