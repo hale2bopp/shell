@@ -352,32 +352,43 @@ PipesErr Shell::ParsePipes(vector<string> tokens, vector<vector<string>>& pipes)
 
 
 PipesErr Shell::HandlePipes(const vector<vector<string>>& pipes, RedirectionParams& redirParams){
-    int    pipefd[2];
-    char   buf;
-    for (int i = 0; i < numPipes; i++){
+    cout << "num pipes: " << numPipes<<endl;
+    int pipefd[2];
+    for (int i = 0; i < numPipes+1; i++){
         // create a pipe using pipe(2)         
-        pid_t cpid = fork();
-        if (cpid == -1) {
-           perror("fork");
-           return PipesExecErr;
+        if(pipe(pipefd) == -1) {
+          perror("Pipe failed");
+          return PipesExecErr;
         }
 
-        if (fork() == 0) {
+        pid_t cpid = fork();
+        if (cpid == -1) {
+           perror("fork error");
+           return PipesExecErr;
+        } else if (cpid == 0){
             // dup2 stdout to next pipe
-            if (i != numPipes-1) {
+            if (i != numPipes) {
+                cout << "opening stdout"<< endl;
+//                close(fileno(stdout));
+//                fflush(stdout);
                 close(fileno(stdout));
-                dup2(pipefd[1], fileno(stdout));
+//                dup2(pipefd[1], fileno(stdout));
+                dup(pipefd[1]);
             }
             close(pipefd[0]);
 
             // dup2 stdin from previous pipe 
             if (i != 0){
+                cout << "opening stdin from previous pipe" <<endl;
+//                close(fileno(stdin));
+//                fflush(stdin);                
                 close(fileno(stdin));
-                dup2(pipefd[0], fileno(stdin));
+//                dup2(pipefd[0], fileno(stdin));
+                dup(pipefd[0]);                
             }
             close(pipefd[1]);
 
-//            RedirectionParams redirParams = {0};
+            RedirectionParams redirParams = {0};
             RedirErr err = PostTokeniseProcessing(redirParams, pipes[i]);
             if (err!=RedirErrNone){
                 perror("Wrong Redirection");
@@ -386,12 +397,16 @@ PipesErr Shell::HandlePipes(const vector<vector<string>>& pipes, RedirectionPara
             HandleRedirection(redirParams);
             ExecuteProgram(redirParams.cmd);
             perror("unable to execute");
-        }
-//        close(pipefd[0]);
-//        close(pipefd[1]);
-        wait(0);
+        } 
+        //else {
+//        }
 
     }
+            close(pipefd[0]);
+            close(pipefd[1]);
+            wait(0);
+            wait(0);
+
     return PipesErrNone;
 }
 
