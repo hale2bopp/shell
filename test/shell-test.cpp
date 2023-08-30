@@ -470,8 +470,10 @@ TEST_F(ShellTest, PipeProcessingTestTokenise){
     std::ostringstream oss("");
     vector<string> fullCmd = {"cat", "README.md", "|", "sort"};
 
+    Pipeline pipeline = {0};
     EXPECT_EQ(shell->Tokenise(s, ' '), fullCmd);
-    EXPECT_EQ(shell->getNumPipes(), 1);
+    shell->ParsePipes(fullCmd, pipeline);
+    EXPECT_EQ(pipeline.numPipes, 1);
 }
  
 TEST_F(ShellTest, MultiplePipeProcessingTestTokenise){
@@ -482,8 +484,10 @@ TEST_F(ShellTest, MultiplePipeProcessingTestTokenise){
     std::ostringstream oss("");
     vector<string> fullCmd = {"cat", "README.md", "|", "sort", "|" , "give"};
 
+    Pipeline pipeline = {0};
     EXPECT_EQ(shell->Tokenise(s, ' '), fullCmd);
-    EXPECT_EQ(shell->getNumPipes(), 2);
+    shell->ParsePipes(fullCmd, pipeline);
+    EXPECT_EQ(pipeline.numPipes, 2);
 }
  
 TEST_F(ShellTest, NoSpacesPipeTokenise){
@@ -494,8 +498,10 @@ TEST_F(ShellTest, NoSpacesPipeTokenise){
     std::ostringstream oss("");
     vector<string> fullCmd = {"cat", "README.md", "|", "sort", "|" , "give"};
 
+    Pipeline pipeline = {0};
     EXPECT_EQ(shell->Tokenise(s, ' '), fullCmd);
-    EXPECT_EQ(shell->getNumPipes(), 2);
+    shell->ParsePipes(fullCmd, pipeline);
+    EXPECT_EQ(pipeline.numPipes, 2);
 }
 
 TEST_F(ShellTest, ManyPipesTokenise){
@@ -505,9 +511,11 @@ TEST_F(ShellTest, ManyPipesTokenise){
     std::istringstream iss(s);
     std::ostringstream oss("");
     vector<string> fullCmd = {"cat", "README.md", "|", "sort", "|" , "give", "|", "take" , "|","help"};
-
+    
+    Pipeline pipeline = {0};
     EXPECT_EQ(shell->Tokenise(s, ' '), fullCmd);
-    EXPECT_EQ(shell->getNumPipes(), 4);
+    shell->ParsePipes(fullCmd, pipeline);
+    EXPECT_EQ(pipeline.numPipes, 4);
 }
 
 TEST_F(ShellTest, DoublePipeTokenise){
@@ -518,22 +526,23 @@ TEST_F(ShellTest, DoublePipeTokenise){
     std::ostringstream oss("");
     vector<string> fullCmd = {"cat", "README.md", "||"};
 
+    Pipeline pipeline = {0};
     EXPECT_EQ(shell->Tokenise(s, ' '), fullCmd);
-    EXPECT_EQ(shell->getNumPipes(), 2);
+    shell->ParsePipes(fullCmd, pipeline);
+    EXPECT_EQ(pipeline.numPipes, 0);
 }
 
 TEST_F(ShellTest, DoublePipe){
-
     SetUp("no prompt", 10);
     string s = "cat README.md ||\n";
     std::istringstream iss(s);
     std::ostringstream oss("");
     vector<string> fullCmd = {"cat", "README.md", "||"};
 
+    Pipeline pipeline = {0};
     EXPECT_EQ(shell->Tokenise(s, ' '), fullCmd);
-    EXPECT_EQ(shell->getNumPipes(), 2);
-    vector<vector<string>> pipes;
-    EXPECT_EQ(shell->ParsePipes(fullCmd, pipes), PipesDoublePipe);
+    EXPECT_EQ(shell->ParsePipes(fullCmd, pipeline), PipesDoublePipe);
+    EXPECT_EQ(pipeline.numPipes, 0);
 }
 
 
@@ -544,10 +553,9 @@ TEST_F(ShellTest, InvalidPipeConfigError){
     std::istringstream iss(s);
     std::ostringstream oss("");
     vector<string> fullCmd = {"cat", "README.md", "|", "sort", "|"};
-    vector<vector<string>> pipes;
+    Pipeline pipeline = {0};
     EXPECT_EQ(shell->Tokenise(s, ' '), fullCmd);
-    EXPECT_EQ(shell->getNumPipes(), 2);
-    EXPECT_EQ(shell->ParsePipes(fullCmd, pipes), PipesEndsWithPipe);
+    EXPECT_EQ(shell->ParsePipes(fullCmd, pipeline), PipesEndsWithPipe);
 }
 
 TEST_F(ShellTest, TriplePipe){
@@ -558,10 +566,10 @@ TEST_F(ShellTest, TriplePipe){
     std::ostringstream oss("");
     vector<string> fullCmd = {"cat", "README.md", "|||"};
 
+    Pipeline pipeline = {0};
     EXPECT_EQ(shell->Tokenise(s, ' '), fullCmd);
-    EXPECT_EQ(shell->getNumPipes(), 3);
-    vector<vector<string>> pipes;
-    EXPECT_EQ(shell->ParsePipes(fullCmd, pipes), PipesDoublePipe);
+    EXPECT_EQ(shell->ParsePipes(fullCmd, pipeline), PipesDoublePipe);
+    EXPECT_EQ(pipeline.numPipes, 0);
 }
 
 TEST_F(ShellTest, ManyPipesProcessTest){
@@ -571,12 +579,13 @@ TEST_F(ShellTest, ManyPipesProcessTest){
     std::istringstream iss(s);
     std::ostringstream oss("");
     vector<string> fullCmd = {"cat", "README.md", "|", "sort", "|" , "give", "|", "take" , "|","help"};
-    
     EXPECT_EQ(shell->Tokenise(s, ' '), fullCmd);
-    EXPECT_EQ(shell->getNumPipes(), 4);
-    vector<vector<string>> pipes;
+
+    Pipeline pipeline = {0};
+    EXPECT_EQ(shell->Tokenise(s, ' '), fullCmd);
     vector<vector<string>> correctPipes = {{"cat", "README.md"}, {"sort"}, {"give"}, {"take"}, {"help"}};
-    EXPECT_EQ(shell->ParsePipes(fullCmd, pipes), PipesErrNone);
-    EXPECT_EQ(pipes, correctPipes);
+    EXPECT_EQ(shell->ParsePipes(fullCmd, pipeline), PipesErrNone);
+    EXPECT_EQ(pipeline.pipes, correctPipes);
+    EXPECT_EQ(pipeline.numPipes, 4);
 }
 

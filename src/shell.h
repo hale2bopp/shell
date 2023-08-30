@@ -51,7 +51,6 @@ class Shell{
 private:
     string shellPrompt;
     CommandHistory commandHistory;
-    int numPipes = 0;
 // potentially a list of features the shell has?
     bool upArrow;
     bool backSpace;
@@ -84,9 +83,6 @@ public:
     CommandHistory* GetCommandHistory(void){
         return &commandHistory;
     }
-    int getNumPipes(void){
-        return numPipes;
-    }
 
 // Shell functionality    
     void DisplayPrompt(ostream& ofs);
@@ -97,8 +93,8 @@ public:
     void PutTerminalInPerCharMode(void);
     void PutTerminalBackInNormalMode(void);
     vector<string> Tokenise(const string& s, const char &delimiter);
-    PipesErr ParsePipes(vector<string> tokens, vector<vector<string>>&pipes);
-    PipesErr HandlePipes(const vector<vector<string>>& pipes, RedirectionParams& redirPrams);
+    PipesErr ParsePipes(vector<string> tokens, Pipeline& pipeline);
+    PipesErr HandlePipes(const Pipeline& pipeline, RedirectionParams& redirPrams);
     RedirErr PostTokeniseProcessing(RedirectionParams& redirParams, const vector<string>& cmd);
     void HandleRedirection(const RedirectionParams& redirParams);
     void printTokens(const vector<string> &input, ostream& ofs);   

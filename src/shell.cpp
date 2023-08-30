@@ -280,7 +280,6 @@ vector<string> Shell::Tokenise(const string& s, const char& delimiter){
                 break;
             case '|':
                 detectDoubleChar(s[i], numberOfPipe, tokens, temp, wordBoundaryFlag, multiplePipe);
-                numPipes++;
                 break;
             default: 
                 temp.push_back(s[i]);
@@ -328,7 +327,7 @@ void Shell::setCmdEnd(RedirectionParams& redirParams, const int& index){
  * \brief Separate tokens out into pipes
  * @param input vector of strings 
  */
-PipesErr Shell::ParsePipes(vector<string> tokens, vector<vector<string>>& pipes){    
+PipesErr Shell::ParsePipes(vector<string> tokens, Pipeline& pipeline){    
     vector<string> temp;
     for (int i = 0; i < tokens.size(); i++){
         if (tokens[i] == "|"){
@@ -338,58 +337,80 @@ PipesErr Shell::ParsePipes(vector<string> tokens, vector<vector<string>>& pipes)
             }
             // create a new set of commands 
             // open input and output pipes
-            pipes.push_back(temp);
+            pipeline.pipes.push_back(temp);
             temp.clear();
+            pipeline.numPipes++;
         } else if (count(tokens[i].begin(), tokens[i].end(), '|') > 1) {
             return PipesDoublePipe;
         } else {
             temp.push_back(tokens[i]);
         }
     }
-    pipes.push_back(temp);
+    pipeline.pipes.push_back(temp);
     return PipesErrNone;
 }
 
 
-PipesErr Shell::HandlePipes(const vector<vector<string>>& pipes, RedirectionParams& redirParams){
-    cout << "num pipes: " << numPipes<<endl;
-    int pipefd[2];
-    for (int i = 0; i < numPipes+1; i++){
-        // create a pipe using pipe(2)         
-        if(pipe(pipefd) == -1) {
-          perror("Pipe failed");
-          return PipesExecErr;
+PipesErr Shell::HandlePipes(const Pipeline& pipeline, RedirectionParams& redirParams){
+    if (pipeline.numPipes > 0){
+        int pipefd[2*pipeline.numPipes];
+        for (int i = 0; i < pipeline.numPipes; i++){
+            // create a pipe using pipe(2)         
+            if(pipe(pipefd+(i*2)) < 0 ) {
+                perror("Pipe failed");
+                return PipesExecErr;
+            }
         }
 
-        pid_t cpid = fork();
-        if (cpid == -1) {
-           perror("fork error");
-           return PipesExecErr;
-        } else if (cpid == 0){
-            // dup2 stdout to next pipe
-            if (i != numPipes) {
-                cout << "opening stdout"<< endl;
-//                close(fileno(stdout));
-//                fflush(stdout);
-                close(fileno(stdout));
-//                dup2(pipefd[1], fileno(stdout));
-                dup(pipefd[1]);
-            }
-            close(pipefd[0]);
+        for (int i = 0; i < pipeline.numPipes+1; i++){
+            pid_t cpid = fork();
+            if (cpid < 0) {
+                perror("fork error");
+                return PipesExecErr;
+            } else if (cpid == 0){
+                // dup2 stdin from previous pipe 
+                if (i != 0){
+                    if (dup2(pipefd[(i-1)*2], fileno(stdin)) < 0){
+                        perror("unable to open stdin from previous pipe");
+                        return PipesExecErr;
+                    }
+                }
 
-            // dup2 stdin from previous pipe 
-            if (i != 0){
-                cout << "opening stdin from previous pipe" <<endl;
-//                close(fileno(stdin));
-//                fflush(stdin);                
-                close(fileno(stdin));
-//                dup2(pipefd[0], fileno(stdin));
-                dup(pipefd[0]);                
+                // dup2 stdout to next pipe
+                if (i != pipeline.numPipes) {
+                    if (dup2(pipefd[(i*2)+1], fileno(stdout)) < 0){
+                        perror("unable to open stdout to next pipe");
+                        return PipesExecErr;
+                    }
+                }
+                for( int j = 0; j < 2*pipeline.numPipes; j++){
+                    close(pipefd[j]);
+                }
+                RedirectionParams redirParams = {0};
+                RedirErr err = PostTokeniseProcessing(redirParams, pipeline.pipes[i]);
+                if (err!=RedirErrNone){
+                    perror("Wrong Redirection");
+                    return PipesExecErr;
+                }
+                HandleRedirection(redirParams);
+                ExecuteProgram(redirParams.cmd);
+                perror("unable to execute");           
             }
-            close(pipefd[1]);
+        }
+        // parent closes all of its copies at the end
+        for( int i = 0; i < 2 * pipeline.numPipes; i++ ){
+            close( pipefd[i] );
+        }
 
+        // waits for children
+        for(int i = 0; i < pipeline.numPipes+1; i++){
+            wait(NULL);
+        }
+    } else {
+        // no pipes
+        if (fork() == 0){
             RedirectionParams redirParams = {0};
-            RedirErr err = PostTokeniseProcessing(redirParams, pipes[i]);
+            RedirErr err = PostTokeniseProcessing(redirParams, pipeline.pipes[0]);
             if (err!=RedirErrNone){
                 perror("Wrong Redirection");
                 return PipesExecErr;
@@ -397,16 +418,10 @@ PipesErr Shell::HandlePipes(const vector<vector<string>>& pipes, RedirectionPara
             HandleRedirection(redirParams);
             ExecuteProgram(redirParams.cmd);
             perror("unable to execute");
-        } 
-        //else {
-//        }
-
+        } else {
+            wait(NULL);
+        }
     }
-            close(pipefd[0]);
-            close(pipefd[1]);
-            wait(0);
-            wait(0);
-
     return PipesErrNone;
 }
 

@@ -14,4 +14,9 @@ enum PipesErr{
     PipesExecErr = 3,
 };
 
+typedef struct _Pipeline {
+    int numPipes;
+    std::vector<std::vector<std::string>> pipes;
+} Pipeline;
+
 #endif  // PIPES_H
