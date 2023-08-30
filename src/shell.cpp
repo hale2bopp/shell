@@ -35,7 +35,7 @@ CommandHistory::CommandHistory(int maxCmdHistorySize): maxCmdHistorySize(maxCmdH
  * for main 
  * @param vector of strings describing a command to enter 
  */
-void CommandHistory::MainWrapperAddCmdToHistory(string &cmd){
+void CommandHistory::MainWrapperAddCmdToHistory(const string &cmd){
     if (cmd.size() !=0){
         AddCmdToHistory(cmd, cmdHistoryList);
         currentHistoryIndex = cmdHistoryList.size();
@@ -57,7 +57,7 @@ void Shell::DisplayPrompt(ostream& ofs){
  * @param vector of strings describing a command to enter 
  * @param vector of vector of strings with current command history
  */
-void CommandHistory::AddCmdToHistory(string &cmd, deque<string> &cmdList){
+void CommandHistory::AddCmdToHistory(const string &cmd, deque<string> &cmdList){
     if (cmdList.size() >= maxCmdHistorySize){
         cmdList.pop_front();
     } 
@@ -81,7 +81,7 @@ string CommandHistory::GetSavedCurrentInput(void){
 /**
  * \brief Save currently entered string
  */
-void CommandHistory::SaveCurrentEnteredString(string s){
+void CommandHistory::SaveCurrentEnteredString(const string& s){
     if ((SetSavedCurrentInputFlag) && (s.size()>0)){
         SetSavedCurrentInput(s);
         SetSavedCurrentInputFlag = false;
@@ -91,21 +91,21 @@ void CommandHistory::SaveCurrentEnteredString(string s){
 /**
  * \brief Sets index in the command history vector
  */
-void CommandHistory::SetCurrentHistoryIndex(int val){
+void CommandHistory::SetCurrentHistoryIndex(const int& val){
     currentHistoryIndex = val;
 }
 
 /**
  * \brief Saves current input string before being replaced by up arrow
  */
-void CommandHistory::SetSavedCurrentInput(string s){
+void CommandHistory::SetSavedCurrentInput(const string& s){
     savedCurrentInput = s;
 }
 
 /**
  * \brief Handles up arrow press
  */
-string Shell::handleUpArrow(string s, ostream& ofs){
+string Shell::handleUpArrow(const string& s, ostream& ofs){
     auto cmdHistory = GetCommandHistory();
     cmdHistory->SaveCurrentEnteredString(s);
     int chi = cmdHistory->GetCurrentHistoryIndex();
@@ -119,7 +119,7 @@ string Shell::handleUpArrow(string s, ostream& ofs){
 /**
  * \brief Handles down arrow press
  */
-string Shell::handleDownArrow(string s, ostream& ofs){
+string Shell::handleDownArrow(const string& s, ostream& ofs){
     auto cmdHistory = GetCommandHistory();
     cmdHistory->SaveCurrentEnteredString(s);
     int chi = cmdHistory->GetCurrentHistoryIndex();
@@ -209,7 +209,7 @@ string Shell::GetInput(istream& ifs, ostream& ofs){
  * by execvp. 
  * @param vector of strings with command to be run
  */
-int Shell::ExecuteProgram(vector<string>& cmd){
+int Shell::ExecuteProgram(const vector<string>& cmd){
     vector<char *> vec_cp;
     vec_cp.reserve(cmd.size() + 1);
     for (auto s : cmd){
@@ -230,6 +230,21 @@ void Shell::tokenHelper(vector<string>& tokens, string& temp, bool& wordBoundary
     }
 }
 
+void Shell::detectDoubleChar(const char& charDetect, int& numChar, vector<string>& tokens, string& temp, bool& wordBoundaryFlag, bool& multipleChar){
+    if (multipleChar){
+        string str(numChar+1,charDetect);
+        tokens.pop_back();
+        tokens.push_back(str);
+    } else {
+        tokenHelper(tokens, temp, wordBoundaryFlag);
+        string str(1,charDetect);
+        tokens.push_back(str);
+    }
+    multipleChar = true;
+    numChar++;
+
+}
+
 /**
  * \brief Tokenise entered input string from shell to extract command
  * and arguments
@@ -237,29 +252,21 @@ void Shell::tokenHelper(vector<string>& tokens, string& temp, bool& wordBoundary
  * @param delimiter character to split string into command and args. 
  *        in normal operation, this should be ' '.
  */
-vector<string> Shell::Tokenise(string s, char delimiter){
+vector<string> Shell::Tokenise(const string& s, const char& delimiter){
     // ignore whitespaces 
     // end on enter 
     vector<string> tokens;
     bool wordBoundaryFlag = true;
     int numberOfRedirect = 0;
+    int numberOfPipe = 0;
+    bool multiplePipe = false;
     bool multipleRedirect = false;
     string temp;
     for(int i = 0; i < s[i]; i++){
         switch(s[i]){
             case '>':
             case '<':
-                if (multipleRedirect){
-                    string str(numberOfRedirect+1,s[i]);
-                    tokens.pop_back();
-                    tokens.push_back(str);
-                } else {
-                    tokenHelper(tokens, temp, wordBoundaryFlag);
-                    string str(1,s[i]);
-                    tokens.push_back(str);
-                }
-                multipleRedirect = true;
-                numberOfRedirect++;
+                detectDoubleChar(s[i], numberOfRedirect, tokens, temp, wordBoundaryFlag, multipleRedirect);
                 break;
             case ' ':
                 // if previous state was false
@@ -267,12 +274,19 @@ vector<string> Shell::Tokenise(string s, char delimiter){
                 // to finding a space
                 tokenHelper(tokens, temp, wordBoundaryFlag);
                 multipleRedirect = false;
+                multiplePipe = false;
                 numberOfRedirect = 0;
+                numberOfPipe = 0;
+                break;
+            case '|':
+                detectDoubleChar(s[i], numberOfPipe, tokens, temp, wordBoundaryFlag, multiplePipe);
                 break;
             default: 
                 temp.push_back(s[i]);
                 wordBoundaryFlag = false;
                 multipleRedirect = false;
+                multiplePipe = false;
+                numberOfPipe = 0;
                 numberOfRedirect = 0;
                 break;
         }
@@ -302,7 +316,7 @@ void Shell::printTokens(const vector<string> &input, ostream& ofs){
  * \brief Simple helper to set the end of a commnand sent to execvp
  * @param input redirection Param struct, index
  */
-void Shell::setCmdEnd(RedirectionParams& redirParams, int index){
+void Shell::setCmdEnd(RedirectionParams& redirParams, const int& index){
     if (!redirParams.foundRedirectionParam){
         redirParams.cmdEnd = index;
         redirParams.foundRedirectionParam = true;
@@ -310,10 +324,117 @@ void Shell::setCmdEnd(RedirectionParams& redirParams, int index){
 }
 
 /**
+ * \brief Separate tokens out into pipes
+ * @param input vector of strings 
+ * @param pipeline struct
+ */
+PipesErr Shell::ParsePipes(vector<string> tokens, Pipeline& pipeline){    
+    vector<string> temp;
+    for (int i = 0; i < tokens.size(); i++){
+        if (tokens[i] == "|"){
+            if (i == tokens.size()-1){
+                perror("invalid pipe");
+                return PipesEndsWithPipe;
+            }
+            // create a new set of commands 
+            // open input and output pipes
+            pipeline.pipes.push_back(temp);
+            temp.clear();
+            pipeline.numPipes++;
+        } else if (count(tokens[i].begin(), tokens[i].end(), '|') > 1) {
+            return PipesDoublePipe;
+        } else {
+            temp.push_back(tokens[i]);
+        }
+    }
+    pipeline.pipes.push_back(temp);
+    return PipesErrNone;
+}
+
+/**
+ * \brief Handle Pipes if any, and execute program
+ * @param pipeline struct 
+ * @param redirParams redirection parameters
+ */
+PipesErr Shell::HandlePipes(const Pipeline& pipeline, RedirectionParams& redirParams){
+    if (pipeline.numPipes > 0){
+        int pipefd[2*pipeline.numPipes];
+        for (int i = 0; i < pipeline.numPipes; i++){
+            // create a pipe using pipe(2)         
+            if(pipe(pipefd+(i*2)) < 0 ) {
+                perror("Pipe failed");
+                return PipesExecErr;
+            }
+        }
+
+        for (int i = 0; i < pipeline.numPipes+1; i++){
+            pid_t cpid = fork();
+            if (cpid < 0) {
+                perror("fork error");
+                return PipesExecErr;
+            } else if (cpid == 0){
+                // dup2 stdin from previous pipe 
+                if (i != 0){
+                    if (dup2(pipefd[(i-1)*2], fileno(stdin)) < 0){
+                        perror("unable to open stdin from previous pipe");
+                        return PipesExecErr;
+                    }
+                }
+
+                // dup2 stdout to next pipe
+                if (i != pipeline.numPipes) {
+                    if (dup2(pipefd[(i*2)+1], fileno(stdout)) < 0){
+                        perror("unable to open stdout to next pipe");
+                        return PipesExecErr;
+                    }
+                }
+                for( int j = 0; j < 2*pipeline.numPipes; j++){
+                    close(pipefd[j]);
+                }
+                RedirectionParams redirParams = {0};
+                RedirErr err = PostTokeniseProcessing(redirParams, pipeline.pipes[i]);
+                if (err!=RedirErrNone){
+                    perror("Wrong Redirection");
+                    return PipesExecErr;
+                }
+                HandleRedirection(redirParams);
+                ExecuteProgram(redirParams.cmd);
+                perror("unable to execute");           
+            }
+        }
+        // parent closes all of its copies at the end
+        for( int i = 0; i < 2 * pipeline.numPipes; i++ ){
+            close( pipefd[i] );
+        }
+
+        // waits for children
+        for(int i = 0; i < pipeline.numPipes+1; i++){
+            wait(NULL);
+        }
+    } else {
+        // no pipes
+        if (fork() == 0){
+            RedirectionParams redirParams = {0};
+            RedirErr err = PostTokeniseProcessing(redirParams, pipeline.pipes[0]);
+            if (err!=RedirErrNone){
+                perror("Wrong Redirection");
+                return PipesExecErr;
+            }
+            HandleRedirection(redirParams);
+            ExecuteProgram(redirParams.cmd);
+            perror("unable to execute");
+        } else {
+            wait(NULL);
+        }
+    }
+    return PipesErrNone;
+}
+
+/**
  * \brief Check for Redirection and split out command
  * @param input vector of strings
  */
-RedirErr Shell::PostTokeniseProcessing(RedirectionParams& redirParams, vector<string>& cmd){
+RedirErr Shell::PostTokeniseProcessing(RedirectionParams& redirParams, const vector<string>& cmd){
     redirParams.cmdEnd = cmd.size();
     ofstream outputFile;
     ifstream inputFile;
@@ -351,7 +472,7 @@ RedirErr Shell::PostTokeniseProcessing(RedirectionParams& redirParams, vector<st
  * \brief Handle Redirection 
  * @param input command, redirectionType
  */
-void Shell::HandleRedirection(RedirectionParams& redirParams){
+void Shell::HandleRedirection(const RedirectionParams& redirParams){
     // Note there could be multiple redirection flags in a single command 
     switch(redirParams.outputRedirectionType){
         case (OutputCreate):

@@ -14,20 +14,18 @@ int main(void){
         vector<string> tokens = shell.Tokenise(shellInput, ' ');
         shell.GetCommandHistory()->MainWrapperAddCmdToHistory(shellInput);
         fflush(stdout);
-        int pid = fork(); 
-        if (pid == 0) {
-            RedirectionParams redirParams = {0};
-            RedirErr err = shell.PostTokeniseProcessing(redirParams, tokens);
-            if (err!=RedirErrNone){
-                perror("Wrong Redirection");
-                continue;
-            }
-            shell.HandleRedirection(redirParams);
-            shell.ExecuteProgram(redirParams.cmd);
-            perror("unable to execute");
-        } else {
-            wait(NULL);
+        Pipeline pipeline = {0};
+        PipesErr pipesErr = shell.ParsePipes(tokens, pipeline);
+        if (pipesErr!=PipesErrNone){
+            perror("error in parsing pipes");
+            continue;
         }
+        RedirectionParams redirParams = {0};
+        pipesErr = shell.HandlePipes(pipeline, redirParams);
+        if (pipesErr!=PipesErrNone){
+            perror("error in handling pipes");
+            continue;
+        } 
     }
     shell.PutTerminalBackInNormalMode();
     return 0;
