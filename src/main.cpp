@@ -26,22 +26,6 @@ int main(void){
             perror("error in handling pipes");
             continue;
         } 
-/*
-        int pid = fork(); 
-        if (pid == 0) {
-            RedirectionParams redirParams = {0};
-            RedirErr err = shell.PostTokeniseProcessing(redirParams, tokens);
-            if (err!=RedirErrNone){
-                perror("Wrong Redirection");
-                continue;
-            }
-            shell.HandleRedirection(redirParams);
-            shell.ExecuteProgram(redirParams.cmd);
-            perror("unable to execute");
-        } else {
-            wait(NULL);
-        }
-*/
     }
     shell.PutTerminalBackInNormalMode();
     return 0;

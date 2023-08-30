@@ -326,6 +326,7 @@ void Shell::setCmdEnd(RedirectionParams& redirParams, const int& index){
 /**
  * \brief Separate tokens out into pipes
  * @param input vector of strings 
+ * @param pipeline struct
  */
 PipesErr Shell::ParsePipes(vector<string> tokens, Pipeline& pipeline){    
     vector<string> temp;
@@ -350,7 +351,11 @@ PipesErr Shell::ParsePipes(vector<string> tokens, Pipeline& pipeline){
     return PipesErrNone;
 }
 
-
+/**
+ * \brief Handle Pipes if any, and execute program
+ * @param pipeline struct 
+ * @param redirParams redirection parameters
+ */
 PipesErr Shell::HandlePipes(const Pipeline& pipeline, RedirectionParams& redirParams){
     if (pipeline.numPipes > 0){
         int pipefd[2*pipeline.numPipes];
