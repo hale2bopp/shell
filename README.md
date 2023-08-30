@@ -4,6 +4,8 @@ A simple shell. Running in C++.
 - Tokenises based on spaces in inputs 
 - Executes a limited set of commands
 - Allows backspace and command history (up arrow, down arrow)
+- Allows redirection
+- Multistage pipes
 
 ## Build 
 ### Generate Makefile 
