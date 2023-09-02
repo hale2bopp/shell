@@ -325,6 +325,28 @@ TEST_F(ShellTest, UpArrow25times){
     EXPECT_EQ(shell->GetInput(iss, oss), "cat Makefile");
 }
 
+TEST_F(ShellTest, inputTestLeftArrow){
+    SetUp("no prompt", 10);
+    string s = "Dimpy";
+    s += LEFT_ARROW_SEQ;
+    s += "j\n";
+    std::istringstream iss(s);
+    std::ostringstream oss("");
+    EXPECT_EQ(shell->GetInput(iss, oss), "Dimpjy");
+}
+
+TEST_F(ShellTest, inputTestRightArrow){
+    SetUp("no prompt", 10);
+    string s = "Dimpy";
+    s += LEFT_ARROW_SEQ;
+    s += LEFT_ARROW_SEQ;
+    s += RIGHT_ARROW_SEQ;
+    s += "j\n";
+    std::istringstream iss(s);
+    std::ostringstream oss("");
+    EXPECT_EQ(shell->GetInput(iss, oss), "Dimpjy");
+}
+
 TEST_F(ShellTest, CheckRedirParamsInitState){
     SetUp("no prompt", 10);
     RedirectionParams redirParams = {0};

@@ -21,6 +21,8 @@ using namespace std;
 #define ESCAPE_SEQ 27
 #define UP_ARROW 65
 #define DOWN_ARROW 66
+#define RIGHT_ARROW 67
+#define LEFT_ARROW 68
 #define ENTER 10
 #define ASCII_BACKSPACE 8
 
@@ -51,6 +53,7 @@ class Shell{
 private:
     string shellPrompt;
     CommandHistory commandHistory;
+    int cursorPosition = 0;
 // potentially a list of features the shell has?
     bool upArrow;
     bool backSpace;
@@ -63,16 +66,25 @@ private:
     const string moveCursorOneRight = "\33[C";
     const string eraseTillStartOfLine = "\33[2K";
     const string moveCursorToBeginningOfLine = "\r";
-    
+    const string insertCharacter = "\E[4h";  
+    const string moveCursorTillStart = "\u001b[1000D";
     // Functions
     string handleUpArrow(const string& s, ostream& ofs);
     string handleDownArrow(const string& s, ostream& ofs);
+    string handleLeftArrow(const string& s, const char& c, ostream& ofs);
+    string handleRightArrow(const string& s, const char& c, ostream& ofs);
     string replaceInput(ostream& ofs);
     void moveCursorToBackDisplayPrompt(ostream& ofs);
-    void eraseLastCharacter(string& s, ostream& ofs);
+    void eraseCharacter(string& s, ostream& ofs);
+    void cursorOneRight(string& s, ostream& ofs);
+    void cursorOneLeft(string& s, ostream& ofs);
+    void moveCursorLeftRight(string& s, ostream& ofs);
     void tokenHelper(vector<string>& tokens, string& temp, bool& wordBoundary);
     void detectDoubleChar(const char& charDetect, int& numChar, vector<string>& tokens, string& temp, bool& wordBoundaryFlag, bool& multipleChar);
+
     void setCmdEnd(RedirectionParams& redirParams, const int& index);
+    void incrementCursorPosition(const string&s, int& cursor);
+    void decrementCursorPosition(const string&s, int& cursor);
 public:
     Shell(void);
     Shell(CommandHistory& cmdHistory);
