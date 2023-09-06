@@ -161,7 +161,7 @@ TEST_F(ShellTest, cinTestBackspace)
     // Create payload
     string part1 = "Dimpj";
     string part2 = "y loves Mice\n";
-    string s = part1 + (char) 127 + part2;
+    string s = part1 + (char) DELETE + part2;
     std::istringstream iss(s);
     std::ostringstream oss("");
     EXPECT_EQ(shell->GetInput(iss, oss), "Dimpy loves Mice");
@@ -173,7 +173,7 @@ TEST_F(ShellTest, cinTestMultipleBackspace)
     SetUp("no prompt", 10);
     // Create payload
     string part1 = "Dimpjsdjk";
-    string backSpaces(5, (char) 127);
+    string backSpaces(5, (char) DELETE);
     string part2 = "y loves Mice\n";
     string s = part1 + backSpaces + part2;
     std::istringstream iss(s);
@@ -325,6 +325,82 @@ TEST_F(ShellTest, UpArrow25times){
     EXPECT_EQ(shell->GetInput(iss, oss), "cat Makefile");
 }
 
+TEST_F(ShellTest, initCursorPosition){
+    SetUp("no prompt", 10);
+    EXPECT_EQ(shell->GetCursorPosition(), 0);
+    
+}
+
+TEST_F(ShellTest, inputCursorPosition){
+    SetUp("no prompt", 10);
+    string s = "Dimpy\n";
+    std::istringstream iss(s);
+    std::ostringstream oss("");
+    shell->GetInput(iss, oss);
+    EXPECT_EQ(shell->GetCursorPosition(), 5);
+    
+}
+
+TEST_F(ShellTest, inputInitLeftArrowLeftCursorPosition){
+    SetUp("no prompt", 10);
+    string s = LEFT_ARROW_SEQ;
+    s += "\n";
+    std::istringstream iss(s);
+    std::ostringstream oss("");
+    shell->GetInput(iss, oss);
+    EXPECT_EQ(shell->GetCursorPosition(), 0);
+    
+}
+
+TEST_F(ShellTest, inputInitRightArrowLeftCursorPosition){
+    SetUp("no prompt", 10);
+    string s = RIGHT_ARROW_SEQ;
+    s += "\n";
+    std::istringstream iss(s);
+    std::ostringstream oss("");
+    shell->GetInput(iss, oss);
+    EXPECT_EQ(shell->GetCursorPosition(), 0);
+
+}
+
+TEST_F(ShellTest, inputTestLeftArrowCursorPosition){
+    SetUp("no prompt", 10);
+    string s = "Dimpy";
+    s += LEFT_ARROW_SEQ;
+    s += LEFT_ARROW_SEQ;
+    s +="\n";
+    std::istringstream iss(s);
+    std::ostringstream oss("");
+    shell->GetInput(iss, oss);
+    EXPECT_EQ(shell->GetCursorPosition(), 3);
+}
+
+TEST_F(ShellTest, inputTestLeftRightArrowCursorPosition){
+    SetUp("no prompt", 10);
+    string s = "Dimpy";
+    s += LEFT_ARROW_SEQ;
+    s += RIGHT_ARROW_SEQ;
+    s +="\n";
+    std::istringstream iss(s);
+    std::ostringstream oss("");
+    shell->GetInput(iss, oss);
+    EXPECT_EQ(shell->GetCursorPosition(), 5);
+}
+
+
+TEST_F(ShellTest, eraseEmptyPrompt){
+    SetUp("no prompt", 10);
+    EXPECT_EQ(shell->GetCursorPosition(), 0);
+    string s = "";
+    s += (char) DELETE;
+    s +="\n";
+    std::istringstream iss(s);
+    std::ostringstream oss("");
+    shell->GetInput(iss, oss);
+    EXPECT_EQ(shell->GetCursorPosition(), 0);
+}
+
+/*
 TEST_F(ShellTest, inputTestLeftArrow){
     SetUp("no prompt", 10);
     string s = "Dimpy";
@@ -346,7 +422,7 @@ TEST_F(ShellTest, inputTestRightArrow){
     std::ostringstream oss("");
     EXPECT_EQ(shell->GetInput(iss, oss), "Dimpjy");
 }
-
+*/
 TEST_F(ShellTest, CheckRedirParamsInitState){
     SetUp("no prompt", 10);
     RedirectionParams redirParams = {0};

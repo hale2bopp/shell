@@ -30,7 +30,7 @@ class CommandHistory{
 private:
     int maxCmdHistorySize;
     string savedCurrentInput;
-    int currentHistoryIndex;
+    int currentHistoryIndex = 0;
 
 public: 
     bool SetSavedCurrentInputFlag= true;
@@ -97,6 +97,7 @@ public:
         return &commandHistory;
     }
 
+    int GetCursorPosition(void){ return cursorPosition; }
 // Shell functionality    
     void DisplayPrompt(ostream& ofs);
     void CheckLength(string& s);
