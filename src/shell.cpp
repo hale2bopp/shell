@@ -521,7 +521,7 @@ void Shell::HandleRedirection(const RedirectionParams& redirParams){
 
 /*
  * \brief erases whole line and moves cursor to beginning of line
- *
+ * @param ofs output stream
  */
 void Shell::moveCursorToBackDisplayPrompt(ostream& ofs){
     cursorPosition = 0; 
@@ -530,8 +530,9 @@ void Shell::moveCursorToBackDisplayPrompt(ostream& ofs){
 }
 
 /*
- * \brief move cursor right
- *
+ * \brief move cursor right (wrapper)
+ * @param s input string
+ * @param ofs output stream
  */
 void Shell::cursorOneRight(string&s, ostream& ofs){
     incrementCursorPosition(s, cursorPosition);
@@ -539,8 +540,9 @@ void Shell::cursorOneRight(string&s, ostream& ofs){
 }
 
 /*
- * \brief move cursor left
- *
+ * \brief move cursor left (wrapper)
+ * @param s input string
+ * @param ofs output stream
  */
 void Shell::cursorOneLeft(string&s, ostream& ofs){
     decrementCursorPosition(s, cursorPosition);
@@ -549,7 +551,8 @@ void Shell::cursorOneLeft(string&s, ostream& ofs){
 
 /*
  * \brief move cursor left or right
- *
+ * @param s input string
+ * @param ofs output stream
  */
 void Shell::moveCursorLeftRight(string&s, ostream& ofs){
     for (int i = 0; i < 4; i++){
@@ -563,10 +566,20 @@ void Shell::moveCursorLeftRight(string&s, ostream& ofs){
     }
 }
 
+/*
+ * \brief safely decrement cursor position
+ * @param s input string
+ * @param cursor cursorPosition
+ */
 void Shell::decrementCursorPosition(const string&s, int& cursor){
     cursor = max(0,cursor-1);
 }
 
+/*
+ * \brief safely increment cursor position
+ * @param s input string
+ * @param cursor cursorPosition
+ */
 void Shell::incrementCursorPosition(const string&s, int& cursor){
     cursor = min((int)s.size(), cursor+1);
 }
@@ -574,7 +587,8 @@ void Shell::incrementCursorPosition(const string&s, int& cursor){
 /*
  * \brief erase character and move the cursor one
  * step back
- *
+ * @param s input string
+ * @param ofs output stream
  */
 void Shell::eraseCharacter(string&s, ostream& ofs){
     // remove the 'erase sequence' printed to the screen 
@@ -595,6 +609,13 @@ void Shell::eraseCharacter(string&s, ostream& ofs){
     }
 }
 
+/*
+ * \brief insert character at cursorPosition
+ * @param s input string
+ * @param c input character
+ * @param cursor cursorPosition
+ * @param ofs output stream
+ */
 void Shell::insertCharacter(string& s, const char&c, int& cursor, ostream& ofs){
     if (cursor == s.size()){
         s += c;
