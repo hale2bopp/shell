@@ -4,6 +4,7 @@ A simple shell. Running in C++.
 - Tokenises based on spaces in inputs 
 - Executes a limited set of commands
 - Allows backspace and command history (up arrow, down arrow)
+- Erase at cursor position, move it left/right using left/right arrow
 - Allows redirection
 - Multistage pipes
 
