@@ -400,7 +400,7 @@ TEST_F(ShellTest, eraseEmptyPrompt){
     EXPECT_EQ(shell->GetCursorPosition(), 0);
 }
 
-/*
+
 TEST_F(ShellTest, inputTestLeftArrow){
     SetUp("no prompt", 10);
     string s = "Dimpy";
@@ -422,7 +422,19 @@ TEST_F(ShellTest, inputTestRightArrow){
     std::ostringstream oss("");
     EXPECT_EQ(shell->GetInput(iss, oss), "Dimpjy");
 }
-*/
+
+TEST_F(ShellTest, inputTestBackspaceInString){
+    SetUp("no prompt", 10);
+    string s = "Dimpy";
+    s += LEFT_ARROW_SEQ;
+    s += LEFT_ARROW_SEQ;
+    s += (char) DELETE;
+    s += "j\n";
+    std::istringstream iss(s);
+    std::ostringstream oss("");
+    EXPECT_EQ(shell->GetInput(iss, oss), "Dijpy");
+}
+
 TEST_F(ShellTest, CheckRedirParamsInitState){
     SetUp("no prompt", 10);
     RedirectionParams redirParams = {0};

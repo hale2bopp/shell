@@ -177,19 +177,17 @@ string Shell::GetInput(istream& ifs, ostream& ofs){
         ifs.get(c);
         switch(c){
             case (char)ESCAPE_SEQ:
-                // get 2 more
+                // get 2 more characters
                 ifs.get(c);
                 ifs.get(c);
                 if (c == (char)UP_ARROW){
                     moveCursorToBackDisplayPrompt(ofs);
                     shellInput = handleUpArrow(shellInput, ofs);
-//                    cout << "\nup: shellInput: " << shellInput << endl;
                     cursorPosition = shellInput.size();
                 }
                 if (c == (char) DOWN_ARROW){
                     moveCursorToBackDisplayPrompt(ofs);
                     shellInput = handleDownArrow(shellInput, ofs);
-//                    cout << "\ndown: shellInput: " << shellInput << endl;
                     cursorPosition = shellInput.size();
                 }
                 if (c == (char) LEFT_ARROW){
@@ -538,7 +536,6 @@ void Shell::moveCursorToBackDisplayPrompt(ostream& ofs){
 void Shell::cursorOneRight(string&s, ostream& ofs){
     incrementCursorPosition(s, cursorPosition);
     moveCursorLeftRight(s, ofs);
-    // cout << "\ncursorPosition: " << cursorPosition << endl;
 }
 
 /*
@@ -548,7 +545,6 @@ void Shell::cursorOneRight(string&s, ostream& ofs){
 void Shell::cursorOneLeft(string&s, ostream& ofs){
     decrementCursorPosition(s, cursorPosition);
     moveCursorLeftRight(s, ofs);
-    // cout << "\ncursorPosition: " << cursorPosition << endl;
 }
 
 /*
@@ -581,7 +577,6 @@ void Shell::incrementCursorPosition(const string&s, int& cursor){
  *
  */
 void Shell::eraseCharacter(string&s, ostream& ofs){
-    // cout << "\ncursorPosition: " << cursorPosition << endl;
     // remove the 'erase sequence' printed to the screen 
     for (int i = 0; i < 2; i++){
         ofs << moveCursorOneLeft << eraseCursorTillEndOfLine; 
@@ -606,9 +601,6 @@ void Shell::insertCharacter(string& s, const char&c, int& cursor, ostream& ofs){
     } else {
         s = s.substr(0,cursor) + c + s.substr(cursor);
     }
-    //for (int i = 0; i < 4; i++){
-    //    ofs << moveCursorOneLeft << eraseCursorTillEndOfLine;
-    //}
     ofs << moveCursorTillStart;
     ofs << shellPrompt << s;
     ofs << moveCursorTillStart;
