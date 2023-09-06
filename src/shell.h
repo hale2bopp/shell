@@ -66,7 +66,7 @@ private:
     const string moveCursorOneRight = "\33[C";
     const string eraseTillStartOfLine = "\33[2K";
     const string moveCursorToBeginningOfLine = "\r";
-    const string insertCharacter = "\E[4h";  
+    const string insertCharacterStr = "\E[4h";  
     const string moveCursorTillStart = "\u001b[1000D";
     // Functions
     string handleUpArrow(const string& s, ostream& ofs);
@@ -85,6 +85,7 @@ private:
     void setCmdEnd(RedirectionParams& redirParams, const int& index);
     void incrementCursorPosition(const string&s, int& cursor);
     void decrementCursorPosition(const string&s, int& cursor);
+    void insertCharacter(string& s, const char&c, int& cursor, ostream& ofs);
 public:
     Shell(void);
     Shell(CommandHistory& cmdHistory);

@@ -215,12 +215,13 @@ string Shell::GetInput(istream& ifs, ostream& ofs){
             case (char)ENTER:
                 break;
             default:
-                if (cursorPosition == shellInput.size()){
-                    shellInput += c;
-                } else {
-                    shellInput = shellInput.substr(0,cursorPosition) + c + shellInput.substr(cursorPosition+1);
-                }
-                incrementCursorPosition(shellInput, cursorPosition);
+                insertCharacter(shellInput, c, cursorPosition, ofs);
+//                if (cursorPosition == shellInput.size()){
+//                    shellInput += c;
+//                } else {
+//                    shellInput = shellInput.substr(0,cursorPosition) + c + shellInput.substr(cursorPosition+1);
+//                }
+//                incrementCursorPosition(shellInput, cursorPosition);
 //                cursorPosition++;
 
                 break;
@@ -596,22 +597,34 @@ void Shell::incrementCursorPosition(const string&s, int& cursor){
  */
 void Shell::eraseCharacter(string&s, ostream& ofs){
     decrementCursorPosition(s, cursorPosition);
-//    s.pop_back();
-    cout << "\ns.substr(0, cursorPosition): " << s.substr(0, cursorPosition) << endl;
-    cout << "s.substr(cursorPosition+1): " << s.substr(cursorPosition+1) << endl;
-
     for (int i = 0; i < 3; i++){
         ofs << moveCursorOneLeft << eraseCursorTillEndOfLine; 
     }
     s = s.substr(0, cursorPosition) + s.substr(cursorPosition+1);     
-    cout << "S: " << s << endl;
     ofs << moveCursorTillStart;
     ofs << shellPrompt << s;
     ofs << moveCursorTillStart;
     for (int i = 0; i < shellPrompt.size() + cursorPosition; i++){
         ofs << moveCursorOneRight;
     }
+}
 
+void Shell::insertCharacter(string& s, const char&c, int& cursor, ostream& ofs){
+    if (cursor == s.size()){
+        s += c;
+    } else {
+        s = s.substr(0,cursor) + c + s.substr(cursor);
+    }
+    //for (int i = 0; i < 4; i++){
+    //    ofs << moveCursorOneLeft << eraseCursorTillEndOfLine;
+    //}
+    ofs << moveCursorTillStart;
+    ofs << shellPrompt << s;
+    ofs << moveCursorTillStart;
+    for (int i = 0; i < shellPrompt.size() + cursorPosition+1; i++){
+        ofs << moveCursorOneRight;
+    }
+    incrementCursorPosition(s, cursorPosition);
 }
 
 /*
