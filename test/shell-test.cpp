@@ -327,8 +327,7 @@ TEST_F(ShellTest, UpArrow25times){
 
 TEST_F(ShellTest, initCursorPosition){
     SetUp("no prompt", 10);
-    EXPECT_EQ(shell->GetCursorPosition(), 0);
-    
+    EXPECT_EQ(shell->GetCursorPosition(), 0);    
 }
 
 TEST_F(ShellTest, inputCursorPosition){
@@ -434,6 +433,7 @@ TEST_F(ShellTest, inputTestBackspaceInString){
     std::ostringstream oss("");
     EXPECT_EQ(shell->GetInput(iss, oss), "Dijpy");
 }
+
 
 TEST_F(ShellTest, CheckRedirParamsInitState){
     SetUp("no prompt", 10);
