@@ -167,6 +167,7 @@ string Shell::replaceInput(ostream& ofs){
  * passes to tokeniser 
  */
 string Shell::GetInput(istream& ifs, ostream& ofs){ 
+    cursorPosition = 0;
     auto cmdHistory = GetCommandHistory();
     cmdHistory->SetSavedCurrentInputFlag = true;
 
@@ -176,25 +177,33 @@ string Shell::GetInput(istream& ifs, ostream& ofs){
         ifs.get(c);
         switch(c){
             case (char)ESCAPE_SEQ:
-                // get 2 more
+                // get 2 more characters
                 ifs.get(c);
                 ifs.get(c);
                 if (c == (char)UP_ARROW){
                     moveCursorToBackDisplayPrompt(ofs);
                     shellInput = handleUpArrow(shellInput, ofs);
+                    cursorPosition = shellInput.size();
                 }
                 if (c == (char) DOWN_ARROW){
                     moveCursorToBackDisplayPrompt(ofs);
                     shellInput = handleDownArrow(shellInput, ofs);
+                    cursorPosition = shellInput.size();
+                }
+                if (c == (char) LEFT_ARROW){
+                    cursorOneLeft(shellInput, ofs);
+                }
+                if (c == (char) RIGHT_ARROW){
+                    cursorOneRight(shellInput, ofs);
                 } 
                 break;
             case (char) DELETE: 
-                eraseLastCharacter(shellInput, ofs);
+                eraseCharacter(shellInput, ofs);
                 break;
             case (char)ENTER:
                 break;
             default:
-                shellInput += c; 
+                insertCharacter(shellInput, c, cursorPosition, ofs);
                 break;
         }
     }
@@ -512,24 +521,114 @@ void Shell::HandleRedirection(const RedirectionParams& redirParams){
 
 /*
  * \brief erases whole line and moves cursor to beginning of line
- *
+ * @param ofs output stream
  */
 void Shell::moveCursorToBackDisplayPrompt(ostream& ofs){
+    cursorPosition = 0; 
     ofs << eraseTillStartOfLine + moveCursorToBeginningOfLine;
     DisplayPrompt(ofs);
 }
 
+/*
+ * \brief move cursor right (wrapper)
+ * @param s input string
+ * @param ofs output stream
+ */
+void Shell::cursorOneRight(string&s, ostream& ofs){
+    incrementCursorPosition(s, cursorPosition);
+    moveCursorLeftRight(s, ofs);
+}
 
 /*
- * \brief erase last character and move the cursor one
- * step back
- *
+ * \brief move cursor left (wrapper)
+ * @param s input string
+ * @param ofs output stream
  */
-void Shell::eraseLastCharacter(string&s, ostream& ofs){
-    s.pop_back();
-    for (int i = 0; i < 3; i++){
+void Shell::cursorOneLeft(string&s, ostream& ofs){
+    decrementCursorPosition(s, cursorPosition);
+    moveCursorLeftRight(s, ofs);
+}
+
+/*
+ * \brief move cursor left or right
+ * @param s input string
+ * @param ofs output stream
+ */
+void Shell::moveCursorLeftRight(string&s, ostream& ofs){
+    for (int i = 0; i < 4; i++){
         ofs << moveCursorOneLeft << eraseCursorTillEndOfLine;
     }
+    ofs << moveCursorTillStart;
+    ofs << shellPrompt << s;
+    ofs << moveCursorTillStart;
+    for (int i = 0; i < shellPrompt.size() + cursorPosition; i++){
+        ofs << moveCursorOneRight;
+    }
+}
+
+/*
+ * \brief safely decrement cursor position
+ * @param s input string
+ * @param cursor cursorPosition
+ */
+void Shell::decrementCursorPosition(const string&s, int& cursor){
+    cursor = max(0,cursor-1);
+}
+
+/*
+ * \brief safely increment cursor position
+ * @param s input string
+ * @param cursor cursorPosition
+ */
+void Shell::incrementCursorPosition(const string&s, int& cursor){
+    cursor = min((int)s.size(), cursor+1);
+}
+
+/*
+ * \brief erase character and move the cursor one
+ * step back
+ * @param s input string
+ * @param ofs output stream
+ */
+void Shell::eraseCharacter(string&s, ostream& ofs){
+    // remove the 'erase sequence' printed to the screen 
+    for (int i = 0; i < 2; i++){
+        ofs << moveCursorOneLeft << eraseCursorTillEndOfLine; 
+    }
+    if (cursorPosition > 0){
+        // move it one more left to emulate an erased character
+        ofs << moveCursorOneLeft << eraseCursorTillEndOfLine;
+        decrementCursorPosition(s, cursorPosition);
+        s = s.substr(0, cursorPosition) + s.substr(cursorPosition+1);     
+        ofs << moveCursorTillStart;
+        ofs << shellPrompt << s;
+        ofs << moveCursorTillStart;
+        for (int i = 0; i < shellPrompt.size() + cursorPosition; i++){
+            ofs << moveCursorOneRight;
+        }
+    }
+}
+
+/*
+ * \brief insert character at cursorPosition
+ * @param s input string
+ * @param c input character
+ * @param cursor cursorPosition
+ * @param ofs output stream
+ */
+void Shell::insertCharacter(string& s, const char&c, int& cursor, ostream& ofs){
+    if (cursor == s.size()){
+        s += c;
+    } else {
+        s = s.substr(0,cursor) + c + s.substr(cursor);
+    }
+    ofs << moveCursorTillStart;
+    ofs << shellPrompt << s;
+    ofs << moveCursorTillStart;
+    for (int i = 0; i < shellPrompt.size()+cursorPosition+1; i++){
+        ofs << moveCursorOneRight;
+    }
+    incrementCursorPosition(s, cursorPosition);
 }
 
 /*
