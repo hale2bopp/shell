@@ -375,7 +375,8 @@ PipesErr Shell::HandlePipes(const Pipeline& pipeline, RedirectionParams& redirPa
                 return PipesExecErr;
             }
         }
-
+        // pid of root of pipe
+        pid_t rootPid;
         for (int i = 0; i < pipeline.numPipes+1; i++){
             pid_t cpid = fork();
             if (cpid < 0) {
@@ -388,6 +389,12 @@ PipesErr Shell::HandlePipes(const Pipeline& pipeline, RedirectionParams& redirPa
                         perror("unable to open stdin from previous pipe");
                         return PipesExecErr;
                     }
+                    // set all further pipes to the same pgid as the root
+                    setpgid(rootPid, 0);
+                } else {
+                    // if it is the first command in the pipe, store the pid
+                    rootPid = getpid();
+                    setpgid(rootPid, 0);
                 }
 
                 // dup2 stdout to next pipe
