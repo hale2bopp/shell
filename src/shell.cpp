@@ -251,8 +251,9 @@ void Shell::detectDoubleChar(const char& charDetect, int& numChar, vector<string
     }
     multipleChar = true;
     numChar++;
-
 }
+
+
 
 /**
  * \brief Tokenise entered input string from shell to extract command
@@ -266,37 +267,39 @@ vector<string> Shell::Tokenise(const string& s, const char& delimiter){
     // end on enter 
     vector<string> tokens;
     bool wordBoundaryFlag = true;
-    int numberOfRedirect = 0;
-    int numberOfPipe = 0;
-    bool multiplePipe = false;
-    bool multipleRedirect = false;
+    typedef struct _TemporaryCounts{
+        int numberOfRedirect = 0;
+        int numberOfPipe = 0;
+        int numberOfBg = 0;
+        bool multiplePipe = false;
+        bool multipleRedirect = false;
+        bool multipleBg = false;
+    } TemporaryCounts;
     string temp;
+    TemporaryCounts temporaryCounts = {0};
     for(int i = 0; i < s[i]; i++){
         switch(s[i]){
             case '>':
             case '<':
-                detectDoubleChar(s[i], numberOfRedirect, tokens, temp, wordBoundaryFlag, multipleRedirect);
+                detectDoubleChar(s[i], temporaryCounts.numberOfRedirect, tokens, temp, wordBoundaryFlag, temporaryCounts.multipleRedirect);
                 break;
             case ' ':
                 // if previous state was false
                 // this is a transition from finding a word
                 // to finding a space
                 tokenHelper(tokens, temp, wordBoundaryFlag);
-                multipleRedirect = false;
-                multiplePipe = false;
-                numberOfRedirect = 0;
-                numberOfPipe = 0;
+                temporaryCounts = {0};
                 break;
             case '|':
-                detectDoubleChar(s[i], numberOfPipe, tokens, temp, wordBoundaryFlag, multiplePipe);
+                detectDoubleChar(s[i], temporaryCounts.numberOfPipe, tokens, temp, wordBoundaryFlag, temporaryCounts.multiplePipe);
+                break;
+            case '&':
+                detectDoubleChar(s[i], temporaryCounts.numberOfBg, tokens, temp, wordBoundaryFlag, temporaryCounts.multipleBg);
                 break;
             default: 
                 temp.push_back(s[i]);
+                temporaryCounts = {0};
                 wordBoundaryFlag = false;
-                multipleRedirect = false;
-                multiplePipe = false;
-                numberOfPipe = 0;
-                numberOfRedirect = 0;
                 break;
         }
     }
@@ -411,8 +414,8 @@ PipesErr Shell::HandlePipes(const Pipeline& pipeline, RedirectionParams& redirPa
                     close(pipefd[j]);
                 }
                 RedirectionParams redirParams = {0};
-                RedirErr err = PostTokeniseProcessing(redirParams, pipeline.pipes[i]);
-                if (err!=RedirErrNone){
+                PostTokeniseProcessingErr err = PostTokeniseProcessing(redirParams, pipeline.pipes[i]);
+                if (err!=PostTokeniseProcessingErrNone){
                     perror("Wrong Redirection");
                     return PipesExecErr;
                 }
@@ -438,8 +441,8 @@ PipesErr Shell::HandlePipes(const Pipeline& pipeline, RedirectionParams& redirPa
         // no pipes
         if (fork() == 0){
             RedirectionParams redirParams = {0};
-            RedirErr err = PostTokeniseProcessing(redirParams, pipeline.pipes[0]);
-            if (err!=RedirErrNone){
+            PostTokeniseProcessingErr err = PostTokeniseProcessing(redirParams, pipeline.pipes[0]);
+            if (err!=PostTokeniseProcessingErrNone){
                 perror("Wrong Redirection");
                 return PipesExecErr;
             }
@@ -457,7 +460,7 @@ PipesErr Shell::HandlePipes(const Pipeline& pipeline, RedirectionParams& redirPa
  * \brief Check for Redirection and split out command
  * @param input vector of strings
  */
-RedirErr Shell::PostTokeniseProcessing(RedirectionParams& redirParams, const vector<string>& cmd){
+PostTokeniseProcessingErr Shell::PostTokeniseProcessing(RedirectionParams& redirParams, const vector<string>& cmd){
     redirParams.cmdEnd = cmd.size();
     ofstream outputFile;
     ifstream inputFile;
@@ -482,13 +485,19 @@ RedirErr Shell::PostTokeniseProcessing(RedirectionParams& redirParams, const vec
                 redirParams.inputRedirectionType = Input;
                 redirParams.infilename = cmd[redirParams.inputFileIndex];
         } 
+        if ((cmd[i] == "&" ) &&( i!=cmd.size()-1)){
+            return BgErrWrongPosition;
+        }
+        if (count(cmd[i].begin(), cmd[i].end(), '&') > 1) {
+            return BgErrDoubleBg;
+        }
     }
     if ((redirParams.outputFileIndex != 0) && (redirParams.inputFileIndex != 0) &&(redirParams.outputFileIndex <= redirParams.inputFileIndex)){
         return RedirErrWrongOrder; 
     }
     vector<string> inputCmd;
     redirParams.cmd.assign(cmd.begin()+redirParams.cmdStart, cmd.begin()+redirParams.cmdEnd);
-    return RedirErrNone; 
+    return PostTokeniseProcessingErrNone; 
 }
 
 /**

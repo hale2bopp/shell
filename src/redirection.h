@@ -7,10 +7,6 @@
 #define REDIRECTION_H
 
 #include <vector>
-enum RedirErr{
-    RedirErrNone = 0,
-    RedirErrWrongOrder = 1,
-};
 
 enum RedirectionType
 {

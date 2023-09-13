@@ -457,7 +457,7 @@ TEST_F(ShellTest, NoRedirectInputCmdFullCommand){
     vector<string> Cmd = {"echo", "\"hello\""};
     EXPECT_EQ(shell->Tokenise(s, ' '), Cmd);
     RedirectionParams redirParams = {0};
-    RedirErr err = shell->PostTokeniseProcessing(redirParams, Cmd);
+    PostTokeniseProcessingErr err = shell->PostTokeniseProcessing(redirParams, Cmd);
     EXPECT_EQ(redirParams.cmd, Cmd);
 }
 
@@ -471,9 +471,9 @@ TEST_F(ShellTest, WithRedirectInputCmd){
     vector<string> Cmd = {"echo", "\"hello\""};
     EXPECT_EQ(shell->Tokenise(s, ' '), fullCmd);
     RedirectionParams redirParams = {0};
-    RedirErr err = shell->PostTokeniseProcessing(redirParams, fullCmd);
+    PostTokeniseProcessingErr err = shell->PostTokeniseProcessing(redirParams, fullCmd);
     EXPECT_EQ(redirParams.cmd, Cmd);
-    EXPECT_EQ(err, RedirErrNone);
+    EXPECT_EQ(err, PostTokeniseProcessingErrNone);
 }
 
 TEST_F(ShellTest, PostTokeniseProcessingBoundsTest){
@@ -485,8 +485,8 @@ TEST_F(ShellTest, PostTokeniseProcessingBoundsTest){
     vector<string> Cmd = {"echo", "\"hello\""};
     EXPECT_EQ(shell->Tokenise(s, ' '), fullCmd);
     RedirectionParams redirParams = {0};
-    RedirErr err = shell->PostTokeniseProcessing(redirParams, fullCmd);
-    EXPECT_EQ(err, RedirErrNone);
+    PostTokeniseProcessingErr err = shell->PostTokeniseProcessing(redirParams, fullCmd);
+    EXPECT_EQ(err, PostTokeniseProcessingErrNone);
     EXPECT_EQ(redirParams.cmd.size(), 2);
     EXPECT_EQ(redirParams.cmd, Cmd);
     EXPECT_EQ(redirParams.cmdStart, 0);
@@ -503,8 +503,8 @@ TEST_F(ShellTest, TestTriggerRedirection){
     vector<string> Cmd = {"echo", "\"hello\""};
     EXPECT_EQ(shell->Tokenise(s, ' '), fullCmd);
     RedirectionParams redirParams = {0};
-    RedirErr err = shell->PostTokeniseProcessing(redirParams, fullCmd);
-    EXPECT_EQ(err, RedirErrNone);
+    PostTokeniseProcessingErr err = shell->PostTokeniseProcessing(redirParams, fullCmd);
+    EXPECT_EQ(err, PostTokeniseProcessingErrNone);
     EXPECT_EQ(redirParams.outputRedirectionType, OutputCreate);
     EXPECT_EQ(redirParams.inputRedirectionType, RedirNone);
 }
@@ -518,8 +518,8 @@ TEST_F(ShellTest, TestOutputfilename){
     vector<string> Cmd = {"echo", "\"hello\""};
     EXPECT_EQ(shell->Tokenise(s, ' '), fullCmd);
     RedirectionParams redirParams = {0};
-    RedirErr err = shell->PostTokeniseProcessing(redirParams, fullCmd);
-    EXPECT_EQ(err, RedirErrNone);
+    PostTokeniseProcessingErr err = shell->PostTokeniseProcessing(redirParams, fullCmd);
+    EXPECT_EQ(err, PostTokeniseProcessingErrNone);
     EXPECT_EQ(redirParams.outfilename, "test.txt");
 }
 TEST_F(ShellTest, InputRedirectionArgsTest){
@@ -532,9 +532,9 @@ TEST_F(ShellTest, InputRedirectionArgsTest){
     EXPECT_EQ(shell->Tokenise(s, ' '), fullCmd);
 
     RedirectionParams redirParams = {0};
-    RedirErr err = shell->PostTokeniseProcessing(redirParams, fullCmd);
+    PostTokeniseProcessingErr err = shell->PostTokeniseProcessing(redirParams, fullCmd);
 
-    EXPECT_EQ(err, RedirErrNone);
+    EXPECT_EQ(err, PostTokeniseProcessingErrNone);
     EXPECT_EQ(redirParams.cmd, cutCmd);
     EXPECT_EQ(redirParams.infilename, "cmd.txt");
 }
@@ -548,8 +548,8 @@ TEST_F(ShellTest, MultipleRedirectionArgsTest){
     vector<string> cutCmd = {"cat"};
     EXPECT_EQ(shell->Tokenise(s, ' '), fullCmd);
     RedirectionParams redirParams = {0};
-    RedirErr err = shell->PostTokeniseProcessing(redirParams, fullCmd);
-    EXPECT_EQ(err, RedirErrNone);
+    PostTokeniseProcessingErr err = shell->PostTokeniseProcessing(redirParams, fullCmd);
+    EXPECT_EQ(err, PostTokeniseProcessingErrNone);
     EXPECT_EQ(redirParams.infilename, "cmd.txt");
     EXPECT_EQ(redirParams.outfilename, "test.txt");
     EXPECT_EQ(redirParams.cmd, cutCmd);
@@ -567,7 +567,7 @@ TEST_F(ShellTest, WrongOrderRedirectionTest){
     EXPECT_EQ(shell->Tokenise(s, ' '), fullCmd);
 
     RedirectionParams redirParams = {0};
-    RedirErr err = shell->PostTokeniseProcessing(redirParams, fullCmd);
+    PostTokeniseProcessingErr err = shell->PostTokeniseProcessing(redirParams, fullCmd);
     EXPECT_EQ(err, RedirErrWrongOrder);
 }
  
@@ -677,3 +677,44 @@ TEST_F(ShellTest, ManyPipesProcessTest){
     EXPECT_EQ(pipeline.numPipes, 4);
 }
 
+TEST_F(ShellTest, DetectBgToken){
+
+    SetUp("no prompt", 10);
+    string s = "sleep 10 & \n";
+    vector<string> fullCmd = {"sleep", "10", "&"};
+    EXPECT_EQ(shell->Tokenise(s, ' '), fullCmd);
+    RedirectionParams redirParams = {0};
+    PostTokeniseProcessingErr err = shell->PostTokeniseProcessing(redirParams, fullCmd);
+    EXPECT_EQ(err, PostTokeniseProcessingErrNone);
+}
+
+TEST_F(ShellTest, DetectBgTokenNoSpace){
+
+    SetUp("no prompt", 10);
+    string s = "sleep 10& \n";
+    vector<string> fullCmd = {"sleep", "10", "&"};
+    EXPECT_EQ(shell->Tokenise(s, ' '), fullCmd);
+    RedirectionParams redirParams = {0};
+    PostTokeniseProcessingErr err = shell->PostTokeniseProcessing(redirParams, fullCmd);
+    EXPECT_EQ(err, PostTokeniseProcessingErrNone);
+}
+
+TEST_F(ShellTest, DetectDoubleBgToken){
+    SetUp("no prompt", 10);
+    string s = "sleep 10 && \n";
+    vector<string> fullCmd = {"sleep", "10", "&&"};
+    EXPECT_EQ(shell->Tokenise(s, ' '), fullCmd);
+    RedirectionParams redirParams = {0};
+    PostTokeniseProcessingErr err = shell->PostTokeniseProcessing(redirParams, fullCmd);
+    EXPECT_EQ(err, BgErrDoubleBg);
+}
+
+TEST_F(ShellTest, DetectTripleBgToken){
+    SetUp("no prompt", 10);
+    string s = "sleep 10 &&& \n";
+    vector<string> fullCmd = {"sleep", "10", "&&&"};
+    EXPECT_EQ(shell->Tokenise(s, ' '), fullCmd);
+    RedirectionParams redirParams = {0};
+    PostTokeniseProcessingErr err = shell->PostTokeniseProcessing(redirParams, fullCmd);
+    EXPECT_EQ(err, BgErrDoubleBg);
+}

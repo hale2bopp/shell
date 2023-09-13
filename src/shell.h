@@ -25,6 +25,14 @@ using namespace std;
 #define LEFT_ARROW 68
 #define ENTER 10
 #define ASCII_BACKSPACE 8
+#define BACKGROUND '&'
+
+enum PostTokeniseProcessingErr{
+    PostTokeniseProcessingErrNone = 0,
+    RedirErrWrongOrder = 1,
+    BgErrWrongPosition = 2,
+    BgErrDoubleBg = 3,
+};
 
 class CommandHistory{
 private:
@@ -109,7 +117,7 @@ public:
     vector<string> Tokenise(const string& s, const char &delimiter);
     PipesErr ParsePipes(vector<string> tokens, Pipeline& pipeline);
     PipesErr HandlePipes(const Pipeline& pipeline, RedirectionParams& redirPrams);
-    RedirErr PostTokeniseProcessing(RedirectionParams& redirParams, const vector<string>& cmd);
+    PostTokeniseProcessingErr PostTokeniseProcessing(RedirectionParams& redirParams, const vector<string>& cmd);
     void HandleRedirection(const RedirectionParams& redirParams);
     void printTokens(const vector<string> &input, ostream& ofs);   
 };
