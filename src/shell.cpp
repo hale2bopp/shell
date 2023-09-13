@@ -383,14 +383,17 @@ PipesErr Shell::HandlePipes(const Pipeline& pipeline, RedirectionParams& redirPa
                 perror("fork error");
                 return PipesExecErr;
             } else if (cpid == 0){
+                // set process group to itself
+                setpgrp();
                 // dup2 stdin from previous pipe 
                 if (i != 0){
+                    // set all further pipes to the same pgid as the root
+                    setpgid(rootPid, 0);
+
                     if (dup2(pipefd[(i-1)*2], fileno(stdin)) < 0){
                         perror("unable to open stdin from previous pipe");
                         return PipesExecErr;
                     }
-                    // set all further pipes to the same pgid as the root
-                    setpgid(rootPid, 0);
                 } else {
                     // if it is the first command in the pipe, store the pid
                     rootPid = getpid();
@@ -416,6 +419,10 @@ PipesErr Shell::HandlePipes(const Pipeline& pipeline, RedirectionParams& redirPa
                 HandleRedirection(redirParams);
                 ExecuteProgram(redirParams.cmd);
                 perror("unable to execute");           
+            } else {
+                // PARENT
+                // set process group of child
+                setpgid(cpid, cpid);
             }
         }
         // parent closes all of its copies at the end
