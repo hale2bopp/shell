@@ -41,11 +41,10 @@ private:
     int pgid;
     int pid;
     string cmdName;
+public:
     Pipeline pipeline = {0};
     RedirectionParams redirParams = {0} ;
-public:
-    Command();
-    ~Command();
+
     void SetIsInBackground(bool isBackground){
         m_isBackground = isBackground;
     }
@@ -132,8 +131,8 @@ public:
     void PutTerminalBackInNormalMode(void);
     vector<string> Tokenise(const string& s, const char &delimiter);
     PipesErr ParsePipes(vector<string> tokens, Pipeline& pipeline);
-    PipesErr HandlePipes(const Pipeline& pipeline, RedirectionParams& redirPrams);
-    PostTokeniseProcessingErr PostTokeniseProcessing(RedirectionParams& redirParams, const vector<string>& cmd);
+    PipesErr HandlePipes(Command& command);
+    PostTokeniseProcessingErr PostTokeniseProcessing(Command& command, const vector<string> &cmd);
     void HandleRedirection(const RedirectionParams& redirParams);
     void printTokens(const vector<string> &input, ostream& ofs);   
 };

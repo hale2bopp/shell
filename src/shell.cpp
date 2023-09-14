@@ -340,7 +340,7 @@ void Shell::setCmdEnd(RedirectionParams& redirParams, const int& index){
  * @param input vector of strings 
  * @param pipeline struct
  */
-PipesErr Shell::ParsePipes(vector<string> tokens, Pipeline& pipeline){    
+PipesErr Shell::ParsePipes(vector<string> tokens, Pipeline& pipeline){
     vector<string> temp;
     for (int i = 0; i < tokens.size(); i++){
         if (tokens[i] == "|"){
@@ -368,16 +368,16 @@ PipesErr Shell::ParsePipes(vector<string> tokens, Pipeline& pipeline){
  * @param pipeline struct 
  * @param redirParams redirection parameters
  */
-PipesErr Shell::HandlePipes(const Pipeline& pipeline, RedirectionParams& redirParams){
+PipesErr Shell::HandlePipes(Command& command){
 //    bool isBackground = false;
 //    int lastPipeSize = pipeline.pipes[pipeline.numPipes].size();
 //    if (pipeline.pipes[pipeline.numPipes][lastPipeSize-1] != "&"){
 //        pipeline.pipes[pipeline.numPipes].pop_back();
 //        isBackground = true;
 //    }
-    if (pipeline.numPipes > 0){
-        int pipefd[2*pipeline.numPipes];
-        for (int i = 0; i < pipeline.numPipes; i++){
+    if (command.pipeline.numPipes > 0){
+        int pipefd[2*command.pipeline.numPipes];
+        for (int i = 0; i < command.pipeline.numPipes; i++){
             // create a pipe using pipe(2)         
             if(pipe(pipefd+(i*2)) < 0 ) {
                 perror("Pipe failed");
@@ -386,7 +386,7 @@ PipesErr Shell::HandlePipes(const Pipeline& pipeline, RedirectionParams& redirPa
         }
         // pid of root of pipe
         pid_t rootPid;
-        for (int i = 0; i < pipeline.numPipes+1; i++){
+        for (int i = 0; i < command.pipeline.numPipes+1; i++){
             pid_t cpid = fork();
             if (cpid < 0) {
                 perror("fork error");
@@ -410,23 +410,23 @@ PipesErr Shell::HandlePipes(const Pipeline& pipeline, RedirectionParams& redirPa
                 }
 
                 // dup2 stdout to next pipe
-                if (i != pipeline.numPipes) {
+                if (i != command.pipeline.numPipes) {
                     if (dup2(pipefd[(i*2)+1], fileno(stdout)) < 0){
                         perror("unable to open stdout to next pipe");
                         return PipesExecErr;
                     }
                 }
-                for( int j = 0; j < 2*pipeline.numPipes; j++){
+                for( int j = 0; j < 2*command.pipeline.numPipes; j++){
                     close(pipefd[j]);
                 }
-                RedirectionParams redirParams = {0};
-                PostTokeniseProcessingErr err = PostTokeniseProcessing(redirParams, pipeline.pipes[i]);
+                //RedirectionParams redirParams = {0};
+                PostTokeniseProcessingErr err = PostTokeniseProcessing(command, command.pipeline.pipes[i]);
                 if (err!=PostTokeniseProcessingErrNone){
                     perror("Wrong Redirection");
                     return PipesExecErr;
                 }
-                HandleRedirection(redirParams);
-                ExecuteProgram(redirParams.cmd);
+                HandleRedirection(command.redirParams);
+                ExecuteProgram(command.redirParams.cmd);
                 perror("unable to execute");           
             } else {
                 // PARENT
@@ -435,7 +435,7 @@ PipesErr Shell::HandlePipes(const Pipeline& pipeline, RedirectionParams& redirPa
             }
         }
         // parent closes all of its copies at the end
-        for( int i = 0; i < 2 * pipeline.numPipes; i++ ){
+        for( int i = 0; i < 2 * command.pipeline.numPipes; i++ ){
             close( pipefd[i] );
         }
 
@@ -443,21 +443,20 @@ PipesErr Shell::HandlePipes(const Pipeline& pipeline, RedirectionParams& redirPa
         // Check whether the last token of last pipe
         // is a background symbol. if so, do not wait
 //        if (isBackground){
-            for(int i = 0; i < pipeline.numPipes+1; i++){
+            for(int i = 0; i < command.pipeline.numPipes+1; i++){
                 wait(NULL);
             }
 //        }
     } else {
         // no pipes
         if (fork() == 0){
-            RedirectionParams redirParams = {0};
-            PostTokeniseProcessingErr err = PostTokeniseProcessing(redirParams, pipeline.pipes[0]);
+            PostTokeniseProcessingErr err = PostTokeniseProcessing(command, command.pipeline.pipes[0]);
             if (err!=PostTokeniseProcessingErrNone){
                 perror("Wrong Redirection");
                 return PipesExecErr;
             }
-            HandleRedirection(redirParams);
-            ExecuteProgram(redirParams.cmd);
+            HandleRedirection(command.redirParams);
+            ExecuteProgram(command.redirParams.cmd);
             perror("unable to execute");
         } else {
             wait(NULL);
@@ -470,30 +469,30 @@ PipesErr Shell::HandlePipes(const Pipeline& pipeline, RedirectionParams& redirPa
  * \brief Check for Redirection and split out command
  * @param input vector of strings
  */
-PostTokeniseProcessingErr Shell::PostTokeniseProcessing(RedirectionParams& redirParams, const vector<string>& cmd){
-    redirParams.cmdEnd = cmd.size();
+PostTokeniseProcessingErr Shell::PostTokeniseProcessing(Command& command, const vector<string>& cmd){
+    command.redirParams.cmdEnd = cmd.size();
     ofstream outputFile;
     ifstream inputFile;
     for (int i = 0; i < cmd.size(); i++){
         if (cmd[i] == ">"){
-                redirParams.outputRedirectionType = OutputCreate;
-                redirParams.outputFileIndex = i+1;
-                setCmdEnd(redirParams,i);
-                redirParams.outfilename = cmd[redirParams.outputFileIndex];
+                command.redirParams.outputRedirectionType = OutputCreate;
+                command.redirParams.outputFileIndex = i+1;
+                setCmdEnd(command.redirParams,i);
+                command.redirParams.outfilename = cmd[command.redirParams.outputFileIndex];
         } else if (cmd[i] == ">>"){
-                redirParams.outputRedirectionType = OutputAppend;
-                redirParams.outputFileIndex = i+1;
-                setCmdEnd(redirParams,i);
-                redirParams.outfilename = cmd[redirParams.outputFileIndex];
+                command.redirParams.outputRedirectionType = OutputAppend;
+                command.redirParams.outputFileIndex = i+1;
+                setCmdEnd(command.redirParams,i);
+                command.redirParams.outfilename = cmd[command.redirParams.outputFileIndex];
         } else if (cmd[i] == "<") {
-                redirParams.inputRedirectionType = Input;
-                redirParams.inputFileIndex = i+1;
-                setCmdEnd(redirParams,i);
-                redirParams.infilename = cmd[redirParams.inputFileIndex];
+                command.redirParams.inputRedirectionType = Input;
+                command.redirParams.inputFileIndex = i+1;
+                setCmdEnd(command.redirParams,i);
+                command.redirParams.infilename = cmd[command.redirParams.inputFileIndex];
         } else if (cmd[i] == "<<"){
-                setCmdEnd(redirParams,i);
-                redirParams.inputRedirectionType = Input;
-                redirParams.infilename = cmd[redirParams.inputFileIndex];
+                setCmdEnd(command.redirParams,i);
+                command.redirParams.inputRedirectionType = Input;
+                command.redirParams.infilename = cmd[command.redirParams.inputFileIndex];
         } 
         if ((cmd[i] == "&" ) &&( i!=cmd.size()-1)){
             return BgErrWrongPosition;
@@ -502,11 +501,11 @@ PostTokeniseProcessingErr Shell::PostTokeniseProcessing(RedirectionParams& redir
             return BgErrDoubleBg;
         }
     }
-    if ((redirParams.outputFileIndex != 0) && (redirParams.inputFileIndex != 0) &&(redirParams.outputFileIndex <= redirParams.inputFileIndex)){
+    if ((command.redirParams.outputFileIndex != 0) && (command.redirParams.inputFileIndex != 0) &&(command.redirParams.outputFileIndex <= command.redirParams.inputFileIndex)){
         return RedirErrWrongOrder; 
     }
     vector<string> inputCmd;
-    redirParams.cmd.assign(cmd.begin()+redirParams.cmdStart, cmd.begin()+redirParams.cmdEnd);
+    command.redirParams.cmd.assign(cmd.begin()+command.redirParams.cmdStart, cmd.begin()+command.redirParams.cmdEnd);
     return PostTokeniseProcessingErrNone; 
 }
 

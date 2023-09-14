@@ -16,14 +16,15 @@ int main(void){
         vector<string> tokens = shell.Tokenise(shellInput, ' ');
         shell.GetCommandHistory()->MainWrapperAddCmdToHistory(shellInput);
         fflush(stdout);
-        Pipeline pipeline = {0};
-        PipesErr pipesErr = shell.ParsePipes(tokens, pipeline);
+        Command command;
+//        Pipeline pipeline = {0};
+        PipesErr pipesErr = shell.ParsePipes(tokens, command.pipeline);
         if (pipesErr!=PipesErrNone){
             perror("error in parsing pipes");
             continue;
         }
-        RedirectionParams redirParams = {0};
-        pipesErr = shell.HandlePipes(pipeline, redirParams);
+//        RedirectionParams redirParams = {0};
+        pipesErr = shell.HandlePipes(command);
         if (pipesErr!=PipesErrNone){
             perror("error in handling pipes");
             continue;
