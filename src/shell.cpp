@@ -442,11 +442,11 @@ PipesErr Shell::HandlePipes(const Pipeline& pipeline, RedirectionParams& redirPa
         // waits for children
         // Check whether the last token of last pipe
         // is a background symbol. if so, do not wait
-        if (isBackground){
+//        if (isBackground){
             for(int i = 0; i < pipeline.numPipes+1; i++){
                 wait(NULL);
             }
-        }
+//        }
     } else {
         // no pipes
         if (fork() == 0){
