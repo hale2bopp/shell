@@ -41,7 +41,8 @@ private:
     int pgid;
     int pid;
     string cmdName;
-    Pipeline pipeline;
+    Pipeline pipeline = {0};
+    RedirectionParams redirParams = {0} ;
 public:
     Command();
     ~Command();
