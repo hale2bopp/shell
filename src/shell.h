@@ -45,8 +45,11 @@ public:
     Pipeline pipeline = {0};
     RedirectionParams redirParams = {0} ;
 
-    void SetIsInBackground(bool isBackground){
+    void SetIsBackground(bool isBackground){
         m_isBackground = isBackground;
+    }
+    bool GetIsBackground(void){
+        return m_isBackground;
     }
 };
 
@@ -130,9 +133,9 @@ public:
     void PutTerminalInPerCharMode(void);
     void PutTerminalBackInNormalMode(void);
     vector<string> Tokenise(const string& s, const char &delimiter);
-    PipesErr ParsePipes(vector<string> tokens, Pipeline& pipeline);
+    PipesErr ParsePipes(vector<string> tokens, Command& command);
     PipesErr HandlePipes(Command& command);
-    PostTokeniseProcessingErr PostTokeniseProcessing(Command& command, const vector<string> &cmd);
+    PostTokeniseProcessingErr PostTokeniseProcessing(RedirectionParams& redirParams, const vector<string> &cmd);
     void HandleRedirection(const RedirectionParams& redirParams);
     void printTokens(const vector<string> &input, ostream& ofs);   
 };

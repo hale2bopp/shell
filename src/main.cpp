@@ -17,13 +17,11 @@ int main(void){
         shell.GetCommandHistory()->MainWrapperAddCmdToHistory(shellInput);
         fflush(stdout);
         Command command;
-//        Pipeline pipeline = {0};
-        PipesErr pipesErr = shell.ParsePipes(tokens, command.pipeline);
+        PipesErr pipesErr = shell.ParsePipes(tokens, command);
         if (pipesErr!=PipesErrNone){
             perror("error in parsing pipes");
             continue;
         }
-//        RedirectionParams redirParams = {0};
         pipesErr = shell.HandlePipes(command);
         if (pipesErr!=PipesErrNone){
             perror("error in handling pipes");

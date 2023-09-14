@@ -340,7 +340,7 @@ void Shell::setCmdEnd(RedirectionParams& redirParams, const int& index){
  * @param input vector of strings 
  * @param pipeline struct
  */
-PipesErr Shell::ParsePipes(vector<string> tokens, Pipeline& pipeline){
+PipesErr Shell::ParsePipes(vector<string> tokens, Command& command){
     vector<string> temp;
     for (int i = 0; i < tokens.size(); i++){
         if (tokens[i] == "|"){
@@ -350,16 +350,22 @@ PipesErr Shell::ParsePipes(vector<string> tokens, Pipeline& pipeline){
             }
             // create a new set of commands 
             // open input and output pipes
-            pipeline.pipes.push_back(temp);
+            command.pipeline.pipes.push_back(temp);
             temp.clear();
-            pipeline.numPipes++;
+            command.pipeline.numPipes++;
         } else if (count(tokens[i].begin(), tokens[i].end(), '|') > 1) {
             return PipesDoublePipe;
         } else {
             temp.push_back(tokens[i]);
         }
     }
-    pipeline.pipes.push_back(temp);
+    command.pipeline.pipes.push_back(temp);
+    int lastPipeSize = command.pipeline.pipes[command.pipeline.numPipes].size();
+    if (command.pipeline.pipes[command.pipeline.numPipes][lastPipeSize-1] == "&"){
+        command.pipeline.pipes[command.pipeline.numPipes].pop_back();
+        command.SetIsBackground(true);
+    }
+ 
     return PipesErrNone;
 }
 
@@ -419,8 +425,9 @@ PipesErr Shell::HandlePipes(Command& command){
                 for( int j = 0; j < 2*command.pipeline.numPipes; j++){
                     close(pipefd[j]);
                 }
-                //RedirectionParams redirParams = {0};
-                PostTokeniseProcessingErr err = PostTokeniseProcessing(command, command.pipeline.pipes[i]);
+                // reset redirection params 
+                command.redirParams = {0};
+                PostTokeniseProcessingErr err = PostTokeniseProcessing(command.redirParams, command.pipeline.pipes[i]);
                 if (err!=PostTokeniseProcessingErrNone){
                     perror("Wrong Redirection");
                     return PipesExecErr;
@@ -442,15 +449,16 @@ PipesErr Shell::HandlePipes(Command& command){
         // waits for children
         // Check whether the last token of last pipe
         // is a background symbol. if so, do not wait
-//        if (isBackground){
+        if (!command.GetIsBackground()){
             for(int i = 0; i < command.pipeline.numPipes+1; i++){
                 wait(NULL);
             }
-//        }
+        }
     } else {
         // no pipes
         if (fork() == 0){
-            PostTokeniseProcessingErr err = PostTokeniseProcessing(command, command.pipeline.pipes[0]);
+            command.redirParams = {0};
+            PostTokeniseProcessingErr err = PostTokeniseProcessing(command.redirParams, command.pipeline.pipes[0]);
             if (err!=PostTokeniseProcessingErrNone){
                 perror("Wrong Redirection");
                 return PipesExecErr;
@@ -469,30 +477,30 @@ PipesErr Shell::HandlePipes(Command& command){
  * \brief Check for Redirection and split out command
  * @param input vector of strings
  */
-PostTokeniseProcessingErr Shell::PostTokeniseProcessing(Command& command, const vector<string>& cmd){
-    command.redirParams.cmdEnd = cmd.size();
+PostTokeniseProcessingErr Shell::PostTokeniseProcessing(RedirectionParams& redirParams, const vector<string>& cmd){
+    redirParams.cmdEnd = cmd.size();
     ofstream outputFile;
     ifstream inputFile;
     for (int i = 0; i < cmd.size(); i++){
         if (cmd[i] == ">"){
-                command.redirParams.outputRedirectionType = OutputCreate;
-                command.redirParams.outputFileIndex = i+1;
-                setCmdEnd(command.redirParams,i);
-                command.redirParams.outfilename = cmd[command.redirParams.outputFileIndex];
+                redirParams.outputRedirectionType = OutputCreate;
+                redirParams.outputFileIndex = i+1;
+                setCmdEnd(redirParams,i);
+                redirParams.outfilename = cmd[redirParams.outputFileIndex];
         } else if (cmd[i] == ">>"){
-                command.redirParams.outputRedirectionType = OutputAppend;
-                command.redirParams.outputFileIndex = i+1;
-                setCmdEnd(command.redirParams,i);
-                command.redirParams.outfilename = cmd[command.redirParams.outputFileIndex];
+                redirParams.outputRedirectionType = OutputAppend;
+                redirParams.outputFileIndex = i+1;
+                setCmdEnd(redirParams,i);
+                redirParams.outfilename = cmd[redirParams.outputFileIndex];
         } else if (cmd[i] == "<") {
-                command.redirParams.inputRedirectionType = Input;
-                command.redirParams.inputFileIndex = i+1;
-                setCmdEnd(command.redirParams,i);
-                command.redirParams.infilename = cmd[command.redirParams.inputFileIndex];
+                redirParams.inputRedirectionType = Input;
+                redirParams.inputFileIndex = i+1;
+                setCmdEnd(redirParams,i);
+                redirParams.infilename = cmd[redirParams.inputFileIndex];
         } else if (cmd[i] == "<<"){
-                setCmdEnd(command.redirParams,i);
-                command.redirParams.inputRedirectionType = Input;
-                command.redirParams.infilename = cmd[command.redirParams.inputFileIndex];
+                setCmdEnd(redirParams,i);
+                redirParams.inputRedirectionType = Input;
+                redirParams.infilename = cmd[redirParams.inputFileIndex];
         } 
         if ((cmd[i] == "&" ) &&( i!=cmd.size()-1)){
             return BgErrWrongPosition;
@@ -500,12 +508,18 @@ PostTokeniseProcessingErr Shell::PostTokeniseProcessing(Command& command, const 
         if (count(cmd[i].begin(), cmd[i].end(), '&') > 1) {
             return BgErrDoubleBg;
         }
+        
     }
-    if ((command.redirParams.outputFileIndex != 0) && (command.redirParams.inputFileIndex != 0) &&(command.redirParams.outputFileIndex <= command.redirParams.inputFileIndex)){
+    if ((redirParams.outputFileIndex != 0) && (redirParams.inputFileIndex != 0) &&(redirParams.outputFileIndex <= redirParams.inputFileIndex)){
         return RedirErrWrongOrder; 
     }
+//    int lastPipeSize = command.pipeline.pipes[command.pipeline.numPipes].size();
+//    if (command.pipeline.pipes[command.pipeline.numPipes][lastPipeSize-1] == "&"){
+//        command.pipeline.pipes[command.pipeline.numPipes].pop_back();
+//        command.SetIsBackground(true);
+//    }
     vector<string> inputCmd;
-    command.redirParams.cmd.assign(cmd.begin()+command.redirParams.cmdStart, cmd.begin()+command.redirParams.cmdEnd);
+    redirParams.cmd.assign(cmd.begin()+redirParams.cmdStart, cmd.begin()+redirParams.cmdEnd);
     return PostTokeniseProcessingErrNone; 
 }
 
