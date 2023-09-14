@@ -34,12 +34,27 @@ enum PostTokeniseProcessingErr{
     BgErrDoubleBg = 3,
 };
 
+class Command{
+private:
+    Command *next;  
+    bool m_isBackground;
+    int pgid;
+    int pid;
+    string cmdName;
+    Pipeline pipeline;
+public:
+    Command();
+    ~Command();
+    void SetIsInBackground(bool isBackground){
+        m_isBackground = isBackground;
+    }
+};
+
 class CommandHistory{
 private:
     int maxCmdHistorySize;
     string savedCurrentInput;
     int currentHistoryIndex = 0;
-
 public: 
     bool SetSavedCurrentInputFlag= true;
     CommandHistory(){}

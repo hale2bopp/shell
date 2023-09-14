@@ -718,3 +718,21 @@ TEST_F(ShellTest, DetectTripleBgToken){
     PostTokeniseProcessingErr err = shell->PostTokeniseProcessing(redirParams, fullCmd);
     EXPECT_EQ(err, BgErrDoubleBg);
 }
+
+TEST_F(ShellTest, CheckLastCharOfPipeTest){
+    SetUp("no prompt", 10);
+    string s = "sleep 10 |sleep 10 |sleep 10 &\n";
+    vector<string> fullCmd = {"sleep", "10", "|", "sleep", "10", "|", "sleep", "10", "&"};
+    Pipeline pipeline = {0};
+    EXPECT_EQ(shell->Tokenise(s, ' '), fullCmd);
+    vector<vector<string>> correctPipes = {{"sleep", "10"}, {"sleep", "10"}, {"sleep", "10", "&"}};
+    EXPECT_EQ(shell->ParsePipes(fullCmd, pipeline), PipesErrNone);
+    EXPECT_EQ(pipeline.pipes, correctPipes);
+    EXPECT_EQ(pipeline.numPipes, 2);
+    int lastPipeSize = pipeline.pipes[pipeline.numPipes].size();
+    cout << "strings equal" << endl;
+//    cout << "pipeline.pipes[pipeline.numPipes-1]: " << pipeline.pipes[pipeline.numPipes-1] << endl;
+    cout << "pipeline.pipes[pipeline.numPipes-1][lastPipeSize]: " << pipeline.pipes[pipeline.numPipes][lastPipeSize-1] << endl;
+    EXPECT_EQ(pipeline.pipes[pipeline.numPipes][lastPipeSize-1], "&");
+}
+

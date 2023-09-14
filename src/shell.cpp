@@ -369,6 +369,12 @@ PipesErr Shell::ParsePipes(vector<string> tokens, Pipeline& pipeline){
  * @param redirParams redirection parameters
  */
 PipesErr Shell::HandlePipes(const Pipeline& pipeline, RedirectionParams& redirParams){
+//    bool isBackground = false;
+//    int lastPipeSize = pipeline.pipes[pipeline.numPipes].size();
+//    if (pipeline.pipes[pipeline.numPipes][lastPipeSize-1] != "&"){
+//        pipeline.pipes[pipeline.numPipes].pop_back();
+//        isBackground = true;
+//    }
     if (pipeline.numPipes > 0){
         int pipefd[2*pipeline.numPipes];
         for (int i = 0; i < pipeline.numPipes; i++){
@@ -434,8 +440,12 @@ PipesErr Shell::HandlePipes(const Pipeline& pipeline, RedirectionParams& redirPa
         }
 
         // waits for children
-        for(int i = 0; i < pipeline.numPipes+1; i++){
-            wait(NULL);
+        // Check whether the last token of last pipe
+        // is a background symbol. if so, do not wait
+        if (isBackground){
+            for(int i = 0; i < pipeline.numPipes+1; i++){
+                wait(NULL);
+            }
         }
     } else {
         // no pipes
