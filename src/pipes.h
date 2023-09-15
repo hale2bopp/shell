@@ -14,15 +14,9 @@ enum PipesErr{
     PipesExecErr = 3,
 };
 
-typedef struct _PipeSegment {
-    std::vector<std::string> cmd;
-    int cpid;
-    Redirectio
-} PipeSegment;
-
 typedef struct _Pipeline {
     int numPipes;
-    std::vector<PipeSegment> pipes;
+    std::vector<std::vector<std::string>> pipes;
 } Pipeline;
 
 #endif  // PIPES_H

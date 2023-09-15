@@ -342,7 +342,6 @@ void Shell::setCmdEnd(RedirectionParams& redirParams, const int& index){
  */
 PipesErr Shell::ParsePipes(vector<string> tokens, Command& command){
     vector<string> temp;
-
     for (int i = 0; i < tokens.size(); i++){
         if (tokens[i] == "|"){
             if (i == tokens.size()-1){
@@ -351,8 +350,7 @@ PipesErr Shell::ParsePipes(vector<string> tokens, Command& command){
             }
             // create a new set of commands 
             // open input and output pipes
-            
-            command.pipeline.pipes.cmd.push_back(temp);
+            command.pipeline.pipes.push_back(temp);
             temp.clear();
             command.pipeline.numPipes++;
         } else if (count(tokens[i].begin(), tokens[i].end(), '|') > 1) {
@@ -361,11 +359,10 @@ PipesErr Shell::ParsePipes(vector<string> tokens, Command& command){
             temp.push_back(tokens[i]);
         }
     }
-
-    command.pipeline.pipes.cmd.push_back(temp);
-    int lastPipeSize = command.pipeline.pipes[command.pipeline.numPipes].cmd.size();
-    if (command.pipeline.pipes[command.pipeline.numPipes].cmd[lastPipeSize-1] == "&"){
-//        command.pipeline.pipes[command.pipeline.numPipes].cmd.pop_back();
+    command.pipeline.pipes.push_back(temp);
+    int lastPipeSize = command.pipeline.pipes[command.pipeline.numPipes].size();
+    if (command.pipeline.pipes[command.pipeline.numPipes][lastPipeSize-1] == "&"){
+        command.pipeline.pipes[command.pipeline.numPipes].pop_back();
         command.SetIsBackground(true);
     }
  
@@ -378,6 +375,12 @@ PipesErr Shell::ParsePipes(vector<string> tokens, Command& command){
  * @param redirParams redirection parameters
  */
 PipesErr Shell::HandlePipes(Command& command){
+//    bool isBackground = false;
+//    int lastPipeSize = pipeline.pipes[pipeline.numPipes].size();
+//    if (pipeline.pipes[pipeline.numPipes][lastPipeSize-1] != "&"){
+//        pipeline.pipes[pipeline.numPipes].pop_back();
+//        isBackground = true;
+//    }
     if (command.pipeline.numPipes > 0){
         int pipefd[2*command.pipeline.numPipes];
         for (int i = 0; i < command.pipeline.numPipes; i++){
@@ -424,7 +427,7 @@ PipesErr Shell::HandlePipes(Command& command){
                 }
                 // reset redirection params 
                 command.redirParams = {0};
-                PostTokeniseProcessingErr err = PostTokeniseProcessing(command.redirParams, command.pipeline.pipes.str[i]);
+                PostTokeniseProcessingErr err = PostTokeniseProcessing(command.redirParams, command.pipeline.pipes[i]);
                 if (err!=PostTokeniseProcessingErrNone){
                     perror("Wrong Redirection");
                     return PipesExecErr;
@@ -455,7 +458,7 @@ PipesErr Shell::HandlePipes(Command& command){
         // no pipes
         if (fork() == 0){
             command.redirParams = {0};
-            PostTokeniseProcessingErr err = PostTokeniseProcessing(command.redirParams, command.pipeline.pipes.str[0]);
+            PostTokeniseProcessingErr err = PostTokeniseProcessing(command.redirParams, command.pipeline.pipes[0]);
             if (err!=PostTokeniseProcessingErrNone){
                 perror("Wrong Redirection");
                 return PipesExecErr;
