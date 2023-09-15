@@ -39,9 +39,9 @@ private:
     Command *next;  
     bool m_isBackground;
     int pgid;
-    int pid;
     string cmdName;
 public:
+    vector<int> cpid;
     Pipeline pipeline = {0};
     RedirectionParams redirParams = {0} ;
 

@@ -375,12 +375,6 @@ PipesErr Shell::ParsePipes(vector<string> tokens, Command& command){
  * @param redirParams redirection parameters
  */
 PipesErr Shell::HandlePipes(Command& command){
-//    bool isBackground = false;
-//    int lastPipeSize = pipeline.pipes[pipeline.numPipes].size();
-//    if (pipeline.pipes[pipeline.numPipes][lastPipeSize-1] != "&"){
-//        pipeline.pipes[pipeline.numPipes].pop_back();
-//        isBackground = true;
-//    }
     if (command.pipeline.numPipes > 0){
         int pipefd[2*command.pipeline.numPipes];
         for (int i = 0; i < command.pipeline.numPipes; i++){
@@ -400,8 +394,14 @@ PipesErr Shell::HandlePipes(Command& command){
             } else if (cpid == 0){
                 // set process group to itself
                 setpgrp();
+                pid_t pid = getpid();
+                command.cpid.push_back(pid);
                 // dup2 stdin from previous pipe 
-                if (i != 0){
+                if (i == 0){
+                    // if it is the first command in the pipe, store the pid
+                    rootPid = getpid();
+                    setpgid(rootPid, 0);
+                } else {
                     // set all further pipes to the same pgid as the root
                     setpgid(rootPid, 0);
 
@@ -409,10 +409,6 @@ PipesErr Shell::HandlePipes(Command& command){
                         perror("unable to open stdin from previous pipe");
                         return PipesExecErr;
                     }
-                } else {
-                    // if it is the first command in the pipe, store the pid
-                    rootPid = getpid();
-                    setpgid(rootPid, 0);
                 }
 
                 // dup2 stdout to next pipe
@@ -450,13 +446,26 @@ PipesErr Shell::HandlePipes(Command& command){
         // Check whether the last token of last pipe
         // is a background symbol. if so, do not wait
         if (!command.GetIsBackground()){
-            for(int i = 0; i < command.pipeline.numPipes+1; i++){
-                wait(NULL);
+            cout << "waiting for children " << endl;
+            for(int i = command.pipeline.numPipes; i >= 0; i--){
+                int retVal = 0;
+                if(waitpid(command.cpid[i], &retVal, 0)){
+                    //Report child exited with return status 'return'
+                    //Remove child (linked list style)
+                    cout << "child exited: "<< command.cpid[i] << endl;
+                    command.cpid.pop_back();
+//                wait(NULL);
+                }
             }
+        } else {
+            cout << "not waiting" << endl;
         }
     } else {
         // no pipes
-        if (fork() == 0){
+        pid_t cpid = fork();
+        pid_t pid;
+        if (cpid == 0){
+            pid = getpid();
             command.redirParams = {0};
             PostTokeniseProcessingErr err = PostTokeniseProcessing(command.redirParams, command.pipeline.pipes[0]);
             if (err!=PostTokeniseProcessingErrNone){
@@ -467,7 +476,13 @@ PipesErr Shell::HandlePipes(Command& command){
             ExecuteProgram(command.redirParams.cmd);
             perror("unable to execute");
         } else {
-            wait(NULL);
+            int retVal;
+            if (!command.GetIsBackground()){
+                if(waitpid(pid, &retVal, 0)){
+                    cout << "child exited" << endl;
+                }
+//                wait(NULL);
+            }        
         }
     }
     return PipesErrNone;
