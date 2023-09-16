@@ -397,7 +397,6 @@ PipesErr Shell::HandlePipes(Command& command){
             } else if (cpid == 0){
                 // set process group to itself
                 setpgrp();
-                pid_t pid = getpid();
                 command.cpid.push_back(cpid);
                 // dup2 stdin from previous pipe 
                 if (i == 0){
@@ -461,9 +460,7 @@ PipesErr Shell::HandlePipes(Command& command){
     } else {
         // no pipes
         pid_t cpid = fork();
-        pid_t pid;
         if (cpid == 0){
-            pid = getpid();
             command.redirParams = {0};
             PostTokeniseProcessingErr err = PostTokeniseProcessing(command.redirParams, command.pipeline.pipes[0]);
             if (err!=PostTokeniseProcessingErrNone){
