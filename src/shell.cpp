@@ -360,10 +360,13 @@ PipesErr Shell::ParsePipes(vector<string> tokens, Command& command){
         }
     }
     command.pipeline.pipes.push_back(temp);
+   
     int lastPipeSize = command.pipeline.pipes[command.pipeline.numPipes].size();
-    if (command.pipeline.pipes[command.pipeline.numPipes][lastPipeSize-1] == "&"){
-        command.pipeline.pipes[command.pipeline.numPipes].pop_back();
-        command.SetIsBackground(true);
+    if (lastPipeSize >0){
+        if (command.pipeline.pipes[command.pipeline.numPipes][lastPipeSize-1] == "&"){
+            command.pipeline.pipes[command.pipeline.numPipes].pop_back();
+            command.SetIsBackground(true);
+        }
     }
  
     return PipesErrNone;
@@ -395,7 +398,7 @@ PipesErr Shell::HandlePipes(Command& command){
                 // set process group to itself
                 setpgrp();
                 pid_t pid = getpid();
-                command.cpid.push_back(pid);
+                command.cpid.push_back(cpid);
                 // dup2 stdin from previous pipe 
                 if (i == 0){
                     // if it is the first command in the pipe, store the pid
@@ -446,20 +449,15 @@ PipesErr Shell::HandlePipes(Command& command){
         // Check whether the last token of last pipe
         // is a background symbol. if so, do not wait
         if (!command.GetIsBackground()){
-            cout << "waiting for children " << endl;
             for(int i = command.pipeline.numPipes; i >= 0; i--){
                 int retVal = 0;
                 if(waitpid(command.cpid[i], &retVal, 0)){
                     //Report child exited with return status 'return'
                     //Remove child (linked list style)
-                    cout << "child exited: "<< command.cpid[i] << endl;
                     command.cpid.pop_back();
-//                wait(NULL);
                 }
             }
-        } else {
-            cout << "not waiting" << endl;
-        }
+        } 
     } else {
         // no pipes
         pid_t cpid = fork();
@@ -478,10 +476,10 @@ PipesErr Shell::HandlePipes(Command& command){
         } else {
             int retVal;
             if (!command.GetIsBackground()){
-                if(waitpid(pid, &retVal, 0)){
-                    cout << "child exited" << endl;
+                if(waitpid(cpid, &retVal, 0) < 0){
+                    perror("waitpid error");
+                    return PipesExecErr;
                 }
-//                wait(NULL);
             }        
         }
     }
@@ -528,11 +526,6 @@ PostTokeniseProcessingErr Shell::PostTokeniseProcessing(RedirectionParams& redir
     if ((redirParams.outputFileIndex != 0) && (redirParams.inputFileIndex != 0) &&(redirParams.outputFileIndex <= redirParams.inputFileIndex)){
         return RedirErrWrongOrder; 
     }
-//    int lastPipeSize = command.pipeline.pipes[command.pipeline.numPipes].size();
-//    if (command.pipeline.pipes[command.pipeline.numPipes][lastPipeSize-1] == "&"){
-//        command.pipeline.pipes[command.pipeline.numPipes].pop_back();
-//        command.SetIsBackground(true);
-//    }
     vector<string> inputCmd;
     redirParams.cmd.assign(cmd.begin()+redirParams.cmdStart, cmd.begin()+redirParams.cmdEnd);
     return PostTokeniseProcessingErrNone; 
