@@ -13,5 +13,5 @@ void registerSigchld(void);
 void signalHandler(int sig);
 void handleSigchld(int sig);
 void registerSignals(void);
-
+bool getCoutAlarm(void);
 #endif  // SHELL_SIGNAL_H
