@@ -1,10 +1,12 @@
 #include <iostream>
 #include<sys/wait.h>
 #include "shell.h"
+#include "shellSignal.h"
 #include <string.h>
 const char* err_msg = "unable to execute";
 string env = "PATH=/usr/local/sbin/:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games";
 int main(void){
+    registerSignals();
     CommandHistory cmdHistory(CMD_HISTORY_SIZE);
     Shell shell(cmdHistory);
     shell.PutTerminalInPerCharMode();
@@ -14,14 +16,13 @@ int main(void){
         vector<string> tokens = shell.Tokenise(shellInput, ' ');
         shell.GetCommandHistory()->MainWrapperAddCmdToHistory(shellInput);
         fflush(stdout);
-        Pipeline pipeline = {0};
-        PipesErr pipesErr = shell.ParsePipes(tokens, pipeline);
+        Command command;
+        PipesErr pipesErr = shell.ParsePipes(tokens, command);
         if (pipesErr!=PipesErrNone){
             perror("error in parsing pipes");
             continue;
         }
-        RedirectionParams redirParams = {0};
-        pipesErr = shell.HandlePipes(pipeline, redirParams);
+        pipesErr = shell.HandlePipes(command);
         if (pipesErr!=PipesErrNone){
             perror("error in handling pipes");
             continue;

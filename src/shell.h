@@ -25,13 +25,39 @@ using namespace std;
 #define LEFT_ARROW 68
 #define ENTER 10
 #define ASCII_BACKSPACE 8
+#define BACKGROUND '&'
+
+enum PostTokeniseProcessingErr{
+    PostTokeniseProcessingErrNone = 0,
+    RedirErrWrongOrder = 1,
+    BgErrWrongPosition = 2,
+    BgErrDoubleBg = 3,
+};
+
+class Command{
+private:
+    Command *next;  
+    bool m_isBackground;
+    int pgid;
+    string cmdName;
+public:
+    vector<int> cpid;
+    Pipeline pipeline = {0};
+    RedirectionParams redirParams = {0} ;
+
+    void SetIsBackground(bool isBackground){
+        m_isBackground = isBackground;
+    }
+    bool GetIsBackground(void){
+        return m_isBackground;
+    }
+};
 
 class CommandHistory{
 private:
     int maxCmdHistorySize;
     string savedCurrentInput;
     int currentHistoryIndex = 0;
-
 public: 
     bool SetSavedCurrentInputFlag= true;
     CommandHistory(){}
@@ -107,9 +133,9 @@ public:
     void PutTerminalInPerCharMode(void);
     void PutTerminalBackInNormalMode(void);
     vector<string> Tokenise(const string& s, const char &delimiter);
-    PipesErr ParsePipes(vector<string> tokens, Pipeline& pipeline);
-    PipesErr HandlePipes(const Pipeline& pipeline, RedirectionParams& redirPrams);
-    RedirErr PostTokeniseProcessing(RedirectionParams& redirParams, const vector<string>& cmd);
+    PipesErr ParsePipes(vector<string> tokens, Command& command);
+    PipesErr HandlePipes(Command& command);
+    PostTokeniseProcessingErr PostTokeniseProcessing(RedirectionParams& redirParams, const vector<string> &cmd);
     void HandleRedirection(const RedirectionParams& redirParams);
     void printTokens(const vector<string> &input, ostream& ofs);   
 };
