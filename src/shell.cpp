@@ -542,7 +542,8 @@ void Shell::HandleRedirection(const RedirectionParams& redirParams){
                 fflush(stdout);
                 int newstdout = fileOpen(redirParams.outfilename, O_TRUNC);
 //                int newstdout = open(redirParams.outfilename.c_str(), O_WRONLY | O_CREAT| O_TRUNC, S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH);
-                dup2(newstdout, fileno(stdout));
+                dupFile(newstdout, stdout);                
+//                dup2(newstdout, fileno(stdout));
                 close(newstdout);
             }
             break;
@@ -550,8 +551,9 @@ void Shell::HandleRedirection(const RedirectionParams& redirParams){
             {
                 fflush(stdout);
                 int newstdout = fileOpen(redirParams.outfilename, O_APPEND);
- //               int newstdout = open(redirParams.outfilename.c_str(), O_WRONLY | O_CREAT | O_APPEND, S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH);
-                dup2(newstdout, fileno(stdout));
+//               int newstdout = open(redirParams.outfilename.c_str(), O_WRONLY | O_CREAT | O_APPEND, S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH);
+                dupFile(newstdout, stdout);                
+//                dup2(newstdout, fileno(stdout));
                 close(newstdout);
             }
             break;

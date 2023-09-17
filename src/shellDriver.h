@@ -8,5 +8,5 @@
 #include <string>
 
 int fileOpen(std::string outfilename, int rwFlag);
-
+void dupFile(int fd, FILE* stdinStdout);
 #endif // SHELL_DRIVER_H
