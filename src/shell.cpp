@@ -446,7 +446,7 @@ PipesErr Shell::HandlePipes(Command& command){
 
         // waits for children
         // Check whether the last token of last pipe
-        // is a background symbol. if so, do not wait
+        // is a background symbol. if so, do not wait        
         if (!command.GetIsBackground()){
             for(int i = command.pipeline.numPipes; i >= 0; i--){
                 int retVal = 0;
@@ -456,7 +456,7 @@ PipesErr Shell::HandlePipes(Command& command){
                     command.cpid.pop_back();
                 }
             }
-        } 
+        }        
     } else {
         // no pipes
         pid_t cpid = fork();
@@ -470,13 +470,14 @@ PipesErr Shell::HandlePipes(Command& command){
             HandleRedirection(command.redirParams);
             ExecuteProgram(command.redirParams.cmd);
             perror("unable to execute");
-        } else {
+        }         
+        else {
             int retVal;
-            if (!command.GetIsBackground()){
+            if (!command.GetIsBackground()){                
                 if(waitpid(cpid, &retVal, 0) < 0){
                     perror("waitpid error");
                     return PipesExecErr;
-                }
+                }                
             }        
         }
     }
