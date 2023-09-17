@@ -6,6 +6,7 @@
 #include <fstream>
 #include <unistd.h>
 #include "shell.h"
+#include "shellDriver.h"
 #include "redirection.h"
 #include <termios.h>
 #include <string>
@@ -539,7 +540,8 @@ void Shell::HandleRedirection(const RedirectionParams& redirParams){
         case (OutputCreate):
             {
                 fflush(stdout);
-                int newstdout = open(redirParams.outfilename.c_str(), O_WRONLY | O_CREAT| O_TRUNC, S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH);
+                int newstdout = fileOpen(redirParams.outfilename, O_TRUNC);
+//                int newstdout = open(redirParams.outfilename.c_str(), O_WRONLY | O_CREAT| O_TRUNC, S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH);
                 dup2(newstdout, fileno(stdout));
                 close(newstdout);
             }
@@ -547,7 +549,8 @@ void Shell::HandleRedirection(const RedirectionParams& redirParams){
         case(OutputAppend):
             {
                 fflush(stdout);
-                int newstdout = open(redirParams.outfilename.c_str(), O_WRONLY | O_CREAT | O_APPEND, S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH);
+                int newstdout = fileOpen(redirParams.outfilename, O_APPEND);
+ //               int newstdout = open(redirParams.outfilename.c_str(), O_WRONLY | O_CREAT | O_APPEND, S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH);
                 dup2(newstdout, fileno(stdout));
                 close(newstdout);
             }
