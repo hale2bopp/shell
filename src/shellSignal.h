@@ -8,6 +8,8 @@
 
 #include "signal.h"
 #include <sys/wait.h>
+void registerSigint(void);
+void registerSigchld(void);
 void signalHandler(int sig);
 void handleSigchld(int sig);
 void registerSignals(void);

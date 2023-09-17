@@ -3,12 +3,21 @@
 using namespace std;
 
 
-void registerSignals(){
-    struct sigaction sa = {0};
-    sa.sa_handler = signalHandler;
-    sa.sa_flags = 0;
-    sigemptyset(&sa.sa_mask);
-    sigaction(SIGINT, &sa, NULL);
+void registerSignals(void){
+    registerSigint();
+    registerSigchld();
+}
+
+void registerSigint(void){
+    struct sigaction sigint_action = {0};
+    sigint_action.sa_handler = &signalHandler;
+    sigaction(SIGINT,&sigint_action,NULL);
+}
+
+void registerSigchld(void){
+    struct sigaction sigchld_action = {0};
+    sigchld_action.sa_handler = &handleSigchld;
+    sigaction(SIGCHLD,&sigchld_action,NULL);
 }
 
 
@@ -17,4 +26,7 @@ void signalHandler(int sig){
 }
 
 void handleSigchld(int sig){
+    int status;
+    pid_t pid;
+    while((pid = waitpid(-1, &status, WNOHANG)) > 0){}
 }

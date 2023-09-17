@@ -456,7 +456,7 @@ PipesErr Shell::HandlePipes(Command& command){
                     command.cpid.pop_back();
                 }
             }
-        }        
+        } 
     } else {
         // no pipes
         pid_t cpid = fork();
@@ -470,7 +470,7 @@ PipesErr Shell::HandlePipes(Command& command){
             HandleRedirection(command.redirParams);
             ExecuteProgram(command.redirParams.cmd);
             perror("unable to execute");
-        }         
+        } 
         else {
             int retVal;
             if (!command.GetIsBackground()){                
