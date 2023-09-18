@@ -407,8 +407,8 @@ PipesErr Shell::HandlePipes(Command& command){
                 } else {
                     // set all further pipes to the same pgid as the root
                     setpgid(rootPid, 0);
-
-                    if (dup2(pipefd[(i-1)*2], fileno(stdin)) < 0){
+                    if (dupFile(pipefd[(i-1)*2], stdin)<0){
+                    //if (dup2(pipefd[(i-1)*2], fileno(stdin)) < 0){
                         perror("unable to open stdin from previous pipe");
                         return PipesExecErr;
                     }
@@ -416,13 +416,14 @@ PipesErr Shell::HandlePipes(Command& command){
 
                 // dup2 stdout to next pipe
                 if (i != command.pipeline.numPipes) {
-                    if (dup2(pipefd[(i*2)+1], fileno(stdout)) < 0){
+                    if (dupFile(pipefd[(i*2)+1], stdout)<0){
+//                    if (dup2(pipefd[(i*2)+1], fileno(stdout)) < 0){
                         perror("unable to open stdout to next pipe");
                         return PipesExecErr;
                     }
                 }
                 for( int j = 0; j < 2*command.pipeline.numPipes; j++){
-                    close(pipefd[j]);
+                    fileClose(pipefd[j]);
                 }
                 // reset redirection params 
                 command.redirParams = {0};
@@ -442,7 +443,7 @@ PipesErr Shell::HandlePipes(Command& command){
         }
         // parent closes all of its copies at the end
         for( int i = 0; i < 2 * command.pipeline.numPipes; i++ ){
-            close( pipefd[i] );
+            fileClose( pipefd[i] );
         }
 
         // waits for children
@@ -540,21 +541,21 @@ void Shell::HandleRedirection(const RedirectionParams& redirParams){
         case (OutputCreate):
             {
                 fflush(stdout);
-                int newstdout = fileOpen(redirParams.outfilename, O_TRUNC);
+                int newstdout = fileOpen(redirParams.outfilename, O_WRONLY | O_CREAT| O_TRUNC);
 //                int newstdout = open(redirParams.outfilename.c_str(), O_WRONLY | O_CREAT| O_TRUNC, S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH);
                 dupFile(newstdout, stdout);                
 //                dup2(newstdout, fileno(stdout));
-                close(newstdout);
+                fileClose(newstdout);
             }
             break;
         case(OutputAppend):
             {
                 fflush(stdout);
-                int newstdout = fileOpen(redirParams.outfilename, O_APPEND);
+                int newstdout = fileOpen(redirParams.outfilename, O_WRONLY | O_CREAT | O_APPEND);
 //               int newstdout = open(redirParams.outfilename.c_str(), O_WRONLY | O_CREAT | O_APPEND, S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH);
                 dupFile(newstdout, stdout);                
 //                dup2(newstdout, fileno(stdout));
-                close(newstdout);
+                fileClose(newstdout);
             }
             break;
         default:
@@ -565,9 +566,11 @@ void Shell::HandleRedirection(const RedirectionParams& redirParams){
         case(Input):
             {
                 fflush(stdin);
-                int newstdin = open(redirParams.infilename.c_str(), O_RDONLY , S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH);
-                dup2(newstdin, fileno(stdin));
-                close(newstdin);
+//                int newstdin = open(redirParams.infilename.c_str(), O_RDONLY , S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH);
+                int newstdin = fileOpen(redirParams.infilename, O_RDONLY);
+                dupFile(newstdin, stdin);
+//                dup2(newstdin, fileno(stdin));
+                fileClose(newstdin);
             }
             break;
         default:
