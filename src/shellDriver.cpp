@@ -15,3 +15,7 @@ int dupFile(int fd, FILE* stdinStdout){
 void fileClose(int fd){
     close(fd);
 }
+int execute(const char *cmd, char *const argv[]){
+//int execute( const char* str, const_cast<char* const*>(args)){
+    return execvp(cmd, argv);
+}

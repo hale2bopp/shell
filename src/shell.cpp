@@ -226,7 +226,8 @@ int Shell::ExecuteProgram(const vector<string>& cmd){
         vec_cp.push_back(strdup(s.c_str()));
     }
     vec_cp.push_back(NULL);
-    return execvp(cmd[0].c_str(), const_cast<char* const*>(vec_cp.data()));
+    return execute(cmd[0].c_str(), const_cast<char* const*>(vec_cp.data()));
+//    return execvp(cmd[0].c_str(), const_cast<char* const*>(vec_cp.data()));
 }
 
 

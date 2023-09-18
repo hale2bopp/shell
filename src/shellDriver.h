@@ -10,4 +10,5 @@
 int fileOpen(std::string outfilename, int rwFlag);
 void fileClose(int fd);
 int dupFile(int fd, FILE* stdinStdout);
+int execute( const char *file, char *const argv[]);
 #endif // SHELL_DRIVER_H
