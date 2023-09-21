@@ -2,7 +2,7 @@
 #include "gtest/gtest.h"
 #include "shell.h"
 #include "shell-test.h"
-#include "shellDriver.h"
+#include "shellDriverMock.h"
 #include<sstream>
 #include <fstream>
 
@@ -13,7 +13,7 @@ protected:
     ShellTest() {}
     virtual ~ShellTest() {}
     void SetUp(const std::string & prompt, const int size) {
-        shell = new Shell(prompt, size);
+        shell = new Shell(prompt, size, mockShellDriver);
     }
     void SetUp(){
     // Code here will be called immediately after the constructor (right
@@ -26,6 +26,7 @@ protected:
     }
 
     Shell* shell;
+    ShellDriverMock mockShellDriver;
 };
 
 TEST_F(ShellTest, oneWordResult){

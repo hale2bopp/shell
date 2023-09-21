@@ -1,22 +1,21 @@
-#include "shellDriver.h"
+#include "shellDriverMock.h"
 #include <fcntl.h>
 #include <iostream>
 #include <unistd.h>
 using namespace std;
 
-int fileOpen(string outfilename, int opts){
+int ShellDriverMock::fileOpen(string outfilename, int opts){
     return 0;
 }
 
-int dupFile(int fd, FILE* stdinStdout){
+int ShellDriverMock::dupFile(int fd, FILE* stdinStdout){
     return 0;
 }
 
-void fileClose(int fd){
+void ShellDriverMock::fileClose(int fd){
 
 }
-int execute(const char *cmd, char *const argv[]){
+int ShellDriverMock::execute(const char *cmd, char *const argv[]){
 //int execute( const char* str, const_cast<char* const*>(args)){
     return 0;
 }
-~                             
