@@ -77,7 +77,7 @@ public:
 };
 
 class Shell{
-    private:
+private:
     string shellPrompt = "penn-shredder# ";
     CommandHistory commandHistory;
     ShellDriverInterface &shellDriver;
