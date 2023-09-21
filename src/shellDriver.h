@@ -1,5 +1,5 @@
 /* \file shellDriver.h
- * \brief Wrappers for all functions 
+ * \brief Driver for all functions in shell
  * that touch system level functions
  */
 
@@ -15,13 +15,5 @@ public:
     int dupFile(int fd, FILE* stdinStdout) override;
     int execute( const char *file, char *const argv[]) override;
 };
-
-
-/*
-int fileOpen(std::string outfilename, int rwFlag);
-void fileClose(int fd);
-int dupFile(int fd, FILE* stdinStdout);
-int execute( const char *file, char *const argv[]);
-*/
 
 #endif // SHELL_DRIVER_H

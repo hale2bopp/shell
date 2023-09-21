@@ -16,6 +16,5 @@ void ShellDriver::fileClose(int fd){
     close(fd);
 }
 int ShellDriver::execute(const char *cmd, char *const argv[]){
-//int execute( const char* str, const_cast<char* const*>(args)){
     return execvp(cmd, argv);
 }

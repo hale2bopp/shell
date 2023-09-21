@@ -20,16 +20,6 @@ string prompt = "penn-shredder# ";
 static struct termios oldt, newt;
 
 
-/*
-Shell::Shell(void){
-    this->shellPrompt = prompt;
-}
-
-Shell::Shell(CommandHistory& commandHistory): commandHistory(commandHistory){
-    this->shellPrompt = prompt;
-}
-*/
-
 CommandHistory::CommandHistory(int maxCmdHistorySize): maxCmdHistorySize(maxCmdHistorySize){
 }
 
@@ -230,7 +220,6 @@ int Shell::ExecuteProgram(const vector<string>& cmd){
     }
     vec_cp.push_back(NULL);
     return shellDriver.execute(cmd[0].c_str(), const_cast<char* const*>(vec_cp.data()));
-//    return execvp(cmd[0].c_str(), const_cast<char* const*>(vec_cp.data()));
 }
 
 
@@ -421,7 +410,6 @@ PipesErr Shell::HandlePipes(Command& command){
                 // dup2 stdout to next pipe
                 if (i != command.pipeline.numPipes) {
                     if (shellDriver.dupFile(pipefd[(i*2)+1], stdout)<0){
-//                    if (dup2(pipefd[(i*2)+1], fileno(stdout)) < 0){
                         perror("unable to open stdout to next pipe");
                         return PipesExecErr;
                     }
@@ -544,11 +532,9 @@ void Shell::HandleRedirection(const RedirectionParams& redirParams){
     switch(redirParams.outputRedirectionType){
         case (OutputCreate):
             {
-                fflush(stdout);
+                //fflush(stdout);
                 int newstdout = shellDriver.fileOpen(redirParams.outfilename, O_WRONLY | O_CREAT| O_TRUNC);
-//                int newstdout = open(redirParams.outfilename.c_str(), O_WRONLY | O_CREAT| O_TRUNC, S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH);
                 shellDriver.dupFile(newstdout, stdout);                
-//                dup2(newstdout, fileno(stdout));
                 shellDriver.fileClose(newstdout);
             }
             break;
@@ -556,9 +542,7 @@ void Shell::HandleRedirection(const RedirectionParams& redirParams){
             {
                 fflush(stdout);
                 int newstdout = shellDriver.fileOpen(redirParams.outfilename, O_WRONLY | O_CREAT | O_APPEND);
-//               int newstdout = open(redirParams.outfilename.c_str(), O_WRONLY | O_CREAT | O_APPEND, S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH);
                 shellDriver.dupFile(newstdout, stdout);                
-//                dup2(newstdout, fileno(stdout));
                 shellDriver.fileClose(newstdout);
             }
             break;
@@ -569,11 +553,9 @@ void Shell::HandleRedirection(const RedirectionParams& redirParams){
     switch (redirParams.inputRedirectionType){
         case(Input):
             {
-                fflush(stdin);
-//                int newstdin = open(redirParams.infilename.c_str(), O_RDONLY , S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH);
+                // fflush(stdin);
                 int newstdin = shellDriver.fileOpen(redirParams.infilename, O_RDONLY);
                 shellDriver.dupFile(newstdin, stdin);
-//                dup2(newstdin, fileno(stdin));
                 shellDriver.fileClose(newstdin);
             }
             break;

@@ -115,9 +115,7 @@ class Shell{
     void decrementCursorPosition(const string&s, int& cursor);
     void insertCharacter(string& s, const char&c, int& cursor, ostream& ofs);
 public:
-//    Shell(CommandHistory& cmdHistory, ShellDriverInterface& driver);
     Shell(const string& prompt, const int cmdHistorySize, ShellDriverInterface& driver): shellPrompt(prompt), commandHistory(cmdHistorySize), shellDriver(driver) {} 
-//    Shell(const string& prompt, CommandHistory& cmdHistory): shellPrompt(prompt), commandHistory(cmdHistory){}
 // Getters, Setters 
     CommandHistory* GetCommandHistory(void){
         return &commandHistory;

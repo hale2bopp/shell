@@ -16,6 +16,5 @@ void ShellDriverMock::fileClose(int fd){
 
 }
 int ShellDriverMock::execute(const char *cmd, char *const argv[]){
-//int execute( const char* str, const_cast<char* const*>(args)){
     return 0;
 }

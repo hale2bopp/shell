@@ -23,6 +23,10 @@ protected:
     virtual void TearDown() {
     // Code here will be called immediately after each test (right
     // before the destructor).
+        if (shell) {
+            delete shell;
+            shell = nullptr;
+        }
     }
 
     Shell* shell;

@@ -10,9 +10,7 @@ string mainPrompt = "penn-shredder# ";
 int main(void){
     registerSignals();
     ShellDriver shellDriver;
-//    CommandHistory cmdHistory(CMD_HISTORY_SIZE);
     Shell shell(mainPrompt, CMD_HISTORY_SIZE, shellDriver);
-//    Shell shell(cmdHistory);
     shell.PutTerminalInPerCharMode();
     while (1) {
         shell.DisplayPrompt(cout);

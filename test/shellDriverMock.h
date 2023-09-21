@@ -1,6 +1,6 @@
-/* \file shellDriver.h
+/* \file shellDriverMock.h
  * \brief Wrappers for all functions 
- * that touch system level functions
+ * that touch system level functions mocked
  */
 
 #ifndef SHELL_DRIVER_MOCK_H
@@ -15,13 +15,5 @@ public:
     int dupFile(int fd, FILE* stdinStdout) override;
     int execute( const char *file, char *const argv[]) override;
 };
-
-
-/*
-int fileOpen(std::string outfilename, int rwFlag);
-void fileClose(int fd);
-int dupFile(int fd, FILE* stdinStdout);
-int execute( const char *file, char *const argv[]);
-*/
 
 #endif // SHELL_DRIVER_MOCK_H

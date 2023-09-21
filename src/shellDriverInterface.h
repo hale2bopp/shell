@@ -1,6 +1,5 @@
-/* \file shellDriver.h
- * \brief Wrappers for all functions 
- * that touch system level functions
+/* \file shellDriverInterface.h
+ * \brief Provides abstract class interface for shell driver
  */
 
 #ifndef SHELL_DRIVER_INTERFACE_H
@@ -16,13 +15,5 @@ public:
     // Define other wrapper functions here
     virtual ~ShellDriverInterface() {}
 };
-
-
-/*
-int fileOpen(std::string outfilename, int rwFlag);
-void fileClose(int fd);
-int dupFile(int fd, FILE* stdinStdout);
-int execute( const char *file, char *const argv[]);
-*/
 
 #endif // SHELL_DRIVER_INTERFACE_H
