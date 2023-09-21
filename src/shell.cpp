@@ -401,7 +401,6 @@ PipesErr Shell::HandlePipes(Command& command){
                     // set all further pipes to the same pgid as the root
                     setpgid(rootPid, 0);
                     if (shellDriver.dupFile(pipefd[(i-1)*2], stdin)<0){
-                    //if (dup2(pipefd[(i-1)*2], fileno(stdin)) < 0){
                         perror("unable to open stdin from previous pipe");
                         return PipesExecErr;
                     }
@@ -532,7 +531,6 @@ void Shell::HandleRedirection(const RedirectionParams& redirParams){
     switch(redirParams.outputRedirectionType){
         case (OutputCreate):
             {
-                //fflush(stdout);
                 int newstdout = shellDriver.fileOpen(redirParams.outfilename, O_WRONLY | O_CREAT| O_TRUNC);
                 shellDriver.dupFile(newstdout, stdout);                
                 shellDriver.fileClose(newstdout);
@@ -540,7 +538,6 @@ void Shell::HandleRedirection(const RedirectionParams& redirParams){
             break;
         case(OutputAppend):
             {
-                fflush(stdout);
                 int newstdout = shellDriver.fileOpen(redirParams.outfilename, O_WRONLY | O_CREAT | O_APPEND);
                 shellDriver.dupFile(newstdout, stdout);                
                 shellDriver.fileClose(newstdout);
@@ -553,7 +550,6 @@ void Shell::HandleRedirection(const RedirectionParams& redirParams){
     switch (redirParams.inputRedirectionType){
         case(Input):
             {
-                // fflush(stdin);
                 int newstdin = shellDriver.fileOpen(redirParams.infilename, O_RDONLY);
                 shellDriver.dupFile(newstdin, stdin);
                 shellDriver.fileClose(newstdin);
