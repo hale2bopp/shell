@@ -1,6 +1,6 @@
 set(BINARY ${CMAKE_PROJECT_NAME}_tst)
 
-set(TEST_SOURCES shell-test.cpp shell-test.h main.cpp)
+set(TEST_SOURCES shell-test.cpp shell-test.h main.cpp shellDriverMock.cpp)
 set(SOURCES ${TEST_SOURCES})
 
 add_executable(${BINARY} ${TEST_SOURCES})

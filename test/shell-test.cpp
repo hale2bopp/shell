@@ -2,6 +2,7 @@
 #include "gtest/gtest.h"
 #include "shell.h"
 #include "shell-test.h"
+#include "shellDriver.h"
 #include<sstream>
 #include <fstream>
 
@@ -738,4 +739,11 @@ TEST_F(ShellTest, CheckLastCharOfPipeTest){
     EXPECT_EQ(command.pipeline.pipes, correctPipes);
     EXPECT_EQ(command.GetIsBackground(), true);
     EXPECT_EQ(command.pipeline.numPipes, 2);
+}
+
+TEST_F(ShellTest, TestMockExecute){
+    SetUp("no prompt", 10);
+    vector<string> fullCmd = {"ls", "-la"};
+    Command command;
+    EXPECT_EQ(shell->ExecuteProgram(fullCmd), 0);
 }
