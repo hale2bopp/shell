@@ -2,6 +2,7 @@
 #include "gtest/gtest.h"
 #include "shell.h"
 #include "shell-test.h"
+#include "shellDriverMock.h"
 #include<sstream>
 #include <fstream>
 
@@ -12,7 +13,7 @@ protected:
     ShellTest() {}
     virtual ~ShellTest() {}
     void SetUp(const std::string & prompt, const int size) {
-        shell = new Shell(prompt, size);
+        shell = new Shell(prompt, size, mockShellDriver);
     }
     void SetUp(){
     // Code here will be called immediately after the constructor (right
@@ -22,9 +23,14 @@ protected:
     virtual void TearDown() {
     // Code here will be called immediately after each test (right
     // before the destructor).
+        if (shell) {
+            delete shell;
+            shell = nullptr;
+        }
     }
 
     Shell* shell;
+    ShellDriverMock mockShellDriver;
 };
 
 TEST_F(ShellTest, oneWordResult){
@@ -738,4 +744,11 @@ TEST_F(ShellTest, CheckLastCharOfPipeTest){
     EXPECT_EQ(command.pipeline.pipes, correctPipes);
     EXPECT_EQ(command.GetIsBackground(), true);
     EXPECT_EQ(command.pipeline.numPipes, 2);
+}
+
+TEST_F(ShellTest, TestMockExecute){
+    SetUp("no prompt", 10);
+    vector<string> fullCmd = {"ls", "-la"};
+    Command command;
+    EXPECT_EQ(shell->ExecuteProgram(fullCmd), 0);
 }

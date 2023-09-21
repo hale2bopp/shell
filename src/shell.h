@@ -12,6 +12,7 @@
 #include <queue>
 #include "redirection.h"
 #include "pipes.h"
+#include "shellDriver.h"
 using std::deque;
 using namespace std;
 
@@ -77,8 +78,9 @@ public:
 
 class Shell{
 private:
-    string shellPrompt;
+    string shellPrompt = "penn-shredder# ";
     CommandHistory commandHistory;
+    ShellDriverInterface &shellDriver;
     int cursorPosition = 0;
 // potentially a list of features the shell has?
     bool upArrow;
@@ -113,11 +115,7 @@ private:
     void decrementCursorPosition(const string&s, int& cursor);
     void insertCharacter(string& s, const char&c, int& cursor, ostream& ofs);
 public:
-    Shell(void);
-    Shell(CommandHistory& cmdHistory);
-    Shell(const string& prompt):shellPrompt(prompt){}
-    Shell(const string& prompt, const int cmdHistorySize): shellPrompt(prompt), commandHistory(cmdHistorySize){} 
-    Shell(const string& prompt, CommandHistory& cmdHistory): shellPrompt(prompt), commandHistory(cmdHistory){}
+    Shell(const string& prompt, const int cmdHistorySize, ShellDriverInterface& driver): shellPrompt(prompt), commandHistory(cmdHistorySize), shellDriver(driver) {} 
 // Getters, Setters 
     CommandHistory* GetCommandHistory(void){
         return &commandHistory;
