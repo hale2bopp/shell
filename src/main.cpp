@@ -5,10 +5,14 @@
 #include <string.h>
 const char* err_msg = "unable to execute";
 string env = "PATH=/usr/local/sbin/:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games";
+
+string mainPrompt = "penn-shredder# ";
 int main(void){
     registerSignals();
-    CommandHistory cmdHistory(CMD_HISTORY_SIZE);
-    Shell shell(cmdHistory);
+    ShellDriver shellDriver;
+//    CommandHistory cmdHistory(CMD_HISTORY_SIZE);
+    Shell shell(mainPrompt, CMD_HISTORY_SIZE, shellDriver);
+//    Shell shell(cmdHistory);
     shell.PutTerminalInPerCharMode();
     while (1) {
         shell.DisplayPrompt(cout);

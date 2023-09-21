@@ -4,18 +4,18 @@
 #include <unistd.h>
 using namespace std;
 
-int fileOpen(string outfilename, int opts){
+int ShellDriver::fileOpen(string outfilename, int opts){
     return open(outfilename.c_str(), opts, S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH);
 }
 
-int dupFile(int fd, FILE* stdinStdout){
+int ShellDriver::dupFile(int fd, FILE* stdinStdout){
     return dup2(fd, fileno(stdinStdout));
 }
 
-void fileClose(int fd){
+void ShellDriver::fileClose(int fd){
     close(fd);
 }
-int execute(const char *cmd, char *const argv[]){
+int ShellDriver::execute(const char *cmd, char *const argv[]){
 //int execute( const char* str, const_cast<char* const*>(args)){
     return execvp(cmd, argv);
 }
