@@ -555,7 +555,22 @@ TEST_F(ShellTest, InputRedirectionArgsTest){
     EXPECT_EQ(command.redirParams.cmd, cutCmd);
     EXPECT_EQ(command.redirParams.infilename, "cmd.txt");
 }
- 
+
+TEST_F(ShellTest, InputMultipleRedirectionArgsTest){
+    SetUp("no prompt", 10);
+    string s = "cat << cmd.txt\n";
+    std::istringstream iss(s);
+    std::ostringstream oss("");
+    vector<string> fullCmd = {"cat", "<<", "cmd.txt"};
+    vector<string> cutCmd = {"cat"};
+    EXPECT_EQ(shell->Tokenise(s, ' '), fullCmd);
+    Command command;
+    PostTokeniseProcessingErr err = shell->PostTokeniseProcessing(command.redirParams, fullCmd);
+    EXPECT_EQ(err, PostTokeniseProcessingErrNone);
+    EXPECT_EQ(command.redirParams.cmd, cutCmd);
+    EXPECT_EQ(command.redirParams.infilename, "cmd.txt");
+}
+
 TEST_F(ShellTest, MultipleRedirectionArgsTest){
     SetUp("no prompt", 10);
     string s = "cat < cmd.txt > test.txt\n";
