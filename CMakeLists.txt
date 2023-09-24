@@ -17,8 +17,5 @@ SETUP_TARGET_FOR_COVERAGE_LCOV(NAME ${PROJECT_NAME}_coverage
                                EXECUTABLE ${CMAKE_BINARY_DIR}/test/shell_tst
                                BASE_DIRECTORY ${CMAKE_SOURCE_DIR}/src )
 
-# SETUP_TARGET_FOR_COVERAGE_LCOV(NAME coverage
-#                                EXECUTABLE make target
-#                               DEPENDENCIES shell_coverage_run)
 endif()
 
