@@ -502,7 +502,6 @@ PostTokeniseProcessingErr Shell::PostTokeniseProcessing(RedirectionParams& redir
                 setCmdEnd(redirParams,i);
                 redirParams.infilename = cmd[redirParams.inputFileIndex];
         } else if (cmd[i] == "<<"){
-                setCmdEnd(redirParams,i);
                 redirParams.inputRedirectionType = Input;
                 redirParams.inputFileIndex = i+1;
                 setCmdEnd(redirParams,i);
