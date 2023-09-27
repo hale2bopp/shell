@@ -6,6 +6,7 @@
 #include<sstream>
 #include <fstream>
 
+using namespace testing;
 
 // The fixture for testing class Shell.
 class ShellTest : public ::testing::Test {
@@ -44,8 +45,9 @@ TEST_F(ShellTest, oneWordResult){
 
 TEST_F(ShellTest, tooLongInput){
     SetUp("no prompt", 10);
-    string tooLong(MAX_INPUT+1, 'a');
-    string justRight(MAX_INPUT, 'a');
+    int maxInputLength = shell->GetMaxInputLength();
+    string tooLong(maxInputLength+1, 'a');
+    string justRight(maxInputLength, 'a');
     shell->CheckLength(tooLong);
     EXPECT_EQ(tooLong, justRight);
 }
@@ -541,6 +543,22 @@ TEST_F(ShellTest, TestOutputfilename){
     EXPECT_EQ(err, PostTokeniseProcessingErrNone);
     EXPECT_EQ(command.redirParams.outfilename, "test.txt");
 }
+
+TEST_F(ShellTest, TestInputfilename){
+    SetUp("no prompt", 10);
+    string s = "cat<<test.txt\n";
+    std::istringstream iss(s);
+    std::ostringstream oss("");
+    vector<string> fullCmd = {"cat", "<<", "test.txt"};
+    vector<string> Cmd = {"cat"};
+    EXPECT_EQ(shell->Tokenise(s, ' '), fullCmd);
+    Command command;
+    PostTokeniseProcessingErr err = shell->PostTokeniseProcessing(command.redirParams, fullCmd);
+    EXPECT_EQ(err, PostTokeniseProcessingErrNone);
+    EXPECT_EQ(command.redirParams.infilename, "test.txt");
+}
+
+
 TEST_F(ShellTest, InputRedirectionArgsTest){
     SetUp("no prompt", 10);
     string s = "cat < cmd.txt\n";
@@ -748,7 +766,57 @@ TEST_F(ShellTest, CheckLastCharOfPipeTest){
 
 TEST_F(ShellTest, TestMockExecute){
     SetUp("no prompt", 10);
-    vector<string> fullCmd = {"ls", "-la"};
+    EXPECT_CALL(mockShellDriver, execute(_, _)).Times(1);
+    EXPECT_CALL(mockShellDriver, processFork()).Times(AtLeast(1)); 
+
+    vector<string> tokens = shell->Tokenise("ls -la ", ' ');
     Command command;
-    EXPECT_EQ(shell->ExecuteProgram(fullCmd), 0);
+    PipesErr pipesErr = shell->ParsePipes(tokens, command);
+    EXPECT_EQ(pipesErr, PipesErrNone);
+    pipesErr = shell->HandlePipes(command);
+    EXPECT_EQ(pipesErr, PipesErrNone);
+}
+
+TEST_F(ShellTest, TestMockExecuteErr){
+    SetUp("no prompt", 10);
+    EXPECT_CALL(mockShellDriver, execute(_, _)).Times(0);
+    EXPECT_CALL(mockShellDriver, processFork()).Times(AtLeast(1));
+
+    vector<string> tokens = shell->Tokenise("ls & -la", ' ');
+    Command command;
+    PipesErr pipesErr = shell->ParsePipes(tokens, command);
+    EXPECT_EQ(pipesErr, PipesErrNone);
+    pipesErr = shell->HandlePipes(command);
+    EXPECT_EQ(pipesErr, PipesExecErr);
+}
+
+
+TEST_F(ShellTest, TestExecutePipes){
+    SetUp("no prompt", 10);
+    EXPECT_CALL(mockShellDriver, execute(_, _)).Times(2);
+    EXPECT_CALL(mockShellDriver, dupFile(_, _)).Times(2);
+    EXPECT_CALL(mockShellDriver, fileClose(_)).Times(6);
+    EXPECT_CALL(mockShellDriver, processFork()).Times(AtLeast(2));
+
+    vector<string> tokens = shell->Tokenise("ls -la | wc -l", ' ');
+    Command command;
+    PipesErr pipesErr = shell->ParsePipes(tokens, command);
+    EXPECT_EQ(pipesErr, PipesErrNone);
+    pipesErr = shell->HandlePipes(command);
+    EXPECT_EQ(pipesErr, PipesErrNone);
+}
+
+TEST_F(ShellTest, TestExecutePipesBg){
+    SetUp("no prompt", 10);
+    EXPECT_CALL(mockShellDriver, execute(_, _)).Times(2);
+    EXPECT_CALL(mockShellDriver, dupFile(_, _)).Times(2);
+    EXPECT_CALL(mockShellDriver, fileClose(_)).Times(6);
+    EXPECT_CALL(mockShellDriver, processFork()).Times(AtLeast(2));
+
+    vector<string> tokens = shell->Tokenise("ls -la | wc -l &", ' ');
+    Command command;
+    PipesErr pipesErr = shell->ParsePipes(tokens, command);
+    EXPECT_EQ(pipesErr, PipesErrNone);
+    pipesErr = shell->HandlePipes(command);
+    EXPECT_EQ(pipesErr, PipesErrNone);
 }

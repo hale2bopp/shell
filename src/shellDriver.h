@@ -14,6 +14,7 @@ public:
     void fileClose(int fd) override;
     int dupFile(int fd, FILE* stdinStdout) override;
     int execute( const char *file, char *const argv[]) override;
+    pid_t processFork(void) override;
 };
 
 #endif // SHELL_DRIVER_H

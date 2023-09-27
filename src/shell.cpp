@@ -130,8 +130,8 @@ string Shell::handleDownArrow(const string& s, ostream& ofs){
  * @param input string 
  */
 void Shell::CheckLength(string &shellInput){
-    if (shellInput.size() > MAX_INPUT){
-        shellInput = shellInput.substr(0, MAX_INPUT);
+    if (shellInput.size() > maxInputLength){
+        shellInput = shellInput.substr(0, maxInputLength);
     }
 }
 
@@ -384,7 +384,7 @@ PipesErr Shell::HandlePipes(Command& command){
         // pid of root of pipe
         pid_t rootPid;
         for (int i = 0; i < command.pipeline.numPipes+1; i++){
-            pid_t cpid = fork();
+            pid_t cpid = shellDriver.processFork();
             if (cpid < 0) {
                 perror("fork error");
                 return PipesExecErr;
@@ -452,7 +452,7 @@ PipesErr Shell::HandlePipes(Command& command){
         } 
     } else {
         // no pipes
-        pid_t cpid = fork();
+        pid_t cpid = shellDriver.processFork();
         if (cpid == 0){
             command.redirParams = {0};
             PostTokeniseProcessingErr err = PostTokeniseProcessing(command.redirParams, command.pipeline.pipes[0]);
@@ -504,6 +504,8 @@ PostTokeniseProcessingErr Shell::PostTokeniseProcessing(RedirectionParams& redir
         } else if (cmd[i] == "<<"){
                 setCmdEnd(redirParams,i);
                 redirParams.inputRedirectionType = Input;
+                redirParams.inputFileIndex = i+1;
+                setCmdEnd(redirParams,i);
                 redirParams.infilename = cmd[redirParams.inputFileIndex];
         } 
         if ((cmd[i] == "&" ) &&( i!=cmd.size()-1)){

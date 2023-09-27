@@ -82,6 +82,7 @@ private:
     CommandHistory commandHistory;
     ShellDriverInterface &shellDriver;
     int cursorPosition = 0;
+    int maxInputLength = MAX_INPUT;
 // potentially a list of features the shell has?
     bool upArrow;
     bool backSpace;
@@ -115,12 +116,16 @@ private:
     void decrementCursorPosition(const string&s, int& cursor);
     void insertCharacter(string& s, const char&c, int& cursor, ostream& ofs);
 public:
-    Shell(const string& prompt, const int cmdHistorySize, ShellDriverInterface& driver): shellPrompt(prompt), commandHistory(cmdHistorySize), shellDriver(driver) {} 
+    Shell(const string& prompt, const int cmdHistorySize, ShellDriverInterface& driver): shellPrompt(prompt), commandHistory(cmdHistorySize), shellDriver(driver) {
+        this->maxInputLength = MAX_INPUT;
+    } 
 // Getters, Setters 
     CommandHistory* GetCommandHistory(void){
         return &commandHistory;
     }
-
+    int GetMaxInputLength(void){
+        return maxInputLength;
+    }
     int GetCursorPosition(void){ return cursorPosition; }
 // Shell functionality    
     void DisplayPrompt(ostream& ofs);
