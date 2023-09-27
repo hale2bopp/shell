@@ -7,10 +7,17 @@
 #define SHELL_DRIVER_H
 #include <string>
 #include "shellDriverInterface.h"
+#include <fcntl.h>
+
+enum FileOpenOpts {
+    S_CREAT = O_WRONLY | O_CREAT| O_TRUNC, 
+    S_APPEND  = O_WRONLY | O_CREAT| O_APPEND,
+    S_RDONLY = O_RDONLY,
+};
 
 class ShellDriver: public ShellDriverInterface {
 public:
-    int fileOpen(std::string outfilename, int rwFlag) override;
+    int fileOpen(std::string outfilename, int opts) override;
     void fileClose(int fd) override;
     int dupFile(int fd, FILE* stdinStdout) override;
     int execute( const char *file, char *const argv[]) override;

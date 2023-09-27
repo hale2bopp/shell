@@ -820,3 +820,26 @@ TEST_F(ShellTest, TestExecutePipesBg){
     pipesErr = shell->HandlePipes(command);
     EXPECT_EQ(pipesErr, PipesErrNone);
 }
+
+
+TEST_F(ShellTest, HandleOutputRedirection){
+
+    SetUp("no prompt", 10);
+    string s = "echo \"hello\">test.txt\n";
+    std::istringstream iss(s);
+    std::ostringstream oss("");
+    vector<string> fullCmd = {"echo", "\"hello\"", ">", "test.txt"};
+    vector<string> Cmd = {"echo", "\"hello\""};
+    EXPECT_EQ(shell->Tokenise(s, ' '), fullCmd);
+    Command command;
+    PostTokeniseProcessingErr err = shell->PostTokeniseProcessing(command.redirParams, fullCmd);
+    EXPECT_EQ(err, PostTokeniseProcessingErrNone);
+    EXPECT_EQ(command.redirParams.outputRedirectionType, OutputCreate);
+    EXPECT_EQ(command.redirParams.inputRedirectionType, RedirNone);
+
+    EXPECT_CALL(mockShellDriver, fileOpen(command.redirParams.outfilename, 0)).Times(1);
+    EXPECT_CALL(mockShellDriver, dupFile(_,_)).Times(1);
+    EXPECT_CALL(mockShellDriver, fileClose(_)).Times(1);
+
+    shell->HandleRedirection(command.redirParams);
+}

@@ -533,14 +533,14 @@ void Shell::HandleRedirection(const RedirectionParams& redirParams){
     switch(redirParams.outputRedirectionType){
         case (OutputCreate):
             {
-                int newstdout = shellDriver.fileOpen(redirParams.outfilename, O_WRONLY | O_CREAT| O_TRUNC);
+                int newstdout = shellDriver.fileOpen(redirParams.outfilename, S_CREAT);
                 shellDriver.dupFile(newstdout, stdout);                
                 shellDriver.fileClose(newstdout);
             }
             break;
         case(OutputAppend):
             {
-                int newstdout = shellDriver.fileOpen(redirParams.outfilename, O_WRONLY | O_CREAT | O_APPEND);
+                int newstdout = shellDriver.fileOpen(redirParams.outfilename, S_APPEND);
                 shellDriver.dupFile(newstdout, stdout);                
                 shellDriver.fileClose(newstdout);
             }
@@ -552,7 +552,7 @@ void Shell::HandleRedirection(const RedirectionParams& redirParams){
     switch (redirParams.inputRedirectionType){
         case(Input):
             {
-                int newstdin = shellDriver.fileOpen(redirParams.infilename, O_RDONLY);
+                int newstdin = shellDriver.fileOpen(redirParams.infilename, S_RDONLY);
                 shellDriver.dupFile(newstdin, stdin);
                 shellDriver.fileClose(newstdin);
             }
