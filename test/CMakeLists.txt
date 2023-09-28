@@ -3,7 +3,7 @@ set(BINARY ${CMAKE_PROJECT_NAME}_tst)
 set(TEST_SOURCES shell-test.cpp 
                  shell-test.h 
                  main.cpp 
-                 shellDriverMock.cpp
+                 shellDriverMock.h
                  command-history.cpp
                  )
 set(SOURCES ${TEST_SOURCES})
@@ -17,4 +17,4 @@ set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fprofile-arcs -ftest-coverage")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fprofile-arcs -ftest-coverage")
 
 
-target_link_libraries(${BINARY} PUBLIC ${CMAKE_PROJECT_NAME}_lib gtest)
+target_link_libraries(${BINARY} PUBLIC ${CMAKE_PROJECT_NAME}_lib gtest gmock)

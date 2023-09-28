@@ -130,8 +130,8 @@ string Shell::handleDownArrow(const string& s, ostream& ofs){
  * @param input string 
  */
 void Shell::CheckLength(string &shellInput){
-    if (shellInput.size() > MAX_INPUT){
-        shellInput = shellInput.substr(0, MAX_INPUT);
+    if (shellInput.size() > maxInputLength){
+        shellInput = shellInput.substr(0, maxInputLength);
     }
 }
 
@@ -384,7 +384,7 @@ PipesErr Shell::HandlePipes(Command& command){
         // pid of root of pipe
         pid_t rootPid;
         for (int i = 0; i < command.pipeline.numPipes+1; i++){
-            pid_t cpid = fork();
+            pid_t cpid = shellDriver.processFork();
             if (cpid < 0) {
                 perror("fork error");
                 return PipesExecErr;
@@ -452,7 +452,7 @@ PipesErr Shell::HandlePipes(Command& command){
         } 
     } else {
         // no pipes
-        pid_t cpid = fork();
+        pid_t cpid = shellDriver.processFork();
         if (cpid == 0){
             command.redirParams = {0};
             PostTokeniseProcessingErr err = PostTokeniseProcessing(command.redirParams, command.pipeline.pipes[0]);
@@ -532,14 +532,14 @@ void Shell::HandleRedirection(const RedirectionParams& redirParams){
     switch(redirParams.outputRedirectionType){
         case (OutputCreate):
             {
-                int newstdout = shellDriver.fileOpen(redirParams.outfilename, O_WRONLY | O_CREAT| O_TRUNC);
+                int newstdout = shellDriver.fileOpen(redirParams.outfilename, S_CREAT);
                 shellDriver.dupFile(newstdout, stdout);                
                 shellDriver.fileClose(newstdout);
             }
             break;
         case(OutputAppend):
             {
-                int newstdout = shellDriver.fileOpen(redirParams.outfilename, O_WRONLY | O_CREAT | O_APPEND);
+                int newstdout = shellDriver.fileOpen(redirParams.outfilename, S_APPEND);
                 shellDriver.dupFile(newstdout, stdout);                
                 shellDriver.fileClose(newstdout);
             }
@@ -551,7 +551,7 @@ void Shell::HandleRedirection(const RedirectionParams& redirParams){
     switch (redirParams.inputRedirectionType){
         case(Input):
             {
-                int newstdin = shellDriver.fileOpen(redirParams.infilename, O_RDONLY);
+                int newstdin = shellDriver.fileOpen(redirParams.infilename, S_RDONLY);
                 shellDriver.dupFile(newstdin, stdin);
                 shellDriver.fileClose(newstdin);
             }

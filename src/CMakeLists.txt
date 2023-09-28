@@ -5,8 +5,8 @@ set(SOURCES main.cpp
     redirection.h
     shellSignal.cpp
     shellSignal.h
-    shellDriver.cpp
-    shellDriver.h)
+    shellDriver.h
+    shellDriver.cpp)
 
 # Add coverage flags for C and C++ source code
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fprofile-arcs -ftest-coverage")

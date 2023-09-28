@@ -15,6 +15,11 @@ int ShellDriver::dupFile(int fd, FILE* stdinStdout){
 void ShellDriver::fileClose(int fd){
     close(fd);
 }
+
 int ShellDriver::execute(const char *cmd, char *const argv[]){
     return execvp(cmd, argv);
+}
+
+pid_t ShellDriver::processFork(void){
+    return fork();
 }
