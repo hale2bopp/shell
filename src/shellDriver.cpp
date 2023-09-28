@@ -5,7 +5,23 @@
 using namespace std;
 
 int ShellDriver::fileOpen(string outfilename, int opts){
-    return open(outfilename.c_str(), opts, S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH);
+
+    FileOpenOpts options;
+    switch (opts){
+        case 1:
+            options = S_CREAT;
+            break;
+        case 2:
+            options = S_APPEND;
+            break;
+        case 3:
+            options = S_RDONLY;
+            break;
+        default:
+            options = S_INVALID;
+    }
+    
+    return open(outfilename.c_str(), options, S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH);
 }
 
 int ShellDriver::dupFile(int fd, FILE* stdinStdout){

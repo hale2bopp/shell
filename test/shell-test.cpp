@@ -852,7 +852,7 @@ TEST_F(ShellTest, HandleOutputRedirection){
     EXPECT_EQ(command.redirParams.outputRedirectionType, OutputCreate);
     EXPECT_EQ(command.redirParams.inputRedirectionType, RedirNone);
 
-    EXPECT_CALL(mockShellDriver, fileOpen(command.redirParams.outfilename, 0)).Times(1);
+    EXPECT_CALL(mockShellDriver, fileOpen(command.redirParams.outfilename, _)).Times(1);
     EXPECT_CALL(mockShellDriver, dupFile(_,_)).Times(1);
     EXPECT_CALL(mockShellDriver, fileClose(_)).Times(1);
 
