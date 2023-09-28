@@ -837,7 +837,7 @@ TEST_F(ShellTest, TestExecutePipesBg){
 }
 
 
-TEST_F(ShellTest, HandleOutputRedirection){
+TEST_F(ShellTest, HandleOutputRedirectionCreat){
 
     SetUp("no prompt", 10);
     string s = "echo \"hello\">test.txt\n";
@@ -852,7 +852,49 @@ TEST_F(ShellTest, HandleOutputRedirection){
     EXPECT_EQ(command.redirParams.outputRedirectionType, OutputCreate);
     EXPECT_EQ(command.redirParams.inputRedirectionType, RedirNone);
 
-    EXPECT_CALL(mockShellDriver, fileOpen(command.redirParams.outfilename, _)).Times(1);
+    EXPECT_CALL(mockShellDriver, fileOpen(command.redirParams.outfilename, 577)).Times(1);
+    EXPECT_CALL(mockShellDriver, dupFile(_,_)).Times(1);
+    EXPECT_CALL(mockShellDriver, fileClose(_)).Times(1);
+
+    shell->HandleRedirection(command.redirParams);
+}
+
+TEST_F(ShellTest, HandleOutputRedirectionAppend){
+    SetUp("no prompt", 10);
+    string s = "echo \"hello\">>test.txt\n";
+    std::istringstream iss(s);
+    std::ostringstream oss("");
+    vector<string> fullCmd = {"echo", "\"hello\"", ">>", "test.txt"};
+    vector<string> Cmd = {"echo", "\"hello\""};
+    EXPECT_EQ(shell->Tokenise(s, ' '), fullCmd);
+    Command command;
+    PostTokeniseProcessingErr err = shell->PostTokeniseProcessing(command.redirParams, fullCmd);
+    EXPECT_EQ(err, PostTokeniseProcessingErrNone);
+    EXPECT_EQ(command.redirParams.outputRedirectionType, OutputAppend);
+    EXPECT_EQ(command.redirParams.inputRedirectionType, RedirNone);
+
+    EXPECT_CALL(mockShellDriver, fileOpen(command.redirParams.outfilename, 1089)).Times(1);
+    EXPECT_CALL(mockShellDriver, dupFile(_,_)).Times(1);
+    EXPECT_CALL(mockShellDriver, fileClose(_)).Times(1);
+
+    shell->HandleRedirection(command.redirParams);
+}
+
+TEST_F(ShellTest, HandleInputRedirection){
+    SetUp("no prompt", 10);
+    string s = "cat < test.txt\n";
+    std::istringstream iss(s);
+    std::ostringstream oss("");
+    vector<string> fullCmd = {"cat", "<", "test.txt"};
+    vector<string> Cmd = {"cat"};
+    EXPECT_EQ(shell->Tokenise(s, ' '), fullCmd);
+    Command command;
+    PostTokeniseProcessingErr err = shell->PostTokeniseProcessing(command.redirParams, fullCmd);
+    EXPECT_EQ(err, PostTokeniseProcessingErrNone);
+    EXPECT_EQ(command.redirParams.outputRedirectionType, RedirNone);
+    EXPECT_EQ(command.redirParams.inputRedirectionType, Input);
+
+    EXPECT_CALL(mockShellDriver, fileOpen(command.redirParams.infilename, 0)).Times(1);
     EXPECT_CALL(mockShellDriver, dupFile(_,_)).Times(1);
     EXPECT_CALL(mockShellDriver, fileClose(_)).Times(1);
 
