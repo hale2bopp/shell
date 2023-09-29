@@ -2,12 +2,16 @@ cmake_minimum_required(VERSION 3.10)
 project(shell)
 
 set(CMAKE_CXX_STANDARD 14)
-
+# include directories
 include_directories(src)
+include_directories(${CMAKE_SOURCE_DIR}/../lib/googletest/googletest/include)
+include_directories(${CMAKE_SOURCE_DIR}/../lib/googletest/googlemock/include)
 
+# add subdirectories
 add_subdirectory(src)
 add_subdirectory(test)
-add_subdirectory(lib/googletest)
+
+# set coverage flags
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fprofile-arcs -ftest-coverage")
 set(CMAKE_CXX_FLAGS " ${CMAKE_CXX_FLAGS} -fprofile-arcs -ftest-coverage")
 # cmake command 
