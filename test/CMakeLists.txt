@@ -1,4 +1,4 @@
-set(BINARY ${CMAKE_PROJECT_NAME}_tst)
+set(BINARY ${PROJECT_NAME}_tst)
 
 set(TEST_SOURCES shell-test.cpp 
                  shell-test.h 
@@ -7,8 +7,6 @@ set(TEST_SOURCES shell-test.cpp
                  command-history.cpp
                  )
 
-message("test/CMakeLists.txt: CMAKE_SOURCE_DIR: ${CMAKE_SOURCE_DIR}")
-message("test/CMakeLists.txt: CMAKE_CURRENT_SOURCE_DIR: ${CMAKE_CURRENT_SOURCE_DIR}")
 
 set(SOURCES ${TEST_SOURCES})
 
@@ -28,5 +26,5 @@ target_include_directories(${BINARY} PUBLIC
 # Specify the path to the gmock and gtest library
 link_directories(${CMAKE_SOURCE_DIR}/../lib/googletest/googletest)
 link_directories(${CMAKE_SOURCE_DIR}/../lib/googletest/googlemock)
-target_link_libraries(${BINARY} PUBLIC ${CMAKE_PROJECT_NAME}_lib gtest)
-target_link_libraries(${BINARY} PUBLIC ${CMAKE_PROJECT_NAME}_lib gmock)
+target_link_libraries(${BINARY} PUBLIC ${PROJECT_NAME}_lib gtest)
+target_link_libraries(${BINARY} PUBLIC ${PROJECT_NAME}_lib gmock)
