@@ -7,8 +7,8 @@
 #define SHELL_DRIVER_MOCK_H
 #include <string>
 #include "shellDriverInterface.h"
-#include "gmock/gmock.h"
 #include "gtest/gtest.h"
+#include "gmock/gmock.h"
 
 class ShellDriverMock: public ShellDriverInterface {
 public:
