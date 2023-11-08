@@ -141,6 +141,7 @@ public:
     PostTokeniseProcessingErr PostTokeniseProcessing(RedirectionParams& redirParams, const vector<string> &cmd);
     void HandleRedirection(const RedirectionParams& redirParams);
     void printTokens(const vector<string> &input, ostream& ofs);   
+	void shellRun(void);
 };
 
 

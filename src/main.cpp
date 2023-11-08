@@ -7,7 +7,7 @@ const char* err_msg = "unable to execute";
 string env = "PATH=/usr/local/sbin/:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games";
 
 string mainPrompt = "penn-shredder# ";
-int main(void){
+int Shell::shellRun(void){
     registerSignals();
     ShellDriver shellDriver;
     Shell shell(mainPrompt, CMD_HISTORY_SIZE, shellDriver);
