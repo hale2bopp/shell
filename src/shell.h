@@ -35,6 +35,8 @@ enum PostTokeniseProcessingErr{
     BgErrDoubleBg = 3,
 };
 
+
+
 class Command{
 private:
     Command *next;  
@@ -141,8 +143,10 @@ public:
     PostTokeniseProcessingErr PostTokeniseProcessing(RedirectionParams& redirParams, const vector<string> &cmd);
     void HandleRedirection(const RedirectionParams& redirParams);
     void printTokens(const vector<string> &input, ostream& ofs);   
-	void shellRun(void);
+	static void shellRun(void);
 };
 
+// Non-member functions
+Shell createShell(void);
 
 #endif  // SHELL_H

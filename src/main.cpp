@@ -6,12 +6,12 @@
 const char* err_msg = "unable to execute";
 string env = "PATH=/usr/local/sbin/:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games";
 
+
 string mainPrompt = "penn-shredder# ";
-int Shell::shellRun(void){
+void Shell::shellRun(void){
     registerSignals();
-    ShellDriver shellDriver;
-    Shell shell(mainPrompt, CMD_HISTORY_SIZE, shellDriver);
     shell.PutTerminalInPerCharMode();
+
     while (1) {
         shell.DisplayPrompt(cout);
         string shellInput = shell.GetInput(cin, cout);
@@ -31,5 +31,4 @@ int Shell::shellRun(void){
         } 
     }
     shell.PutTerminalBackInNormalMode();
-    return 0;
 }

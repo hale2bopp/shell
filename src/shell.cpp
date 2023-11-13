@@ -19,6 +19,11 @@
 string prompt = "penn-shredder# ";
 static struct termios oldt, newt;
 
+Shell createShell(void){
+	ShellDriver shellDriver;
+    Shell shell(mainPrompt, CMD_HISTORY_SIZE, shellDriver);
+	return Shell;
+}
 
 CommandHistory::CommandHistory(int maxCmdHistorySize): maxCmdHistorySize(maxCmdHistorySize){
 }
