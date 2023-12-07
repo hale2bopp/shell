@@ -7,6 +7,7 @@
 #include <unistd.h>
 #include "shell.h"
 #include "shellDriver.h"
+#include "shellSignal.h"
 #include "redirection.h"
 #include <termios.h>
 #include <string>
@@ -19,10 +20,40 @@
 string prompt = "penn-shredder# ";
 static struct termios oldt, newt;
 
-Shell createShell(void){
+
+Shell createShell(const string& mainPrompt){
 	ShellDriver shellDriver;
     Shell shell(mainPrompt, CMD_HISTORY_SIZE, shellDriver);
-	return Shell;
+	return shell;
+}
+
+void shellRunWrapper(Shell& shell) {
+	shell.shellRun();
+}
+
+void Shell::shellRun(){
+    registerSignals();
+    PutTerminalInPerCharMode();
+
+    while (1) {
+        DisplayPrompt(cout);
+        string shellInput = GetInput(cin, cout);
+        vector<string> tokens = Tokenise(shellInput, ' ');
+        GetCommandHistory()->MainWrapperAddCmdToHistory(shellInput);
+        fflush(stdout);
+        Command command;
+        PipesErr pipesErr = ParsePipes(tokens, command);
+        if (pipesErr!=PipesErrNone){
+            perror("error in parsing pipes");
+            continue;
+        }
+        pipesErr = HandlePipes(command);
+        if (pipesErr!=PipesErrNone){
+            perror("error in handling pipes");
+            continue;
+        } 
+    }
+    PutTerminalBackInNormalMode();
 }
 
 CommandHistory::CommandHistory(int maxCmdHistorySize): maxCmdHistorySize(maxCmdHistorySize){

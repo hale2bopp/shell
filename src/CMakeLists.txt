@@ -1,6 +1,5 @@
 set(BINARY ${PROJECT_NAME})
-set(SOURCES main.cpp 
-    shell.cpp 
+set(SOURCES    shell.cpp 
     shell.h 
     redirection.h
     shellSignal.cpp
@@ -12,6 +11,6 @@ set(SOURCES main.cpp
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fprofile-arcs -ftest-coverage")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fprofile-arcs -ftest-coverage")
 
-add_executable(${BINARY}_run ${SOURCES})
+# add_executable(${BINARY}_run ${SOURCES})
 add_library(${BINARY}_lib STATIC ${SOURCES})
 

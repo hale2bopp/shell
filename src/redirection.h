@@ -7,7 +7,7 @@
 #define REDIRECTION_H
 
 #include <vector>
-
+#include <string>
 enum RedirectionType
 {
     RedirNone = 0,   
