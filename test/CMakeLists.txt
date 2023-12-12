@@ -2,7 +2,7 @@ set(BINARY ${PROJECT_NAME}_tst)
 
 set(TEST_SOURCES shell-test.cpp 
                  shell-test.h 
-                 main.cpp 
+                 shellTestMain.cpp
                  shellDriverMock.h
                  command-history.cpp
                  )
