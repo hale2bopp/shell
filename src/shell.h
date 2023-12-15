@@ -148,6 +148,7 @@ public:
 
 // Non-member functions
 Shell createShell(const string& mainPrompt);
-void shellRunWrapper(Shell& shell);
+//void shellRunWrapper(Shell& shell);
+void shellRunWrapper(int argPtr);
  
 #endif  // SHELL_H

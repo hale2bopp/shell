@@ -27,8 +27,11 @@ Shell createShell(const string& mainPrompt){
 	return shell;
 }
 
-void shellRunWrapper(Shell& shell) {
-	shell.shellRun();
+//void shellRunWrapper(Shell& shell) {
+void shellRunWrapper(int argPtr){
+	Shell* shellArg = reinterpret_cast<Shell*>(argPtr);
+	shellArg->shellRun();
+//	shell.shellRun();
 }
 
 void Shell::shellRun(){
