@@ -34,7 +34,12 @@ void shellRunWrapper(int argPtr){
 //	shell.shellRun();
 }
 
+void shellRunWrapperExplicit(Shell& shell){
+	shell.shellRun();
+}
+
 void Shell::shellRun(){
+//	cout << "running shell" << endl; 
     registerSignals();
     PutTerminalInPerCharMode();
 
