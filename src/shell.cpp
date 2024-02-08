@@ -21,11 +21,21 @@ string prompt = "penn-shredder# ";
 static struct termios oldt, newt;
 
 
+std::unique_ptr<Shell> createShell(const std::string& mainPrompt) {
+    // Assuming ShellDriver can be default constructed or however it needs to be initialized.
+    ShellDriver shellDriver;
+    // Use std::make_unique to create a unique_ptr managing a Shell instance.
+    auto shellPtr = std::make_unique<Shell>(mainPrompt, CMD_HISTORY_SIZE, shellDriver);
+    return shellPtr;
+}
+
+/*
 Shell createShell(const string& mainPrompt){
 	ShellDriver shellDriver;
     Shell shell(mainPrompt, CMD_HISTORY_SIZE, shellDriver);
-	return shell;
+	return &shell;
 }
+*/
 
 void shellRunWrapper(Shell& shell){
 	shell.shellRun();

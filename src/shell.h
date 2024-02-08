@@ -7,6 +7,7 @@
 #define SHELL_H
 
 #include <vector>
+#include <memory>
 #include<sys/wait.h>
 #include <tuple>
 #include <queue>
@@ -147,6 +148,7 @@ public:
 };
 
 // Non-member functions
-Shell createShell(const string& mainPrompt);
+// createShell(const string& mainPrompt);
+std::unique_ptr<Shell> createShell(const std::string& mainPrompt);
 void shellRunWrapper(Shell& shell); 
 #endif  // SHELL_H
