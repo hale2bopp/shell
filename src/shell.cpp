@@ -36,15 +36,15 @@ std::unique_ptr<Shell> createShell(const std::string& mainPrompt) {
 }
 
 /*
-Shell createShell(const string& mainPrompt){
-	ShellDriver shellDriverIntf;
-    Shell shell(mainPrompt, CMD_HISTORY_SIZE, shellDriverIntf);
-	return &shell;
-}
-*/
+   Shell createShell(const string& mainPrompt){
+   ShellDriver shellDriverIntf;
+   Shell shell(mainPrompt, CMD_HISTORY_SIZE, shellDriverIntf);
+   return &shell;
+   }
+ */
 
 void shellRunWrapper(Shell& shell){
-	shell.shellRun();
+    shell.shellRun();
 }
 
 void Shell::shellRun(){
@@ -406,7 +406,7 @@ PipesErr Shell::ParsePipes(vector<string> tokens, Command& command){
         }
     }
     command.pipeline.pipes.push_back(temp);
-   
+
     int lastPipeSize = command.pipeline.pipes[command.pipeline.numPipes].size();
     if (lastPipeSize >0){
         if (command.pipeline.pipes[command.pipeline.numPipes][lastPipeSize-1] == "&"){
@@ -414,7 +414,7 @@ PipesErr Shell::ParsePipes(vector<string> tokens, Command& command){
             command.SetIsBackground(true);
         }
     }
- 
+
     return PipesErrNone;
 }
 
@@ -539,25 +539,25 @@ PostTokeniseProcessingErr Shell::PostTokeniseProcessing(RedirectionParams& redir
     ifstream inputFile;
     for (int i = 0; i < cmd.size(); i++){
         if (cmd[i] == ">"){
-                redirParams.outputRedirectionType = OutputCreate;
-                redirParams.outputFileIndex = i+1;
-                setCmdEnd(redirParams,i);
-                redirParams.outfilename = cmd[redirParams.outputFileIndex];
+            redirParams.outputRedirectionType = OutputCreate;
+            redirParams.outputFileIndex = i+1;
+            setCmdEnd(redirParams,i);
+            redirParams.outfilename = cmd[redirParams.outputFileIndex];
         } else if (cmd[i] == ">>"){
-                redirParams.outputRedirectionType = OutputAppend;
-                redirParams.outputFileIndex = i+1;
-                setCmdEnd(redirParams,i);
-                redirParams.outfilename = cmd[redirParams.outputFileIndex];
+            redirParams.outputRedirectionType = OutputAppend;
+            redirParams.outputFileIndex = i+1;
+            setCmdEnd(redirParams,i);
+            redirParams.outfilename = cmd[redirParams.outputFileIndex];
         } else if (cmd[i] == "<") {
-                redirParams.inputRedirectionType = Input;
-                redirParams.inputFileIndex = i+1;
-                setCmdEnd(redirParams,i);
-                redirParams.infilename = cmd[redirParams.inputFileIndex];
+            redirParams.inputRedirectionType = Input;
+            redirParams.inputFileIndex = i+1;
+            setCmdEnd(redirParams,i);
+            redirParams.infilename = cmd[redirParams.inputFileIndex];
         } else if (cmd[i] == "<<"){
-                redirParams.inputRedirectionType = Input;
-                redirParams.inputFileIndex = i+1;
-                setCmdEnd(redirParams,i);
-                redirParams.infilename = cmd[redirParams.inputFileIndex];
+            redirParams.inputRedirectionType = Input;
+            redirParams.inputFileIndex = i+1;
+            setCmdEnd(redirParams,i);
+            redirParams.infilename = cmd[redirParams.inputFileIndex];
         } 
         if ((cmd[i] == "&" ) &&( i!=cmd.size()-1)){
             return BgErrWrongPosition;
@@ -565,7 +565,7 @@ PostTokeniseProcessingErr Shell::PostTokeniseProcessing(RedirectionParams& redir
         if (count(cmd[i].begin(), cmd[i].end(), '&') > 1) {
             return BgErrDoubleBg;
         }
-        
+
     }
     if ((redirParams.outputFileIndex != 0) && (redirParams.inputFileIndex != 0) &&(redirParams.outputFileIndex <= redirParams.inputFileIndex)){
         return RedirErrWrongOrder; 
@@ -734,18 +734,18 @@ void Shell::insertCharacter(string& s, const char&c, int& cursor, ostream& ofs){
  */
 void Shell::PutTerminalInPerCharMode(void){
     /*tcgetattr gets the parameters of the current terminal
-    STDIN_FILENO will tell tcgetattr that it should write the settings
-    of stdin to oldt*/
+      STDIN_FILENO will tell tcgetattr that it should write the settings
+      of stdin to oldt*/
     tcgetattr( STDIN_FILENO, &oldt);
     /*now the settings will be copied*/
     newt = oldt;
 
     /*ICANON normally takes care that one line at a time will be processed
-    that means it will return if it sees a "\n" or an EOF or an EOL*/
+      that means it will return if it sees a "\n" or an EOF or an EOL*/
     newt.c_lflag &= ~(ICANON);          
 
     /*Those new settings will be set to STDIN
-    TCSANOW tells tcsetattr to change attributes immediately. */
+      TCSANOW tells tcsetattr to change attributes immediately. */
     tcsetattr( STDIN_FILENO, TCSANOW, &newt);
 }
 
