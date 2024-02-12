@@ -7,6 +7,7 @@
 #define SHELL_H
 
 #include <vector>
+#include <memory>
 #include<sys/wait.h>
 #include <tuple>
 #include <queue>
@@ -34,6 +35,8 @@ enum PostTokeniseProcessingErr{
     BgErrWrongPosition = 2,
     BgErrDoubleBg = 3,
 };
+
+
 
 class Command{
 private:
@@ -80,7 +83,7 @@ class Shell{
 private:
     string shellPrompt = "penn-shredder# ";
     CommandHistory commandHistory;
-    ShellDriverInterface &shellDriver;
+    ShellDriverInterface &shellDriverIntf;
     int cursorPosition = 0;
     int maxInputLength = MAX_INPUT;
 // potentially a list of features the shell has?
@@ -116,7 +119,7 @@ private:
     void decrementCursorPosition(const string&s, int& cursor);
     void insertCharacter(string& s, const char&c, int& cursor, ostream& ofs);
 public:
-    Shell(const string& prompt, const int cmdHistorySize, ShellDriverInterface& driver): shellPrompt(prompt), commandHistory(cmdHistorySize), shellDriver(driver) {
+    Shell(const string& prompt, const int cmdHistorySize, ShellDriverInterface& driverIntf): shellPrompt(prompt), commandHistory(cmdHistorySize), shellDriverIntf(driverIntf) {
         this->maxInputLength = MAX_INPUT;
     } 
 // Getters, Setters 
@@ -141,7 +144,11 @@ public:
     PostTokeniseProcessingErr PostTokeniseProcessing(RedirectionParams& redirParams, const vector<string> &cmd);
     void HandleRedirection(const RedirectionParams& redirParams);
     void printTokens(const vector<string> &input, ostream& ofs);   
+    void shellRun(void);
 };
 
-
+// Non-member functions
+std::unique_ptr<Shell> createShell(const std::string& mainPrompt);
+std::unique_ptr<Shell> createShellWithDriver(const std::string& mainPrompt,  ShellDriverInterface &shellDriverIntf);
+void shellRunWrapper(Shell& shell); 
 #endif  // SHELL_H

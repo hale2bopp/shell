@@ -14,7 +14,7 @@ public:
     virtual int execute( const char *file, char *const argv[]) = 0;  
     virtual pid_t processFork( void ) = 0;  
     // Define other wrapper functions here
-    virtual ~ShellDriverInterface() {}
+    virtual ~ShellDriverInterface() = default;
 };
 
 #endif // SHELL_DRIVER_INTERFACE_H

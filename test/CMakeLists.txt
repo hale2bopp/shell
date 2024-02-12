@@ -2,7 +2,7 @@ set(BINARY ${PROJECT_NAME}_tst)
 
 set(TEST_SOURCES shell-test.cpp 
                  shell-test.h 
-                 main.cpp 
+                 shellTestMain.cpp
                  shellDriverMock.h
                  command-history.cpp
                  )
@@ -17,7 +17,7 @@ add_test(NAME ${BINARY} COMMAND ${BINARY})
 # Add coverage flags for C and C++ test code
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fprofile-arcs -ftest-coverage")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fprofile-arcs -ftest-coverage")
-
+message(CMAKE_SOURCE_DIR="${CMAKE_SOURCE_DIR}")
 target_include_directories(${BINARY} PUBLIC 
     ${CMAKE_SOURCE_DIR}
     ${CMAKE_SOURCE_DIR}/../lib/googletest/googletest/include

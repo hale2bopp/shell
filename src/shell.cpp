@@ -6,7 +6,8 @@
 #include <fstream>
 #include <unistd.h>
 #include "shell.h"
-#include "shellDriver.h"
+#include "shellDriverInterface.h"
+#include "shellSignal.h"
 #include "redirection.h"
 #include <termios.h>
 #include <string>
@@ -19,6 +20,57 @@
 string prompt = "penn-shredder# ";
 static struct termios oldt, newt;
 
+
+std::unique_ptr<Shell> createShellWithDriver(const std::string& mainPrompt,  ShellDriverInterface &shellDriverIntf){
+    // Use std::make_unique to create a unique_ptr managing a Shell instance.
+    auto shellPtr = std::make_unique<Shell>(mainPrompt, CMD_HISTORY_SIZE, shellDriverIntf);
+    return shellPtr;
+}
+
+std::unique_ptr<Shell> createShell(const std::string& mainPrompt) {
+    // Assuming ShellDriver can be default constructed or however it needs to be initialized.
+    ShellDriver shellDriverIntf;
+    // Use std::make_unique to create a unique_ptr managing a Shell instance.
+    auto shellPtr = std::make_unique<Shell>(mainPrompt, CMD_HISTORY_SIZE, shellDriverIntf);
+    return shellPtr;
+}
+
+/*
+   Shell createShell(const string& mainPrompt){
+   ShellDriver shellDriverIntf;
+   Shell shell(mainPrompt, CMD_HISTORY_SIZE, shellDriverIntf);
+   return &shell;
+   }
+ */
+
+void shellRunWrapper(Shell& shell){
+    shell.shellRun();
+}
+
+void Shell::shellRun(){
+    registerSignals();
+    PutTerminalInPerCharMode();
+
+    while (1) {
+        DisplayPrompt(cout);
+        string shellInput = GetInput(cin, cout);
+        vector<string> tokens = Tokenise(shellInput, ' ');
+        GetCommandHistory()->MainWrapperAddCmdToHistory(shellInput);
+        fflush(stdout);
+        Command command;
+        PipesErr pipesErr = ParsePipes(tokens, command);
+        if (pipesErr!=PipesErrNone){
+            perror("error in parsing pipes");
+            continue;
+        }
+        pipesErr = HandlePipes(command);
+        if (pipesErr!=PipesErrNone){
+            perror("error in handling pipes");
+            continue;
+        } 
+    }
+    PutTerminalBackInNormalMode();
+}
 
 CommandHistory::CommandHistory(int maxCmdHistorySize): maxCmdHistorySize(maxCmdHistorySize){
 }
@@ -219,7 +271,7 @@ int Shell::ExecuteProgram(const vector<string>& cmd){
         vec_cp.push_back(strdup(s.c_str()));
     }
     vec_cp.push_back(NULL);
-    return shellDriver.execute(cmd[0].c_str(), const_cast<char* const*>(vec_cp.data()));
+    return shellDriverIntf.execute(cmd[0].c_str(), const_cast<char* const*>(vec_cp.data()));
 }
 
 
@@ -354,7 +406,7 @@ PipesErr Shell::ParsePipes(vector<string> tokens, Command& command){
         }
     }
     command.pipeline.pipes.push_back(temp);
-   
+
     int lastPipeSize = command.pipeline.pipes[command.pipeline.numPipes].size();
     if (lastPipeSize >0){
         if (command.pipeline.pipes[command.pipeline.numPipes][lastPipeSize-1] == "&"){
@@ -362,7 +414,7 @@ PipesErr Shell::ParsePipes(vector<string> tokens, Command& command){
             command.SetIsBackground(true);
         }
     }
- 
+
     return PipesErrNone;
 }
 
@@ -384,7 +436,7 @@ PipesErr Shell::HandlePipes(Command& command){
         // pid of root of pipe
         pid_t rootPid;
         for (int i = 0; i < command.pipeline.numPipes+1; i++){
-            pid_t cpid = shellDriver.processFork();
+            pid_t cpid = shellDriverIntf.processFork();
             if (cpid < 0) {
                 perror("fork error");
                 return PipesExecErr;
@@ -400,7 +452,7 @@ PipesErr Shell::HandlePipes(Command& command){
                 } else {
                     // set all further pipes to the same pgid as the root
                     setpgid(rootPid, 0);
-                    if (shellDriver.dupFile(pipefd[(i-1)*2], stdin)<0){
+                    if (shellDriverIntf.dupFile(pipefd[(i-1)*2], stdin)<0){
                         perror("unable to open stdin from previous pipe");
                         return PipesExecErr;
                     }
@@ -408,13 +460,13 @@ PipesErr Shell::HandlePipes(Command& command){
 
                 // dup2 stdout to next pipe
                 if (i != command.pipeline.numPipes) {
-                    if (shellDriver.dupFile(pipefd[(i*2)+1], stdout)<0){
+                    if (shellDriverIntf.dupFile(pipefd[(i*2)+1], stdout)<0){
                         perror("unable to open stdout to next pipe");
                         return PipesExecErr;
                     }
                 }
                 for( int j = 0; j < 2*command.pipeline.numPipes; j++){
-                    shellDriver.fileClose(pipefd[j]);
+                    shellDriverIntf.fileClose(pipefd[j]);
                 }
                 // reset redirection params 
                 command.redirParams = {0};
@@ -434,7 +486,7 @@ PipesErr Shell::HandlePipes(Command& command){
         }
         // parent closes all of its copies at the end
         for( int i = 0; i < 2 * command.pipeline.numPipes; i++ ){
-            shellDriver.fileClose( pipefd[i] );
+            shellDriverIntf.fileClose( pipefd[i] );
         }
 
         // waits for children
@@ -452,7 +504,7 @@ PipesErr Shell::HandlePipes(Command& command){
         } 
     } else {
         // no pipes
-        pid_t cpid = shellDriver.processFork();
+        pid_t cpid = shellDriverIntf.processFork();
         if (cpid == 0){
             command.redirParams = {0};
             PostTokeniseProcessingErr err = PostTokeniseProcessing(command.redirParams, command.pipeline.pipes[0]);
@@ -487,25 +539,25 @@ PostTokeniseProcessingErr Shell::PostTokeniseProcessing(RedirectionParams& redir
     ifstream inputFile;
     for (int i = 0; i < cmd.size(); i++){
         if (cmd[i] == ">"){
-                redirParams.outputRedirectionType = OutputCreate;
-                redirParams.outputFileIndex = i+1;
-                setCmdEnd(redirParams,i);
-                redirParams.outfilename = cmd[redirParams.outputFileIndex];
+            redirParams.outputRedirectionType = OutputCreate;
+            redirParams.outputFileIndex = i+1;
+            setCmdEnd(redirParams,i);
+            redirParams.outfilename = cmd[redirParams.outputFileIndex];
         } else if (cmd[i] == ">>"){
-                redirParams.outputRedirectionType = OutputAppend;
-                redirParams.outputFileIndex = i+1;
-                setCmdEnd(redirParams,i);
-                redirParams.outfilename = cmd[redirParams.outputFileIndex];
+            redirParams.outputRedirectionType = OutputAppend;
+            redirParams.outputFileIndex = i+1;
+            setCmdEnd(redirParams,i);
+            redirParams.outfilename = cmd[redirParams.outputFileIndex];
         } else if (cmd[i] == "<") {
-                redirParams.inputRedirectionType = Input;
-                redirParams.inputFileIndex = i+1;
-                setCmdEnd(redirParams,i);
-                redirParams.infilename = cmd[redirParams.inputFileIndex];
+            redirParams.inputRedirectionType = Input;
+            redirParams.inputFileIndex = i+1;
+            setCmdEnd(redirParams,i);
+            redirParams.infilename = cmd[redirParams.inputFileIndex];
         } else if (cmd[i] == "<<"){
-                redirParams.inputRedirectionType = Input;
-                redirParams.inputFileIndex = i+1;
-                setCmdEnd(redirParams,i);
-                redirParams.infilename = cmd[redirParams.inputFileIndex];
+            redirParams.inputRedirectionType = Input;
+            redirParams.inputFileIndex = i+1;
+            setCmdEnd(redirParams,i);
+            redirParams.infilename = cmd[redirParams.inputFileIndex];
         } 
         if ((cmd[i] == "&" ) &&( i!=cmd.size()-1)){
             return BgErrWrongPosition;
@@ -513,7 +565,7 @@ PostTokeniseProcessingErr Shell::PostTokeniseProcessing(RedirectionParams& redir
         if (count(cmd[i].begin(), cmd[i].end(), '&') > 1) {
             return BgErrDoubleBg;
         }
-        
+
     }
     if ((redirParams.outputFileIndex != 0) && (redirParams.inputFileIndex != 0) &&(redirParams.outputFileIndex <= redirParams.inputFileIndex)){
         return RedirErrWrongOrder; 
@@ -532,16 +584,16 @@ void Shell::HandleRedirection(const RedirectionParams& redirParams){
     switch(redirParams.outputRedirectionType){
         case (OutputCreate):
             {
-                int newstdout = shellDriver.fileOpen(redirParams.outfilename, S_CREAT);
-                shellDriver.dupFile(newstdout, stdout);                
-                shellDriver.fileClose(newstdout);
+                int newstdout = shellDriverIntf.fileOpen(redirParams.outfilename, S_CREAT);
+                shellDriverIntf.dupFile(newstdout, stdout);                
+                shellDriverIntf.fileClose(newstdout);
             }
             break;
         case(OutputAppend):
             {
-                int newstdout = shellDriver.fileOpen(redirParams.outfilename, S_APPEND);
-                shellDriver.dupFile(newstdout, stdout);                
-                shellDriver.fileClose(newstdout);
+                int newstdout = shellDriverIntf.fileOpen(redirParams.outfilename, S_APPEND);
+                shellDriverIntf.dupFile(newstdout, stdout);                
+                shellDriverIntf.fileClose(newstdout);
             }
             break;
         default:
@@ -551,9 +603,9 @@ void Shell::HandleRedirection(const RedirectionParams& redirParams){
     switch (redirParams.inputRedirectionType){
         case(Input):
             {
-                int newstdin = shellDriver.fileOpen(redirParams.infilename, S_RDONLY);
-                shellDriver.dupFile(newstdin, stdin);
-                shellDriver.fileClose(newstdin);
+                int newstdin = shellDriverIntf.fileOpen(redirParams.infilename, S_RDONLY);
+                shellDriverIntf.dupFile(newstdin, stdin);
+                shellDriverIntf.fileClose(newstdin);
             }
             break;
         default:
@@ -682,18 +734,18 @@ void Shell::insertCharacter(string& s, const char&c, int& cursor, ostream& ofs){
  */
 void Shell::PutTerminalInPerCharMode(void){
     /*tcgetattr gets the parameters of the current terminal
-    STDIN_FILENO will tell tcgetattr that it should write the settings
-    of stdin to oldt*/
+      STDIN_FILENO will tell tcgetattr that it should write the settings
+      of stdin to oldt*/
     tcgetattr( STDIN_FILENO, &oldt);
     /*now the settings will be copied*/
     newt = oldt;
 
     /*ICANON normally takes care that one line at a time will be processed
-    that means it will return if it sees a "\n" or an EOF or an EOL*/
+      that means it will return if it sees a "\n" or an EOF or an EOL*/
     newt.c_lflag &= ~(ICANON);          
 
     /*Those new settings will be set to STDIN
-    TCSANOW tells tcsetattr to change attributes immediately. */
+      TCSANOW tells tcsetattr to change attributes immediately. */
     tcsetattr( STDIN_FILENO, TCSANOW, &newt);
 }
 
