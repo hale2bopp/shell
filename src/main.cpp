@@ -9,8 +9,8 @@ string env = "PATH=/usr/local/sbin/:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
 
 string mainPrompt = "penn-shredder# ";
 int main(void){
-	ShellDriver shellDriver;
-	auto pennshPtr = createShellWithDriver(mainPrompt, shellDriver);
+    ShellDriver shellDriver;
+    auto pennshPtr = createShellWithDriver(mainPrompt, shellDriver);
     pennshPtr->shellRun();
     return 0;
 }
