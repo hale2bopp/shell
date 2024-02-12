@@ -148,7 +148,6 @@ public:
 };
 
 // Non-member functions
-// createShell(const string& mainPrompt);
 std::unique_ptr<Shell> createShell(const std::string& mainPrompt);
 std::unique_ptr<Shell> createShellWithDriver(const std::string& mainPrompt,  ShellDriverInterface &shellDriverIntf);
 void shellRunWrapper(Shell& shell); 
