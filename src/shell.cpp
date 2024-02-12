@@ -6,7 +6,7 @@
 #include <fstream>
 #include <unistd.h>
 #include "shell.h"
-#include "shellDriver.h"
+#include "shellDriverInterface.h"
 #include "shellSignal.h"
 #include "redirection.h"
 #include <termios.h>
@@ -21,18 +21,24 @@ string prompt = "penn-shredder# ";
 static struct termios oldt, newt;
 
 
+std::unique_ptr<Shell> createShellWithDriver(const std::string& mainPrompt,  ShellDriverInterface &shellDriverIntf){
+    // Use std::make_unique to create a unique_ptr managing a Shell instance.
+    auto shellPtr = std::make_unique<Shell>(mainPrompt, CMD_HISTORY_SIZE, shellDriverIntf);
+    return shellPtr;
+}
+
 std::unique_ptr<Shell> createShell(const std::string& mainPrompt) {
     // Assuming ShellDriver can be default constructed or however it needs to be initialized.
-    ShellDriver shellDriver;
+    ShellDriver shellDriverIntf;
     // Use std::make_unique to create a unique_ptr managing a Shell instance.
-    auto shellPtr = std::make_unique<Shell>(mainPrompt, CMD_HISTORY_SIZE, shellDriver);
+    auto shellPtr = std::make_unique<Shell>(mainPrompt, CMD_HISTORY_SIZE, shellDriverIntf);
     return shellPtr;
 }
 
 /*
 Shell createShell(const string& mainPrompt){
-	ShellDriver shellDriver;
-    Shell shell(mainPrompt, CMD_HISTORY_SIZE, shellDriver);
+	ShellDriver shellDriverIntf;
+    Shell shell(mainPrompt, CMD_HISTORY_SIZE, shellDriverIntf);
 	return &shell;
 }
 */
@@ -265,7 +271,7 @@ int Shell::ExecuteProgram(const vector<string>& cmd){
         vec_cp.push_back(strdup(s.c_str()));
     }
     vec_cp.push_back(NULL);
-    return shellDriver.execute(cmd[0].c_str(), const_cast<char* const*>(vec_cp.data()));
+    return shellDriverIntf.execute(cmd[0].c_str(), const_cast<char* const*>(vec_cp.data()));
 }
 
 
@@ -430,7 +436,7 @@ PipesErr Shell::HandlePipes(Command& command){
         // pid of root of pipe
         pid_t rootPid;
         for (int i = 0; i < command.pipeline.numPipes+1; i++){
-            pid_t cpid = shellDriver.processFork();
+            pid_t cpid = shellDriverIntf.processFork();
             if (cpid < 0) {
                 perror("fork error");
                 return PipesExecErr;
@@ -446,7 +452,7 @@ PipesErr Shell::HandlePipes(Command& command){
                 } else {
                     // set all further pipes to the same pgid as the root
                     setpgid(rootPid, 0);
-                    if (shellDriver.dupFile(pipefd[(i-1)*2], stdin)<0){
+                    if (shellDriverIntf.dupFile(pipefd[(i-1)*2], stdin)<0){
                         perror("unable to open stdin from previous pipe");
                         return PipesExecErr;
                     }
@@ -454,13 +460,13 @@ PipesErr Shell::HandlePipes(Command& command){
 
                 // dup2 stdout to next pipe
                 if (i != command.pipeline.numPipes) {
-                    if (shellDriver.dupFile(pipefd[(i*2)+1], stdout)<0){
+                    if (shellDriverIntf.dupFile(pipefd[(i*2)+1], stdout)<0){
                         perror("unable to open stdout to next pipe");
                         return PipesExecErr;
                     }
                 }
                 for( int j = 0; j < 2*command.pipeline.numPipes; j++){
-                    shellDriver.fileClose(pipefd[j]);
+                    shellDriverIntf.fileClose(pipefd[j]);
                 }
                 // reset redirection params 
                 command.redirParams = {0};
@@ -480,7 +486,7 @@ PipesErr Shell::HandlePipes(Command& command){
         }
         // parent closes all of its copies at the end
         for( int i = 0; i < 2 * command.pipeline.numPipes; i++ ){
-            shellDriver.fileClose( pipefd[i] );
+            shellDriverIntf.fileClose( pipefd[i] );
         }
 
         // waits for children
@@ -498,7 +504,7 @@ PipesErr Shell::HandlePipes(Command& command){
         } 
     } else {
         // no pipes
-        pid_t cpid = shellDriver.processFork();
+        pid_t cpid = shellDriverIntf.processFork();
         if (cpid == 0){
             command.redirParams = {0};
             PostTokeniseProcessingErr err = PostTokeniseProcessing(command.redirParams, command.pipeline.pipes[0]);
@@ -578,16 +584,16 @@ void Shell::HandleRedirection(const RedirectionParams& redirParams){
     switch(redirParams.outputRedirectionType){
         case (OutputCreate):
             {
-                int newstdout = shellDriver.fileOpen(redirParams.outfilename, S_CREAT);
-                shellDriver.dupFile(newstdout, stdout);                
-                shellDriver.fileClose(newstdout);
+                int newstdout = shellDriverIntf.fileOpen(redirParams.outfilename, S_CREAT);
+                shellDriverIntf.dupFile(newstdout, stdout);                
+                shellDriverIntf.fileClose(newstdout);
             }
             break;
         case(OutputAppend):
             {
-                int newstdout = shellDriver.fileOpen(redirParams.outfilename, S_APPEND);
-                shellDriver.dupFile(newstdout, stdout);                
-                shellDriver.fileClose(newstdout);
+                int newstdout = shellDriverIntf.fileOpen(redirParams.outfilename, S_APPEND);
+                shellDriverIntf.dupFile(newstdout, stdout);                
+                shellDriverIntf.fileClose(newstdout);
             }
             break;
         default:
@@ -597,9 +603,9 @@ void Shell::HandleRedirection(const RedirectionParams& redirParams){
     switch (redirParams.inputRedirectionType){
         case(Input):
             {
-                int newstdin = shellDriver.fileOpen(redirParams.infilename, S_RDONLY);
-                shellDriver.dupFile(newstdin, stdin);
-                shellDriver.fileClose(newstdin);
+                int newstdin = shellDriverIntf.fileOpen(redirParams.infilename, S_RDONLY);
+                shellDriverIntf.dupFile(newstdin, stdin);
+                shellDriverIntf.fileClose(newstdin);
             }
             break;
         default:

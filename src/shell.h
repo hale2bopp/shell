@@ -83,7 +83,7 @@ class Shell{
 private:
     string shellPrompt = "penn-shredder# ";
     CommandHistory commandHistory;
-    ShellDriverInterface &shellDriver;
+    ShellDriverInterface &shellDriverIntf;
     int cursorPosition = 0;
     int maxInputLength = MAX_INPUT;
 // potentially a list of features the shell has?
@@ -119,7 +119,7 @@ private:
     void decrementCursorPosition(const string&s, int& cursor);
     void insertCharacter(string& s, const char&c, int& cursor, ostream& ofs);
 public:
-    Shell(const string& prompt, const int cmdHistorySize, ShellDriverInterface& driver): shellPrompt(prompt), commandHistory(cmdHistorySize), shellDriver(driver) {
+    Shell(const string& prompt, const int cmdHistorySize, ShellDriverInterface& driverIntf): shellPrompt(prompt), commandHistory(cmdHistorySize), shellDriverIntf(driverIntf) {
         this->maxInputLength = MAX_INPUT;
     } 
 // Getters, Setters 
@@ -150,5 +150,6 @@ public:
 // Non-member functions
 // createShell(const string& mainPrompt);
 std::unique_ptr<Shell> createShell(const std::string& mainPrompt);
+std::unique_ptr<Shell> createShellWithDriver(const std::string& mainPrompt,  ShellDriverInterface &shellDriverIntf);
 void shellRunWrapper(Shell& shell); 
 #endif  // SHELL_H
