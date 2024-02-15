@@ -7,6 +7,7 @@
 #include <unistd.h>
 #include "shell.h"
 #include "shellDriverInterface.h"
+#include "fileDef.h"
 #include "shellSignal.h"
 #include "redirection.h"
 #include <termios.h>
@@ -26,15 +27,15 @@ std::unique_ptr<Shell> createShellWithDriver(const std::string& mainPrompt,  She
     auto shellPtr = std::make_unique<Shell>(mainPrompt, CMD_HISTORY_SIZE, shellDriverIntf);
     return shellPtr;
 }
-
+/*
 std::unique_ptr<Shell> createShell(const std::string& mainPrompt) {
     // Assuming ShellDriver can be default constructed or however it needs to be initialized.
-    ShellDriver shellDriverIntf;
+    ShellDriverInterface shellDriverIntf;
     // Use std::make_unique to create a unique_ptr managing a Shell instance.
     auto shellPtr = std::make_unique<Shell>(mainPrompt, CMD_HISTORY_SIZE, shellDriverIntf);
     return shellPtr;
 }
-
+*/
 /*
    Shell createShell(const string& mainPrompt){
    ShellDriver shellDriverIntf;

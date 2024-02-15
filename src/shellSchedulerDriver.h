@@ -1,14 +1,14 @@
-/* \file shellDriver.h
+/* \file shellSchedulerDriver.h
  * \brief Driver for all functions in shell
  * that touch system level functions
  */
 
-#ifndef SHELL_DRIVER_H
-#define SHELL_DRIVER_H
+#ifndef SHELL_SCHEDULER_DRIVER_H
+#define SHELL_SCHEDULER_DRIVER_H
 #include <string>
 #include "shellDriverInterface.h"
 
-class ShellDriver: public ShellDriverInterface {
+class ShellSchedulerDriver: public ShellSchedulerDriverInterface {
 public:
     int fileOpen(std::string outfilename, int opts) override;
     void fileClose(int fd) override;
@@ -17,4 +17,4 @@ public:
     pid_t processFork(void) override;
 };
 
-#endif // SHELL_DRIVER_H
+#endif // SHELL_SCHEDULER_DRIVER_H

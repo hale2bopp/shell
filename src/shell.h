@@ -13,7 +13,7 @@
 #include <queue>
 #include "redirection.h"
 #include "pipes.h"
-#include "shellDriver.h"
+#include "shellDriverInterface.h"
 using std::deque;
 using namespace std;
 
@@ -148,7 +148,7 @@ public:
 };
 
 // Non-member functions
-std::unique_ptr<Shell> createShell(const std::string& mainPrompt);
+//std::unique_ptr<Shell> createShell(const std::string& mainPrompt);
 std::unique_ptr<Shell> createShellWithDriver(const std::string& mainPrompt,  ShellDriverInterface &shellDriverIntf);
 void shellRunWrapper(Shell& shell); 
 #endif  // SHELL_H
