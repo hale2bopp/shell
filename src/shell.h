@@ -8,7 +8,6 @@
 
 #include <vector>
 #include <memory>
-#include<sys/wait.h>
 #include <tuple>
 #include <queue>
 #include "redirection.h"

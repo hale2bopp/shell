@@ -14,7 +14,7 @@ public:
     void fileClose(int fd) override;
     int dupFile(int fd, FILE* stdinStdout) override;
     int execute( const char *file, char *const argv[]) override;
-    void pWait(pid_t pid, int *retVal, int val) override;
+    pid_t pWaitpid(pid_t pid, int *retVal, int val) override;
     pid_t processFork(void) override;
 };
 
