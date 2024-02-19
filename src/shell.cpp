@@ -4,18 +4,15 @@
  */
 #include <iostream>
 #include <fstream>
-#include <unistd.h>
 #include "shell.h"
 #include "shellDriverInterface.h"
+#include "fileDef.h"
 #include "shellSignal.h"
 #include "redirection.h"
 #include <termios.h>
-#include <string>
 #include <string.h>
 #include <vector>
 #include <algorithm>
-#include <sys/stat.h>
-#include <fcntl.h>
 
 string prompt = "penn-shredder# ";
 static struct termios oldt, newt;
@@ -26,15 +23,15 @@ std::unique_ptr<Shell> createShellWithDriver(const std::string& mainPrompt,  She
     auto shellPtr = std::make_unique<Shell>(mainPrompt, CMD_HISTORY_SIZE, shellDriverIntf);
     return shellPtr;
 }
-
+/*
 std::unique_ptr<Shell> createShell(const std::string& mainPrompt) {
     // Assuming ShellDriver can be default constructed or however it needs to be initialized.
-    ShellDriver shellDriverIntf;
+    ShellDriverInterface shellDriverIntf;
     // Use std::make_unique to create a unique_ptr managing a Shell instance.
     auto shellPtr = std::make_unique<Shell>(mainPrompt, CMD_HISTORY_SIZE, shellDriverIntf);
     return shellPtr;
 }
-
+*/
 /*
    Shell createShell(const string& mainPrompt){
    ShellDriver shellDriverIntf;
@@ -495,7 +492,7 @@ PipesErr Shell::HandlePipes(Command& command){
         if (!command.GetIsBackground()){
             for(int i = command.pipeline.numPipes; i >= 0; i--){
                 int retVal = 0;
-                if(waitpid(command.cpid[i], &retVal, 0)){
+                if(shellDriverIntf.pWaitpid(command.cpid[i], &retVal, 0)){
                     //Report child exited with return status 'return'
                     //Remove child (linked list style)
                     command.cpid.pop_back();
@@ -519,7 +516,7 @@ PipesErr Shell::HandlePipes(Command& command){
         else {
             int retVal;
             if (!command.GetIsBackground()){                
-                if(waitpid(cpid, &retVal, 0) < 0){
+                if(shellDriverIntf.pWaitpid(cpid, &retVal, 0) < 0){
                     perror("waitpid error");
                     return PipesExecErr;
                 }                

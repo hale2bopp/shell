@@ -16,6 +16,7 @@ public:
     MOCK_METHOD(void, fileClose, (int fd), (override));
     MOCK_METHOD(int, dupFile, (int fd, FILE* stdinStdout), (override));
     MOCK_METHOD(int, execute, (const char *file, char *const argv[]), (override));
+    MOCK_METHOD(pid_t, pWaitpid, (pid_t pid, int *retVal, int val), (override));
     MOCK_METHOD(pid_t, processFork, (), (override));
 };
 

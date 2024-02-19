@@ -7,7 +7,6 @@
 #define SHELL_SIGNAL_H
 
 #include "signal.h"
-#include <sys/wait.h>
 void registerSigint(void);
 void registerSigchld(void);
 void signalHandler(int sig);

@@ -13,6 +13,7 @@ public:
     virtual int dupFile(int fd, FILE* stdinStdout) = 0;
     virtual int execute( const char *file, char *const argv[]) = 0;  
     virtual pid_t processFork( void ) = 0;  
+    virtual pid_t pWaitpid(pid_t pid, int *retVal, int val) = 0;
     // Define other wrapper functions here
     virtual ~ShellDriverInterface() = default;
 };

@@ -1,7 +1,8 @@
 #include "shellDriver.h"
-#include <fcntl.h>
+#include "fileDef.h"
 #include <iostream>
 #include <unistd.h>
+#include <sys/wait.h>
 using namespace std;
 
 int ShellDriver::fileOpen(string outfilename, int opts){
@@ -18,6 +19,10 @@ void ShellDriver::fileClose(int fd){
 
 int ShellDriver::execute(const char *cmd, char *const argv[]){
     return execvp(cmd, argv);
+}
+
+pid_t ShellDriver::pWaitpid(pid_t pid, int *retVal, int val){
+    return waitpid(pid, retVal, val);
 }
 
 pid_t ShellDriver::processFork(void){

@@ -1,4 +1,6 @@
 #include "shellSignal.h"
+#include "shellDriverInterface.h"
+#include <sys/wait.h>
 #include <iostream>
 using namespace std;
 
