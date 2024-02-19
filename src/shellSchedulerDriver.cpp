@@ -21,9 +21,8 @@ int ShellSchedulerDriver::execute(const char *cmd, char *const argv[]){
     return execvp(cmd, argv);
 }
 
-void ShellSchedulerDriver::pWait(pid_t pid, int *retVal, int val){
-//    waitpid(pid, retval, val);
-    p_wait(retval);
+pid_t ShellSchedulerDriver::pWaitpid(pid_t pid, int *retVal, int val){
+    p_waitpid(pid, retVal, val);
 }
 
 pid_t ShellSchedulerDriver::processFork(void){

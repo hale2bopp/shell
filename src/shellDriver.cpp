@@ -21,8 +21,8 @@ int ShellDriver::execute(const char *cmd, char *const argv[]){
     return execvp(cmd, argv);
 }
 
-void ShellDriver::pWait(pid_t pid, int* retVal, int val){
-    waitpid(pid, retVal, val);
+pid_t ShellDriver::pWaitpid(pid_t pid, int *retVal, int val){
+    return waitpid(pid, retVal, val);
 }
 
 pid_t ShellDriver::processFork(void){
