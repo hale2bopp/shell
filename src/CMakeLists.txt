@@ -8,12 +8,17 @@ set(STANDALONE_SOURCES
     shellSignal.h
     shellDriver.h
     shellDriver.cpp
+    shellSchedulerDriver.cpp
+    shellSchedulerDriver.h
+    functionLib.cpp
     )
 
 set(LIB_SOURCES    
     shell.cpp 
     shellSignal.cpp
     shellDriver.cpp
+    shellSchedulerDriver.cpp
+    functionLib.cpp
     )
 
 

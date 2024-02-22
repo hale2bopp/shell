@@ -1,6 +1,7 @@
 #include "shellSchedulerDriver.h"
 #include "fileDef.h"
-#include "os.h"
+//#include "os.h"
+#include "functionLib.h"
 #include <iostream>
 #include <unistd.h>
 using namespace std;
@@ -16,15 +17,17 @@ int ShellSchedulerDriver::dupFile(int fd, FILE* stdinStdout){
 void ShellSchedulerDriver::fileClose(int fd){
     close(fd);
 }
-
 int ShellSchedulerDriver::execute(const char *cmd, char *const argv[]){
-    return execvp(cmd, argv);
+    return dispatchFunction(cmd, argv);
+//    return execvp(cmd, argv);
 }
 
 pid_t ShellSchedulerDriver::pWaitpid(pid_t pid, int *retVal, int val){
-    p_waitpid(pid, retVal, val);
+    return (pid_t)0;
+//    p_waitpid(pid, retVal, val);
 }
 
 pid_t ShellSchedulerDriver::processFork(void){
-    return p_spawn();
+    return (pid_t)0;
+//    return p_spawn();
 }
