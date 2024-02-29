@@ -30,5 +30,9 @@ add_executable(${BINARY}_run ${STANDALONE_SOURCES})
 
 target_link_libraries(${BINARY}_run scheduler_lib)
 
+
 add_library(${BINARY}_lib STATIC ${LIB_SOURCES})
 
+target_include_directories(${BINARY}_lib PUBLIC ./)
+
+target_link_libraries(${BINARY}_lib scheduler_lib)
