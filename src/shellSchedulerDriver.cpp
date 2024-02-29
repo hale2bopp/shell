@@ -1,6 +1,6 @@
 #include "shellSchedulerDriver.h"
 #include "fileDef.h"
-//#include "os.h"
+#include "os.h"
 #include "functionLib.h"
 #include <iostream>
 #include <unistd.h>

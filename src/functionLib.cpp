@@ -3,9 +3,10 @@
 
 using namespace std;    
 
-std::unordered_map <const char*, void (*) (char *const argv[])> funcMap = {{"ls", &ls}};
+std::unordered_map <string, void (*) (char *const argv[])> funcMap = {{"ls", &ls}};
 int dispatchFunction(const char *cmd, char *const argv[]){
-    if(funcMap.find(cmd)== funcMap.end()){
+    string cmd_s(cmd);
+    if(funcMap.count(cmd_s) <=0 ){
         return -1;
     }
 
