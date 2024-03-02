@@ -262,6 +262,10 @@ string Shell::GetInput(istream& ifs, ostream& ofs){
  * @param vector of strings with command to be run
  */
 int Shell::ExecuteProgram(const vector<string>& cmd){
+    // need to handle empty input separately 
+    if (cmd.size() == 0){
+        return 0;
+    }
     vector<char *> vec_cp;
     vec_cp.reserve(cmd.size() + 1);
     for (auto s : cmd){
@@ -473,8 +477,10 @@ PipesErr Shell::HandlePipes(Command& command){
                     return PipesExecErr;
                 }
                 HandleRedirection(command.redirParams);
-                ExecuteProgram(command.redirParams.cmd);
-                perror("unable to execute");           
+                auto ret = ExecuteProgram(command.redirParams.cmd);
+                if (ret < 0 ){
+                    perror("unable to execute");           
+                }
             } else {
                 // PARENT
                 // set process group of child
@@ -510,8 +516,10 @@ PipesErr Shell::HandlePipes(Command& command){
                 return PipesExecErr;
             }
             HandleRedirection(command.redirParams);
-            ExecuteProgram(command.redirParams.cmd);
-            perror("unable to execute");
+            auto ret = ExecuteProgram(command.redirParams.cmd);
+            if (ret < 0){
+                perror("unable to execute");
+            }
         } 
         else {
             int retVal;
