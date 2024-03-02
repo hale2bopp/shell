@@ -12,5 +12,6 @@ int dispatchFunction(const char *cmd, char *const argv[]);
 
 void ls(char *const argv[]);
 
+void ps(char *const argv[]);
 
 #endif // FUNCTIONLIB_H

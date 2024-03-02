@@ -18,3 +18,8 @@ void ls(char *const argv[]){
     cout << "running ls" << endl;
 }
 
+void ps(char *const argv[]){
+    cout << "running ps" << endl;
+}
+
+
