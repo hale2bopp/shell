@@ -1,5 +1,5 @@
 #include "shell.h"
-#include "shellSchedulerDriver.h"
+#include "shellDriver.h"
 #include "shellSignal.h"
 #include <string.h>
 
@@ -8,7 +8,7 @@ string env = "PATH=/usr/local/sbin/:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
 
 string mainPrompt = "penn-shredder# ";
 int main(void){
-    ShellSchedulerDriver shellDriver;
+    ShellDriver shellDriver;
     auto pennshPtr = createShellWithDriver(mainPrompt, shellDriver);
     pennshPtr->shellRun();
     return 0;

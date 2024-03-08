@@ -22,9 +22,25 @@ int ShellSchedulerDriver::execute(const char *cmd, char *const argv[]){
 //    return execvp(cmd, argv);
 }
 
+    
+int ShellSchedulerDriver::fork_and_execute(const char *cmd, char *const argv[]) {
+    return 0;
+}
+
 pid_t ShellSchedulerDriver::pWaitpid(pid_t pid, int *retVal, int val){
     return (pid_t)0;
 //    p_waitpid(pid, retVal, val);
+}
+
+
+void ShellSchedulerDriver::setProcessGroup(void) {
+}
+
+void ShellSchedulerDriver::setPGID(pid_t pid, int val){
+}
+
+pid_t ShellSchedulerDriver::getPID(void){
+    return 0;
 }
 
 pid_t ShellSchedulerDriver::processFork(void){

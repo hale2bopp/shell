@@ -437,22 +437,23 @@ PipesErr Shell::HandlePipes(Command& command){
         // pid of root of pipe
         pid_t rootPid;
         for (int i = 0; i < command.pipeline.numPipes+1; i++){
+//            pid_t cpid = shellDriverIntf.fork_and_execute();
             pid_t cpid = shellDriverIntf.processFork();
             if (cpid < 0) {
                 perror("fork error");
                 return PipesExecErr;
             } else if (cpid == 0){
                 // set process group to itself
-                setpgrp();
+                shellDriverIntf.setProcessGroup();
                 command.cpid.push_back(cpid);
                 // dup2 stdin from previous pipe 
                 if (i == 0){
                     // if it is the first command in the pipe, store the pid
-                    rootPid = getpid();
-                    setpgid(rootPid, 0);
+                    rootPid = shellDriverIntf.getPID();
+                    shellDriverIntf.setPGID(rootPid, 0);
                 } else {
                     // set all further pipes to the same pgid as the root
-                    setpgid(rootPid, 0);
+                    shellDriverIntf.setPGID(rootPid, 0);
                     if (shellDriverIntf.dupFile(pipefd[(i-1)*2], stdin)<0){
                         perror("unable to open stdin from previous pipe");
                         return PipesExecErr;
@@ -484,7 +485,7 @@ PipesErr Shell::HandlePipes(Command& command){
             } else {
                 // PARENT
                 // set process group of child
-                setpgid(cpid, cpid);
+                shellDriverIntf.setPGID(cpid, cpid);
             }
         }
         // parent closes all of its copies at the end
